@@ -9,21 +9,25 @@
 /* Begin PBXBuildFile section */
 		E3573E4D29CC14B3000F7877 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E4C29CC14B3000F7877 /* AppDelegate.swift */; };
 		E3573E4F29CC14B3000F7877 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E4E29CC14B3000F7877 /* SceneDelegate.swift */; };
-		E3573E5129CC14B3000F7877 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E5029CC14B3000F7877 /* ViewController.swift */; };
-		E3573E5429CC14B3000F7877 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E3573E5229CC14B3000F7877 /* Main.storyboard */; };
 		E3573E5629CC14B6000F7877 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E3573E5529CC14B6000F7877 /* Assets.xcassets */; };
 		E3573E5929CC14B6000F7877 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E3573E5729CC14B6000F7877 /* LaunchScreen.storyboard */; };
+		E3573E6329CC161C000F7877 /* RBTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6229CC161C000F7877 /* RBTabBarController.swift */; };
+		E3573E6629CC16C1000F7877 /* RecipeListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6529CC16C1000F7877 /* RecipeListVC.swift */; };
+		E3573E6929CC16DC000F7877 /* GroceryListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6829CC16DC000F7877 /* GroceryListVC.swift */; };
+		E3573E6C29CC185A000F7877 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6B29CC185A000F7877 /* Constants.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		E3573E4929CC14B3000F7877 /* RecipeBook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RecipeBook.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3573E4C29CC14B3000F7877 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E3573E4E29CC14B3000F7877 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		E3573E5029CC14B3000F7877 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		E3573E5329CC14B3000F7877 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		E3573E5529CC14B6000F7877 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E3573E5829CC14B6000F7877 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E3573E5A29CC14B6000F7877 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E3573E6229CC161C000F7877 /* RBTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBTabBarController.swift; sourceTree = "<group>"; };
+		E3573E6529CC16C1000F7877 /* RecipeListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeListVC.swift; sourceTree = "<group>"; };
+		E3573E6829CC16DC000F7877 /* GroceryListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryListVC.swift; sourceTree = "<group>"; };
+		E3573E6B29CC185A000F7877 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,15 +60,49 @@
 		E3573E4B29CC14B3000F7877 /* RecipeBook */ = {
 			isa = PBXGroup;
 			children = (
-				E3573E4C29CC14B3000F7877 /* AppDelegate.swift */,
-				E3573E4E29CC14B3000F7877 /* SceneDelegate.swift */,
-				E3573E5029CC14B3000F7877 /* ViewController.swift */,
-				E3573E5229CC14B3000F7877 /* Main.storyboard */,
-				E3573E5529CC14B6000F7877 /* Assets.xcassets */,
-				E3573E5729CC14B6000F7877 /* LaunchScreen.storyboard */,
+				E3573E6129CC15C4000F7877 /* Custom Views */,
 				E3573E5A29CC14B6000F7877 /* Info.plist */,
+				E3573E6429CC16A2000F7877 /* Screens */,
+				E3573E6029CC1549000F7877 /* Support */,
+				E3573E6A29CC184B000F7877 /* Utilities */,
 			);
 			path = RecipeBook;
+			sourceTree = "<group>";
+		};
+		E3573E6029CC1549000F7877 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				E3573E4C29CC14B3000F7877 /* AppDelegate.swift */,
+				E3573E4E29CC14B3000F7877 /* SceneDelegate.swift */,
+				E3573E5529CC14B6000F7877 /* Assets.xcassets */,
+				E3573E5729CC14B6000F7877 /* LaunchScreen.storyboard */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		E3573E6129CC15C4000F7877 /* Custom Views */ = {
+			isa = PBXGroup;
+			children = (
+				E3573E6229CC161C000F7877 /* RBTabBarController.swift */,
+			);
+			path = "Custom Views";
+			sourceTree = "<group>";
+		};
+		E3573E6429CC16A2000F7877 /* Screens */ = {
+			isa = PBXGroup;
+			children = (
+				E3573E6829CC16DC000F7877 /* GroceryListVC.swift */,
+				E3573E6529CC16C1000F7877 /* RecipeListVC.swift */,
+			);
+			path = Screens;
+			sourceTree = "<group>";
+		};
+		E3573E6A29CC184B000F7877 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				E3573E6B29CC185A000F7877 /* Constants.swift */,
+			);
+			path = Utilities;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -127,7 +165,6 @@
 			files = (
 				E3573E5929CC14B6000F7877 /* LaunchScreen.storyboard in Resources */,
 				E3573E5629CC14B6000F7877 /* Assets.xcassets in Resources */,
-				E3573E5429CC14B3000F7877 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,23 +175,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E3573E5129CC14B3000F7877 /* ViewController.swift in Sources */,
 				E3573E4D29CC14B3000F7877 /* AppDelegate.swift in Sources */,
 				E3573E4F29CC14B3000F7877 /* SceneDelegate.swift in Sources */,
+				E3573E6929CC16DC000F7877 /* GroceryListVC.swift in Sources */,
+				E3573E6629CC16C1000F7877 /* RecipeListVC.swift in Sources */,
+				E3573E6329CC161C000F7877 /* RBTabBarController.swift in Sources */,
+				E3573E6C29CC185A000F7877 /* Constants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		E3573E5229CC14B3000F7877 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				E3573E5329CC14B3000F7877 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		E3573E5729CC14B6000F7877 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -292,9 +324,7 @@
 				INFOPLIST_FILE = RecipeBook/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -320,9 +350,7 @@
 				INFOPLIST_FILE = RecipeBook/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
