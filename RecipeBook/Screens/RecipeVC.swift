@@ -41,13 +41,20 @@ class RecipeVC: UIViewController {
     func configureRecipeTitleLabel() {
         contentView.addSubview(recipeTitleLabel)
         recipeTitleLabel.text = recipe.title
+        // dynamic sizing for recipe title
+        var recipeTitleLines: CGFloat = 1
+        if recipe.title.count > 24 {
+            recipeTitleLines = 2
+        }
+        recipeTitleLabel.numberOfLines = Int(recipeTitleLines)
+        let recipeTitleHeight = 36 * recipeTitleLines
 
         let padding: CGFloat = 24
         NSLayoutConstraint.activate([
             recipeTitleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             recipeTitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
             recipeTitleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding),
-            recipeTitleLabel.heightAnchor.constraint(equalToConstant: 36),
+            recipeTitleLabel.heightAnchor.constraint(equalToConstant: recipeTitleHeight),
         ])
     }
 }
