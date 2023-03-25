@@ -11,7 +11,7 @@ class RBTitleLabel: UILabel {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        configure()
+        self.configure()
     }
 
     required init?(coder: NSCoder) {
@@ -25,8 +25,8 @@ class RBTitleLabel: UILabel {
     }
 
     private func configure() {
-        translatesAutoresizingMaskIntoConstraints = false
-        textColor = .label
-        lineBreakMode = .byWordWrapping
+        self.translatesAutoresizingMaskIntoConstraints = false
+        self.textColor = .label
+        self.lineBreakMode = .byWordWrapping
     }
 }

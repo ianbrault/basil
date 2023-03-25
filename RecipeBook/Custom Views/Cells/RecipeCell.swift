@@ -14,7 +14,7 @@ class RecipeCell: UITableViewCell {
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        configure()
+        self.configure()
     }
 
     required init?(coder: NSCoder) {
@@ -22,21 +22,21 @@ class RecipeCell: UITableViewCell {
     }
 
     func set(recipe: Recipe) {
-        recipeTitleLabel.text = recipe.title
+        self.recipeTitleLabel.text = recipe.title
     }
 
     private func configure() {
-        addSubview(recipeTitleLabel)
+        self.addSubview(self.recipeTitleLabel)
 
-        accessoryType = .disclosureIndicator
+        self.accessoryType = .disclosureIndicator
 
-        recipeTitleLabel.lineBreakMode = .byTruncatingTail
+        self.recipeTitleLabel.lineBreakMode = .byTruncatingTail
 
         NSLayoutConstraint.activate([
-            recipeTitleLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor),
-            recipeTitleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 24),
-            recipeTitleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -45),
-            recipeTitleLabel.heightAnchor.constraint(equalToConstant: 22),
+            self.recipeTitleLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+            self.recipeTitleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 24),
+            self.recipeTitleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -45),
+            self.recipeTitleLabel.heightAnchor.constraint(equalToConstant: 22),
         ])
     }
 }

@@ -11,7 +11,7 @@ class RBTabBarController: UITabBarController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewControllers = [createRecipeListVC(), createGroceryListVC()]
+        self.viewControllers = [self.createRecipeListVC(), self.createGroceryListVC()]
     }
 
     func createRecipeListVC() -> UINavigationController {

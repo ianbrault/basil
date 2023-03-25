@@ -11,6 +11,6 @@ class GroceryListVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        self.view.backgroundColor = .systemBackground
     }
 }

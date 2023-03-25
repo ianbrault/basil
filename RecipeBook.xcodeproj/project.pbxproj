@@ -70,6 +70,14 @@
 			path = Alerts;
 			sourceTree = "<group>";
 		};
+		E34B4CEF29CF78800063A9A2 /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				E3B1C73D29CE1E9600736C96 /* RecipeCell.swift */,
+			);
+			path = Cells;
+			sourceTree = "<group>";
+		};
 		E3573E4029CC14B3000F7877 = {
 			isa = PBXGroup;
 			children = (
@@ -115,9 +123,9 @@
 			isa = PBXGroup;
 			children = (
 				E34B4CE629CEE89E0063A9A2 /* Alerts */,
+				E34B4CEF29CF78800063A9A2 /* Cells */,
 				E3B1C74329CE6A7E00736C96 /* Labels */,
 				E3573E6229CC161C000F7877 /* RBTabBarController.swift */,
-				E3B1C73D29CE1E9600736C96 /* RecipeCell.swift */,
 			);
 			path = "Custom Views";
 			sourceTree = "<group>";

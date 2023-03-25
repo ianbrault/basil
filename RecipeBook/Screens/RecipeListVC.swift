@@ -21,53 +21,53 @@ class RecipeListVC: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        configureNavigationBarOnAppear()
+        self.configureNavigationBarOnAppear()
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        configureViewController()
-        configureTableView()
+        self.configureViewController()
+        self.configureTableView()
     }
 
     func configureNavigationBarOnAppear() {
-        title = "Recipes"
-        navigationController?.navigationBar.prefersLargeTitles = true
-        navigationController?.setNavigationBarHidden(false, animated: true)
+        self.title = "Recipes"
+        self.navigationController?.navigationBar.prefersLargeTitles = true
+        self.navigationController?.setNavigationBarHidden(false, animated: true)
     }
 
     func configureNavigationBarOnDisappear() {
         // clear the title to avoid it overlapping the following view when pushed
-        title = ""
+        self.title = ""
         let backButton = UIBarButtonItem()
         backButton.title = "Recipes"
-        navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
+        self.navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
     }
 
     func configureViewController() {
-        view.backgroundColor = .systemBackground
+        self.view.backgroundColor = .systemBackground
 
         // add an add button to the naviation bar which will add new recipes
         // let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addButtonTapped))
         let addButton = UIBarButtonItem(systemItem: .add, menu: createAddButtonContextMenu())
-        navigationItem.rightBarButtonItem = addButton
+        self.navigationItem.rightBarButtonItem = addButton
     }
 
     func configureTableView() {
-        view.addSubview(tableView)
+        self.view.addSubview(self.tableView)
 
-        tableView.frame = view.bounds
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.removeExcessCells()
+        self.tableView.frame = self.view.bounds
+        self.tableView.delegate = self
+        self.tableView.dataSource = self
+        self.tableView.removeExcessCells()
 
-        tableView.register(RecipeCell.self, forCellReuseIdentifier: RecipeCell.reuseID)
+        self.tableView.register(RecipeCell.self, forCellReuseIdentifier: RecipeCell.reuseID)
     }
 
     func createAddButtonContextMenu() -> UIMenu {
         let menuItems = [
-            UIAction(title: "Add new recipe", image: SFSymbols.addRecipe, handler: addNewRecipe),
-            UIAction(title: "Import recipe", image: SFSymbols.importRecipe, handler: importRecipe),
+            UIAction(title: "Add new recipe", image: SFSymbols.addRecipe, handler: self.addNewRecipe),
+            UIAction(title: "Import recipe", image: SFSymbols.importRecipe, handler: self.importRecipe),
         ]
 
         return UIMenu(title: "", image: nil, identifier: nil, options: [], children: menuItems)
@@ -87,23 +87,23 @@ class RecipeListVC: UIViewController {
 extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return recipes.count
+        return self.recipes.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: RecipeCell.reuseID) as! RecipeCell
-        let recipe = recipes[indexPath.row]
+        let recipe = self.recipes[indexPath.row]
         cell.set(recipe: recipe)
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        configureNavigationBarOnDisappear()
+        self.configureNavigationBarOnDisappear()
 
-        let recipe = recipes[indexPath.row]
+        let recipe = self.recipes[indexPath.row]
         let recipeVC = RecipeVC()
         recipeVC.recipe = recipe
-        navigationController?.pushViewController(recipeVC, animated: true)
+        self.navigationController?.pushViewController(recipeVC, animated: true)
     }
 }
 
