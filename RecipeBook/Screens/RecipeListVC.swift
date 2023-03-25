@@ -21,9 +21,21 @@ class RecipeListVC: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        configureNavigationBarOnAppear()
+    }
+
+    func configureNavigationBarOnAppear() {
         title = "Recipes"
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.setNavigationBarHidden(false, animated: true)
+    }
+
+    func configureNavigationBarOnDisappear() {
+        // clear the title to avoid it overlapping the following view when pushed
+        title = ""
+        let backButton = UIBarButtonItem()
+        backButton.title = "Recipes"
+        navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
     }
 
     override func viewDidLoad() {
@@ -34,6 +46,11 @@ class RecipeListVC: UIViewController {
 
     func configureViewController() {
         view.backgroundColor = .systemBackground
+
+        // add an add button to the naviation bar which will add new recipes
+        // let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addButtonTapped))
+        let addButton = UIBarButtonItem(systemItem: .add, menu: createAddButtonContextMenu())
+        navigationItem.rightBarButtonItem = addButton
     }
 
     func configureTableView() {
@@ -45,6 +62,23 @@ class RecipeListVC: UIViewController {
         tableView.removeExcessCells()
 
         tableView.register(RecipeCell.self, forCellReuseIdentifier: RecipeCell.reuseID)
+    }
+
+    func createAddButtonContextMenu() -> UIMenu {
+        let menuItems = [
+            UIAction(title: "Add new recipe", image: SFSymbols.addRecipe, handler: addNewRecipe),
+            UIAction(title: "Import recipe", image: SFSymbols.importRecipe, handler: importRecipe),
+        ]
+
+        return UIMenu(title: "", image: nil, identifier: nil, options: [], children: menuItems)
+    }
+
+    func addNewRecipe(_ action: UIAction) {
+        print("add new recipe")
+    }
+
+    func importRecipe(_ action: UIAction) {
+        print("import recipe")
     }
 }
 
@@ -62,14 +96,9 @@ extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        configureNavigationBarOnDisappear()
+
         let recipe = recipes[indexPath.row]
-
-        // clear the title to avoid it overlapping the following view when pushed
-        title = ""
-        let backButton = UIBarButtonItem()
-        backButton.title = "Recipes"
-        navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
-
         let recipeVC = RecipeVC()
         recipeVC.recipe = recipe
         navigationController?.pushViewController(recipeVC, animated: true)
