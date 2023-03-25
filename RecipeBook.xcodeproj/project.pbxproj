@@ -15,6 +15,13 @@
 		E3573E6629CC16C1000F7877 /* RecipeListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6529CC16C1000F7877 /* RecipeListVC.swift */; };
 		E3573E6929CC16DC000F7877 /* GroceryListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6829CC16DC000F7877 /* GroceryListVC.swift */; };
 		E3573E6C29CC185A000F7877 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6B29CC185A000F7877 /* Constants.swift */; };
+		E3B1C73929CD205C00736C96 /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73829CD205C00736C96 /* Recipe.swift */; };
+		E3B1C73C29CE1CF600736C96 /* UITableView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73B29CE1CF600736C96 /* UITableView+Ext.swift */; };
+		E3B1C73E29CE1E9600736C96 /* RecipeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73D29CE1E9600736C96 /* RecipeCell.swift */; };
+		E3B1C74029CE22AD00736C96 /* RecipeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73F29CE22AD00736C96 /* RecipeVC.swift */; };
+		E3B1C74229CE68BC00736C96 /* RBBodyLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C74129CE68BC00736C96 /* RBBodyLabel.swift */; };
+		E3B1C74529CE6A9400736C96 /* RBTitleLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C74429CE6A9400736C96 /* RBTitleLabel.swift */; };
+		E3B1C74729CE6CC900736C96 /* UIView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C74629CE6CC900736C96 /* UIView+Ext.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +35,13 @@
 		E3573E6529CC16C1000F7877 /* RecipeListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeListVC.swift; sourceTree = "<group>"; };
 		E3573E6829CC16DC000F7877 /* GroceryListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryListVC.swift; sourceTree = "<group>"; };
 		E3573E6B29CC185A000F7877 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		E3B1C73829CD205C00736C96 /* Recipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
+		E3B1C73B29CE1CF600736C96 /* UITableView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+Ext.swift"; sourceTree = "<group>"; };
+		E3B1C73D29CE1E9600736C96 /* RecipeCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeCell.swift; sourceTree = "<group>"; };
+		E3B1C73F29CE22AD00736C96 /* RecipeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeVC.swift; sourceTree = "<group>"; };
+		E3B1C74129CE68BC00736C96 /* RBBodyLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBBodyLabel.swift; sourceTree = "<group>"; };
+		E3B1C74429CE6A9400736C96 /* RBTitleLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBTitleLabel.swift; sourceTree = "<group>"; };
+		E3B1C74629CE6CC900736C96 /* UIView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Ext.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,7 +75,9 @@
 			isa = PBXGroup;
 			children = (
 				E3573E6129CC15C4000F7877 /* Custom Views */,
+				E3B1C73A29CE1CE200736C96 /* Extensions */,
 				E3573E5A29CC14B6000F7877 /* Info.plist */,
+				E3B1C73729CD205000736C96 /* Models */,
 				E3573E6429CC16A2000F7877 /* Screens */,
 				E3573E6029CC1549000F7877 /* Support */,
 				E3573E6A29CC184B000F7877 /* Utilities */,
@@ -83,7 +99,9 @@
 		E3573E6129CC15C4000F7877 /* Custom Views */ = {
 			isa = PBXGroup;
 			children = (
+				E3B1C74329CE6A7E00736C96 /* Labels */,
 				E3573E6229CC161C000F7877 /* RBTabBarController.swift */,
+				E3B1C73D29CE1E9600736C96 /* RecipeCell.swift */,
 			);
 			path = "Custom Views";
 			sourceTree = "<group>";
@@ -93,6 +111,7 @@
 			children = (
 				E3573E6829CC16DC000F7877 /* GroceryListVC.swift */,
 				E3573E6529CC16C1000F7877 /* RecipeListVC.swift */,
+				E3B1C73F29CE22AD00736C96 /* RecipeVC.swift */,
 			);
 			path = Screens;
 			sourceTree = "<group>";
@@ -103,6 +122,32 @@
 				E3573E6B29CC185A000F7877 /* Constants.swift */,
 			);
 			path = Utilities;
+			sourceTree = "<group>";
+		};
+		E3B1C73729CD205000736C96 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				E3B1C73829CD205C00736C96 /* Recipe.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		E3B1C73A29CE1CE200736C96 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				E3B1C73B29CE1CF600736C96 /* UITableView+Ext.swift */,
+				E3B1C74629CE6CC900736C96 /* UIView+Ext.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		E3B1C74329CE6A7E00736C96 /* Labels */ = {
+			isa = PBXGroup;
+			children = (
+				E3B1C74129CE68BC00736C96 /* RBBodyLabel.swift */,
+				E3B1C74429CE6A9400736C96 /* RBTitleLabel.swift */,
+			);
+			path = Labels;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -177,9 +222,16 @@
 			files = (
 				E3573E4D29CC14B3000F7877 /* AppDelegate.swift in Sources */,
 				E3573E4F29CC14B3000F7877 /* SceneDelegate.swift in Sources */,
+				E3B1C74029CE22AD00736C96 /* RecipeVC.swift in Sources */,
+				E3B1C73929CD205C00736C96 /* Recipe.swift in Sources */,
+				E3B1C73E29CE1E9600736C96 /* RecipeCell.swift in Sources */,
 				E3573E6929CC16DC000F7877 /* GroceryListVC.swift in Sources */,
 				E3573E6629CC16C1000F7877 /* RecipeListVC.swift in Sources */,
+				E3B1C74529CE6A9400736C96 /* RBTitleLabel.swift in Sources */,
+				E3B1C73C29CE1CF600736C96 /* UITableView+Ext.swift in Sources */,
+				E3B1C74729CE6CC900736C96 /* UIView+Ext.swift in Sources */,
 				E3573E6329CC161C000F7877 /* RBTabBarController.swift in Sources */,
+				E3B1C74229CE68BC00736C96 /* RBBodyLabel.swift in Sources */,
 				E3573E6C29CC185A000F7877 /* Constants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
