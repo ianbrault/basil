@@ -24,6 +24,12 @@ class RecipeListVC: UIViewController {
         configureNavigationBarOnAppear()
     }
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        configureViewController()
+        configureTableView()
+    }
+
     func configureNavigationBarOnAppear() {
         title = "Recipes"
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -36,12 +42,6 @@ class RecipeListVC: UIViewController {
         let backButton = UIBarButtonItem()
         backButton.title = "Recipes"
         navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
-    }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        configureViewController()
-        configureTableView()
     }
 
     func configureViewController() {
@@ -78,7 +78,9 @@ class RecipeListVC: UIViewController {
     }
 
     func importRecipe(_ action: UIAction) {
-        print("import recipe")
+        let alert = RBTextFieldAlert(title: "Import a recipe", message: nil, placeholder: "URL")
+        alert.delegate = self
+        self.present(alert.alertController, animated: true)
     }
 }
 
@@ -102,5 +104,12 @@ extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
         let recipeVC = RecipeVC()
         recipeVC.recipe = recipe
         navigationController?.pushViewController(recipeVC, animated: true)
+    }
+}
+
+extension RecipeListVC: RBTextFieldAlertDelegate {
+
+    func didSubmitText(text: String) {
+        self.notImplementedAlert()
     }
 }
