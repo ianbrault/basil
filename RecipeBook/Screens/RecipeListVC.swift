@@ -14,9 +14,17 @@ class RecipeListVC: UIViewController {
     // FIXME: test data
     let recipes: [Recipe] = [
         Recipe(title: "Coconut Chicken Curry", ingredients: [], instructions: []),
+        Recipe(title: "Baked Tofu with Peanut Sauce and Coconut-Lime Rice", ingredients: [], instructions: []),
         Recipe(title: "Roasted Brussels Sprouts", ingredients: [], instructions: []),
         Recipe(title: "Pear Torte", ingredients: [], instructions: []),
     ]
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        title = "Recipes"
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationController?.setNavigationBarHidden(false, animated: true)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,8 +34,6 @@ class RecipeListVC: UIViewController {
 
     func configureViewController() {
         view.backgroundColor = .systemBackground
-        title = "Recipes"
-        navigationController?.navigationBar.prefersLargeTitles = true
     }
 
     func configureTableView() {
@@ -58,9 +64,14 @@ extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let recipe = recipes[indexPath.row]
 
-        let destVC = RecipeVC()
-        destVC.recipe = recipe
-        let navController = UINavigationController(rootViewController: destVC)
-        present(navController, animated: true)
+        // clear the title to avoid it overlapping the following view when pushed
+        title = ""
+        let backButton = UIBarButtonItem()
+        backButton.title = "Recipes"
+        navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
+
+        let recipeVC = RecipeVC()
+        recipeVC.recipe = recipe
+        navigationController?.pushViewController(recipeVC, animated: true)
     }
 }

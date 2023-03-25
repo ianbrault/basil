@@ -30,11 +30,12 @@ class RecipeCell: UITableViewCell {
 
         accessoryType = .disclosureIndicator
 
-        let padding: CGFloat = 24
+        recipeTitleLabel.lineBreakMode = .byTruncatingTail
+
         NSLayoutConstraint.activate([
             recipeTitleLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor),
-            recipeTitleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: padding),
-            recipeTitleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -padding),
+            recipeTitleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 24),
+            recipeTitleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -45),
             recipeTitleLabel.heightAnchor.constraint(equalToConstant: 22),
         ])
     }

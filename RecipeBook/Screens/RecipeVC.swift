@@ -24,10 +24,7 @@ class RecipeVC: UIViewController {
 
     func configureViewController() {
         view.backgroundColor = .systemBackground
-
-        // add a done button to the naviation bar which will dismiss the modal
-        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissVC))
-        navigationItem.rightBarButtonItem = doneButton
+        navigationController?.navigationBar.prefersLargeTitles = false
     }
 
     func configureScrollView() {
@@ -47,14 +44,10 @@ class RecipeVC: UIViewController {
 
         let padding: CGFloat = 24
         NSLayoutConstraint.activate([
-            recipeTitleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
+            recipeTitleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             recipeTitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
             recipeTitleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding),
             recipeTitleLabel.heightAnchor.constraint(equalToConstant: 36),
         ])
-    }
-
-    @objc func dismissVC() {
-        dismiss(animated: true)
     }
 }
