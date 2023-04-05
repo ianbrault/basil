@@ -41,6 +41,14 @@ class RecipeFormVC: UIViewController {
 
     func configureViewController() {
         self.view.backgroundColor = .systemGroupedBackground
+
+        // dismiss the view when the cancel button is tapped
+        let cancelButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(dismissVC))
+        self.navigationItem.leftBarButtonItem = cancelButton
+
+        // save the recipe when the save button is tapped
+        let saveButton = UIBarButtonItem(title: "Save", style: .done, target: self, action: #selector(saveRecipe))
+        self.navigationItem.rightBarButtonItem = saveButton
     }
 
     func configureTableView() {
@@ -57,6 +65,7 @@ class RecipeFormVC: UIViewController {
     }
 
     func createDismissKeyboardTapGesture() {
+        // dismiss the keyboard when the view is tapped
         let tap = UITapGestureRecognizer(target: view, action: #selector(UIView.endEditing))
         self.view.addGestureRecognizer(tap)
     }
@@ -64,24 +73,6 @@ class RecipeFormVC: UIViewController {
     func createKeyboardNotificationObservers() {
         self.addNotificationObserver(name: UIResponder.keyboardWillShowNotification, selector: #selector(onKeyboardAppear))
         self.addNotificationObserver(name: UIResponder.keyboardWillHideNotification, selector: #selector(onKeyboardDisappear))
-    }
-
-    @objc func onKeyboardAppear() {
-        print("onKeyboardAppear")
-        DispatchQueue.main.async {
-            UIView.animate(withDuration: 0.1) {
-                self.tableView.contentInset.bottom = 380
-            }
-        }
-    }
-
-    @objc func onKeyboardDisappear() {
-        print("onKeyboardDisappear")
-        DispatchQueue.main.async {
-            UIView.animate(withDuration: 0.2) {
-                self.tableView.contentInset.bottom = self.tableBottomPadding
-            }
-        }
     }
 
     func appendInputCell(section: Section) {
@@ -102,6 +93,32 @@ class RecipeFormVC: UIViewController {
             }
         }
         return nil
+    }
+
+    @objc func onKeyboardAppear() {
+        print("onKeyboardAppear")
+        DispatchQueue.main.async {
+            UIView.animate(withDuration: 0.1) {
+                self.tableView.contentInset.bottom = 380
+            }
+        }
+    }
+
+    @objc func onKeyboardDisappear() {
+        print("onKeyboardDisappear")
+        DispatchQueue.main.async {
+            UIView.animate(withDuration: 0.2) {
+                self.tableView.contentInset.bottom = self.tableBottomPadding
+            }
+        }
+    }
+
+    @objc func dismissVC() {
+        dismiss(animated: true)
+    }
+
+    @objc func saveRecipe() {
+        // TODO: unimplemented
     }
 }
 
