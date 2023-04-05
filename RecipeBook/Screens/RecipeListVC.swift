@@ -47,8 +47,7 @@ class RecipeListVC: UIViewController {
     func configureViewController() {
         self.view.backgroundColor = .systemBackground
 
-        // add an add button to the naviation bar which will add new recipes
-        // let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addButtonTapped))
+        // add an add button to add new recipes
         let addButton = UIBarButtonItem(systemItem: .add, menu: createAddButtonContextMenu())
         self.navigationItem.rightBarButtonItem = addButton
     }
@@ -74,7 +73,9 @@ class RecipeListVC: UIViewController {
     }
 
     func addNewRecipe(_ action: UIAction) {
-        print("add new recipe")
+        let destVC = RecipeFormVC()
+        let navController = UINavigationController(rootViewController: destVC)
+        self.present(navController, animated: true)
     }
 
     func importRecipe(_ action: UIAction) {

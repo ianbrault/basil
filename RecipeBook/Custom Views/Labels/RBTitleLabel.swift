@@ -18,10 +18,11 @@ class RBTitleLabel: UILabel {
         fatalError("init(coder:) has not been implemented")
     }
 
-    convenience init(fontSize: CGFloat, weight: UIFont.Weight = .bold, textAlignment: NSTextAlignment = .left) {
-        self.init(frame: .zero)
+    init(fontSize: CGFloat, weight: UIFont.Weight = .bold, textAlignment: NSTextAlignment = .left) {
+        super.init(frame: .zero)
         self.font = UIFont.systemFont(ofSize: fontSize, weight: weight)
         self.textAlignment = textAlignment
+        self.configure()
     }
 
     private func configure() {

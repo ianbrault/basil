@@ -30,7 +30,7 @@ class RecipeVC: UIViewController {
     func configureScrollView() {
         self.view.addSubview(self.scrollView)
         self.scrollView.addSubview(self.contentView)
-        self.scrollView.pinToEdges(of: view)
+        self.scrollView.pinToEdges(of: self.view)
         self.contentView.pinToEdges(of: self.scrollView)
 
         NSLayoutConstraint.activate([

@@ -8,7 +8,7 @@
 import UIKit
 
 class RecipeCell: UITableViewCell {
-    static let reuseID = "FavoriteCell"
+    static let reuseID = "RecipeCell"
 
     let recipeTitleLabel = RBBodyLabel(fontSize: 16)
 
@@ -36,7 +36,7 @@ class RecipeCell: UITableViewCell {
             self.recipeTitleLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor),
             self.recipeTitleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 24),
             self.recipeTitleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -45),
-            self.recipeTitleLabel.heightAnchor.constraint(equalToConstant: 22),
+            self.recipeTitleLabel.heightAnchor.constraint(equalToConstant: 24),
         ])
     }
 }
