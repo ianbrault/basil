@@ -9,6 +9,7 @@ import UIKit
 
 protocol RecipeFormCellDelegate: AnyObject {
     func textFieldDidBeginEditing(_: UUID)
+    func textFieldDidEndEditing(_: UUID, text: String?)
     func ingredientsButtonPressed()
     func instructionsButtonPressed()
 }
@@ -100,12 +101,20 @@ extension RecipeFormCell: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         self.delegate?.textFieldDidBeginEditing(self.uuid!)
     }
+
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        self.delegate?.textFieldDidEndEditing(self.uuid!, text: textField.text)
+    }
 }
 
 extension RecipeFormCell.Content {
 
     static func createInput() -> RecipeFormCell.Content {
         return .input(UUID(), "")
+    }
+
+    static func createInput(uuid: UUID, text: String) -> RecipeFormCell.Content {
+        return .input(uuid, text)
     }
 
     static func createButton() -> RecipeFormCell.Content {

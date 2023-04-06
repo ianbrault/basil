@@ -81,7 +81,8 @@ class RecipeFormVC: UIViewController {
         let index = self.tableCells[section.rawValue].count - 1
 
         self.tableCells[section.rawValue].insert(input, at: index)
-        self.tableView.reloadData()
+        let indexPath = IndexPath(row: index, section: section.rawValue)
+        self.tableView.insertRows(at: [indexPath], with: .automatic)
     }
 
     func indexPathFromUuid(uuid: UUID) -> IndexPath? {
@@ -96,7 +97,6 @@ class RecipeFormVC: UIViewController {
     }
 
     @objc func onKeyboardAppear() {
-        print("onKeyboardAppear")
         DispatchQueue.main.async {
             UIView.animate(withDuration: 0.1) {
                 self.tableView.contentInset.bottom = 380
@@ -105,7 +105,6 @@ class RecipeFormVC: UIViewController {
     }
 
     @objc func onKeyboardDisappear() {
-        print("onKeyboardDisappear")
         DispatchQueue.main.async {
             UIView.animate(withDuration: 0.2) {
                 self.tableView.contentInset.bottom = self.tableBottomPadding
@@ -147,12 +146,26 @@ extension RecipeFormVC: UITableViewDataSource, UITableViewDelegate {
         return cell
     }
 
-    /*
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        guard editingStyle == .delete else { return }
-        // TODO: unimplemented
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let contextItem = UIContextualAction(style: .destructive, title: "Delete") {  (action, view, actionPerformed) in
+            self.tableCells[indexPath.section].remove(at: indexPath.row)
+            self.tableView.deleteRows(at: [indexPath], with: .automatic)
+            actionPerformed(true)
+        }
+
+        // do not allow the title to be deleted
+        if indexPath.section == Section.title.rawValue {
+            return nil
+        }
+
+        switch self.tableCells[indexPath.section][indexPath.row] {
+        // do not allow buttons to be deleted
+        case .actionButton(_):
+            return nil
+        case .input(_, _):
+            return UISwipeActionsConfiguration(actions: [contextItem])
+        }
     }
-    */
 }
 
 extension RecipeFormVC: RecipeFormCellDelegate {
@@ -170,6 +183,16 @@ extension RecipeFormVC: RecipeFormCellDelegate {
             DispatchQueue.main.async {
                 self.tableView.scrollToRow(at: indexPath, at: .top, animated: true)
             }
+        } else {
+            self.presentErrorAlert(title: "Something went wrong", message: "Missing input \(uuid)")
+        }
+    }
+
+    func textFieldDidEndEditing(_ uuid: UUID, text: String?) {
+        guard let text else { return }
+        if let indexPath = self.indexPathFromUuid(uuid: uuid) {
+            let cell = self.tableCells[indexPath.section][indexPath.row]
+            self.tableCells[indexPath.section][indexPath.row] = .createInput(uuid: cell.uuid(), text: text)
         } else {
             self.presentErrorAlert(title: "Something went wrong", message: "Missing input \(uuid)")
         }
