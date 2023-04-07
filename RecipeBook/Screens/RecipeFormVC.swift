@@ -7,12 +7,49 @@
 
 import UIKit
 
+protocol RecipeFormVCDelegate: AnyObject {
+    func savedRecipe(recipe: Recipe)
+}
+
 class RecipeFormVC: UIViewController {
 
     enum Section: Int {
         case title = 0
         case ingredients = 1
         case instructions = 2
+
+        var header: String? {
+            switch self {
+            case .title:
+                return nil
+            case .ingredients:
+                return "Ingredients"
+            case .instructions:
+                return "Instructions"
+            }
+        }
+
+        var textFieldPlaceholder: String {
+            switch self {
+            case .title:
+                return "Title"
+            case .ingredients:
+                return "ex: 1 tbsp. olive oil"
+            case .instructions:
+                return "ex: Preheat the oven to 350°F"
+            }
+        }
+
+        var actionButtonText: String? {
+            switch self {
+            case .title:
+                return nil
+            case .ingredients:
+                return "Add another ingredient"
+            case .instructions:
+                return "Add another step"
+            }
+        }
     }
 
     let tableView = UITableView()
@@ -23,6 +60,8 @@ class RecipeFormVC: UIViewController {
     ]
     let tableTopPadding: CGFloat = 20
     let tableBottomPadding: CGFloat = 100
+
+    weak var delegate: RecipeFormVCDelegate?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -88,7 +127,7 @@ class RecipeFormVC: UIViewController {
     func indexPathFromUuid(uuid: UUID) -> IndexPath? {
         for (sectionIndex, sectionCells) in self.tableCells.enumerated() {
             for (rowIndex, cell) in sectionCells.enumerated() {
-                if cell.uuid() == uuid {
+                if cell.uuid == uuid {
                     return IndexPath(row: rowIndex, section: sectionIndex)
                 }
             }
@@ -113,11 +152,41 @@ class RecipeFormVC: UIViewController {
     }
 
     @objc func dismissVC() {
-        dismiss(animated: true)
+        self.dismiss(animated: true)
     }
 
     @objc func saveRecipe() {
-        // TODO: unimplemented
+        // check that the title is filled out
+        let title = self.tableCells[Section.title.rawValue][0].text!
+        if title.isEmpty {
+            self.presentErrorAlert(.missingTitle)
+            return
+        }
+
+        // gather the ingredients
+        var ingredients: [Ingredient] = []
+        for cell in self.tableCells[Section.ingredients.rawValue] {
+            switch cell {
+            case .input(_, let text):
+                ingredients.append(Ingredient(item: text))
+            case .actionButton(_):
+                continue
+            }
+        }
+        // gather the instructions
+        var instructions: [Instruction] = []
+        for cell in self.tableCells[Section.instructions.rawValue] {
+            switch cell {
+            case .input(_, let text):
+                instructions.append(Instruction(step: text))
+            case .actionButton(_):
+                continue
+            }
+        }
+
+        let recipe = Recipe(title: title, ingredients: ingredients, instructions: instructions)
+        self.delegate?.savedRecipe(recipe: recipe)
+        self.dismissVC()
     }
 }
 
@@ -133,7 +202,7 @@ extension RecipeFormVC: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         let tableSection = Section(rawValue: section)!
-        return tableSection.header()
+        return tableSection.header
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -184,53 +253,17 @@ extension RecipeFormVC: RecipeFormCellDelegate {
                 self.tableView.scrollToRow(at: indexPath, at: .top, animated: true)
             }
         } else {
-            self.presentErrorAlert(title: "Something went wrong", message: "Missing input \(uuid)")
+            self.presentErrorAlert(.missingInput(uuid))
         }
     }
 
-    func textFieldDidEndEditing(_ uuid: UUID, text: String?) {
+    func textFieldDidChange(_ uuid: UUID, text: String?) {
         guard let text else { return }
         if let indexPath = self.indexPathFromUuid(uuid: uuid) {
             let cell = self.tableCells[indexPath.section][indexPath.row]
-            self.tableCells[indexPath.section][indexPath.row] = .createInput(uuid: cell.uuid(), text: text)
+            self.tableCells[indexPath.section][indexPath.row] = .createInput(uuid: cell.uuid, text: text)
         } else {
-            self.presentErrorAlert(title: "Something went wrong", message: "Missing input \(uuid)")
-        }
-    }
-}
-
-extension RecipeFormVC.Section {
-
-    func header() -> String? {
-        switch self {
-        case .title:
-            return nil
-        case .ingredients:
-            return "Ingredients"
-        case .instructions:
-            return "Instructions"
-        }
-    }
-
-    func textFieldPlaceholder() -> String {
-        switch self {
-        case .title:
-            return "Title"
-        case .ingredients:
-            return "ex: 1 tbsp. olive oil"
-        case .instructions:
-            return "ex: Preheat the oven to 350°F"
-        }
-    }
-
-    func actionButtonText() -> String? {
-        switch self {
-        case .title:
-            return nil
-        case .ingredients:
-            return "Add another ingredient"
-        case .instructions:
-            return "Add another step"
+            self.presentErrorAlert(.missingInput(uuid))
         }
     }
 }

@@ -9,8 +9,6 @@ import Foundation
 
 struct Recipe: Codable {
     let title: String
-    // TODO: create a custom type that allows for sub-sections
-    let ingredients: [String]
-    // TODO: create a custom type that allows for sub-sections
-    let instructions: [String]
+    let ingredients: [Ingredient]
+    let instructions: [Instruction]
 }

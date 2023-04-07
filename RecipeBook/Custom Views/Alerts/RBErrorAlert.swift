@@ -13,15 +13,15 @@ class RBErrorAlert {
 
     init(title: String, message: String?) {
         self.alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        self.addActions()
+        self.addAction()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func addActions() {
-        let okAction = UIAlertAction(title: "Ok", style: .destructive)
+    func addAction() {
+        let okAction = UIAlertAction(title: "Continue", style: .default)
         self.alertController.addAction(okAction)
     }
 }

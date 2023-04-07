@@ -9,7 +9,7 @@ import UIKit
 
 protocol RecipeFormCellDelegate: AnyObject {
     func textFieldDidBeginEditing(_: UUID)
-    func textFieldDidEndEditing(_: UUID, text: String?)
+    func textFieldDidChange(_: UUID, text: String?)
     func ingredientsButtonPressed()
     func instructionsButtonPressed()
 }
@@ -20,6 +20,24 @@ class RecipeFormCell: UITableViewCell {
     enum Content {
         case input(UUID, String)
         case actionButton(UUID)
+
+        var uuid: UUID {
+            switch self  {
+            case .input(let uuid, _):
+                return uuid
+            case .actionButton(let uuid):
+                return uuid
+            }
+        }
+
+        var text: String? {
+            switch self  {
+            case .input(_, let text):
+                return text
+            case .actionButton(_):
+                return nil
+            }
+        }
     }
 
     var section: RecipeFormVC.Section?
@@ -43,9 +61,10 @@ class RecipeFormCell: UITableViewCell {
         self.section = section
         self.uuid = uuid
 
-        self.textField = RBTextField(placeholder: section.textFieldPlaceholder(), horizontalPadding: 20)
+        self.textField = RBTextField(placeholder: section.textFieldPlaceholder, horizontalPadding: 20)
         self.textField?.delegate = self
         self.textField?.text = text
+        self.textField?.addTarget(self, action: #selector(self.textFieldDidChange(_:)), for: .editingChanged)
         self.addSubview(self.textField!)
 
         NSLayoutConstraint.activate([
@@ -60,7 +79,7 @@ class RecipeFormCell: UITableViewCell {
         self.section = section
         self.uuid = uuid
 
-        self.actionButton = RBPlainButton(title: section.actionButtonText()!, systemImageName: "plus.circle")
+        self.actionButton = RBPlainButton(title: section.actionButtonText!, systemImageName: "plus.circle")
         self.actionButton!.addTarget(self, action: #selector(buttonPressed), for: .touchUpInside)
         self.addSubview(self.actionButton!)
 
@@ -82,6 +101,10 @@ class RecipeFormCell: UITableViewCell {
         }
     }
 
+    @objc func textFieldDidChange(_ textField: UITextField) {
+        self.delegate?.textFieldDidChange(self.uuid!, text: textField.text)
+    }
+
     @objc func buttonPressed() {
         if let section = self.section {
             switch section {
@@ -101,10 +124,6 @@ extension RecipeFormCell: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         self.delegate?.textFieldDidBeginEditing(self.uuid!)
     }
-
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        self.delegate?.textFieldDidEndEditing(self.uuid!, text: textField.text)
-    }
 }
 
 extension RecipeFormCell.Content {
@@ -119,14 +138,5 @@ extension RecipeFormCell.Content {
 
     static func createButton() -> RecipeFormCell.Content {
         return .actionButton(UUID())
-    }
-
-    func uuid() -> UUID {
-        switch self  {
-        case .input(let uuid, _):
-            return uuid
-        case .actionButton(let uuid):
-            return uuid
-        }
     }
 }

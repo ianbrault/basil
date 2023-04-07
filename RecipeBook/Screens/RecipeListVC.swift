@@ -10,18 +10,12 @@ import UIKit
 class RecipeListVC: UIViewController {
 
     let tableView = UITableView()
-    // let recipes: [Recipe] = []
-    // FIXME: test data
-    let recipes: [Recipe] = [
-        Recipe(title: "Coconut Chicken Curry", ingredients: [], instructions: []),
-        Recipe(title: "Baked Tofu with Peanut Sauce and Coconut-Lime Rice", ingredients: [], instructions: []),
-        Recipe(title: "Roasted Brussels Sprouts", ingredients: [], instructions: []),
-        Recipe(title: "Pear Torte", ingredients: [], instructions: []),
-    ]
+    var recipes: [Recipe] = []
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.configureNavigationBarOnAppear()
+        self.loadRecipes()
     }
 
     override func viewDidLoad() {
@@ -63,6 +57,34 @@ class RecipeListVC: UIViewController {
         self.tableView.register(RecipeCell.self, forCellReuseIdentifier: RecipeCell.reuseID)
     }
 
+    func loadRecipes() {
+        PersistenceManager.fetchRecipes { [weak self] (result) in
+            guard let self else { return }
+
+            switch result {
+            case .success(let recipes):
+                // show the empty state view if there are no favorites
+                if recipes.isEmpty {
+                    self.showEmptyStateView(in: self.view)
+                } else {
+                    self.recipes = recipes
+                    // reload table view data on the main thread
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                        // ensure that the table view is brought to the front in case the empty state view is still there
+                        self.view.bringSubviewToFront(self.tableView)
+                    }
+                }
+
+            case .failure(let error):
+                // update UI on the main thread
+                DispatchQueue.main.async {
+                    self.presentErrorAlert(error)
+                }
+            }
+        }
+    }
+
     func createAddButtonContextMenu() -> UIMenu {
         let menuItems = [
             UIAction(title: "Add new recipe", image: SFSymbols.addRecipe, handler: self.addNewRecipe),
@@ -74,6 +96,8 @@ class RecipeListVC: UIViewController {
 
     func addNewRecipe(_ action: UIAction) {
         let destVC = RecipeFormVC()
+        destVC.delegate = self
+
         let navController = UINavigationController(rootViewController: destVC)
         self.present(navController, animated: true)
     }
@@ -105,6 +129,21 @@ extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
         let recipeVC = RecipeVC()
         recipeVC.recipe = recipe
         self.navigationController?.pushViewController(recipeVC, animated: true)
+    }
+}
+
+extension RecipeListVC: RecipeFormVCDelegate {
+
+    func savedRecipe(recipe: Recipe) {
+        print("saved recipe")
+        do {
+            self.recipes.append(recipe)
+            try PersistenceManager.saveRecipes(recipes: self.recipes)
+            self.removeEmptyStateView(in: self.view)
+            self.tableView.reloadData()
+        } catch {
+            self.presentErrorAlert(.failedToSaveRecipes)
+        }
     }
 }
 

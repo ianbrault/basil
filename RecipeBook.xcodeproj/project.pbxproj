@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E349B13A29DFDB2D0097A338 /* PersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E349B13929DFDB2D0097A338 /* PersistenceManager.swift */; };
+		E349B13C29DFDD3C0097A338 /* RBError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E349B13B29DFDD3C0097A338 /* RBError.swift */; };
+		E349B13F29DFE2390097A338 /* RBEmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E349B13E29DFE2390097A338 /* RBEmptyStateView.swift */; };
 		E34B4CEA29CEEA3E0063A9A2 /* RBTextFieldAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B4CE929CEEA3E0063A9A2 /* RBTextFieldAlert.swift */; };
 		E34B4CEC29CF77320063A9A2 /* RBErrorAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B4CEB29CF77320063A9A2 /* RBErrorAlert.swift */; };
 		E34B4CEE29CF77CC0063A9A2 /* UIViewController+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B4CED29CF77CC0063A9A2 /* UIViewController+Ext.swift */; };
@@ -22,6 +25,8 @@
 		E3573E6629CC16C1000F7877 /* RecipeListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6529CC16C1000F7877 /* RecipeListVC.swift */; };
 		E3573E6929CC16DC000F7877 /* GroceryListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6829CC16DC000F7877 /* GroceryListVC.swift */; };
 		E3573E6C29CC185A000F7877 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6B29CC185A000F7877 /* Constants.swift */; };
+		E39A757229DEA77C0009BA57 /* Ingredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39A757129DEA77C0009BA57 /* Ingredient.swift */; };
+		E39A757429DEA7EE0009BA57 /* Instruction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39A757329DEA7EE0009BA57 /* Instruction.swift */; };
 		E3B1C73929CD205C00736C96 /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73829CD205C00736C96 /* Recipe.swift */; };
 		E3B1C73C29CE1CF600736C96 /* UITableView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73B29CE1CF600736C96 /* UITableView+Ext.swift */; };
 		E3B1C73E29CE1E9600736C96 /* RecipeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73D29CE1E9600736C96 /* RecipeCell.swift */; };
@@ -32,6 +37,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E349B13929DFDB2D0097A338 /* PersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManager.swift; sourceTree = "<group>"; };
+		E349B13B29DFDD3C0097A338 /* RBError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBError.swift; sourceTree = "<group>"; };
+		E349B13E29DFE2390097A338 /* RBEmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBEmptyStateView.swift; sourceTree = "<group>"; };
 		E34B4CE929CEEA3E0063A9A2 /* RBTextFieldAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBTextFieldAlert.swift; sourceTree = "<group>"; };
 		E34B4CEB29CF77320063A9A2 /* RBErrorAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBErrorAlert.swift; sourceTree = "<group>"; };
 		E34B4CED29CF77CC0063A9A2 /* UIViewController+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Ext.swift"; sourceTree = "<group>"; };
@@ -49,6 +57,8 @@
 		E3573E6529CC16C1000F7877 /* RecipeListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeListVC.swift; sourceTree = "<group>"; };
 		E3573E6829CC16DC000F7877 /* GroceryListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryListVC.swift; sourceTree = "<group>"; };
 		E3573E6B29CC185A000F7877 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		E39A757129DEA77C0009BA57 /* Ingredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ingredient.swift; sourceTree = "<group>"; };
+		E39A757329DEA7EE0009BA57 /* Instruction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Instruction.swift; sourceTree = "<group>"; };
 		E3B1C73829CD205C00736C96 /* Recipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
 		E3B1C73B29CE1CF600736C96 /* UITableView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+Ext.swift"; sourceTree = "<group>"; };
 		E3B1C73D29CE1E9600736C96 /* RecipeCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeCell.swift; sourceTree = "<group>"; };
@@ -69,6 +79,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E349B13829DFDB1F0097A338 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				E349B13929DFDB2D0097A338 /* PersistenceManager.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		E349B13D29DFE20E0097A338 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				E349B13E29DFE2390097A338 /* RBEmptyStateView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		E34B4CE629CEE89E0063A9A2 /* Alerts */ = {
 			isa = PBXGroup;
 			children = (
@@ -125,6 +151,7 @@
 				E3573E6129CC15C4000F7877 /* Custom Views */,
 				E3B1C73A29CE1CE200736C96 /* Extensions */,
 				E3573E5A29CC14B6000F7877 /* Info.plist */,
+				E349B13829DFDB1F0097A338 /* Managers */,
 				E3B1C73729CD205000736C96 /* Models */,
 				E3573E6429CC16A2000F7877 /* Screens */,
 				E3573E6029CC1549000F7877 /* Support */,
@@ -153,6 +180,7 @@
 				E34B4D0129D0FB660063A9A2 /* Inputs */,
 				E3B1C74329CE6A7E00736C96 /* Labels */,
 				E3573E6229CC161C000F7877 /* RBTabBarController.swift */,
+				E349B13D29DFE20E0097A338 /* Views */,
 			);
 			path = "Custom Views";
 			sourceTree = "<group>";
@@ -172,6 +200,7 @@
 			isa = PBXGroup;
 			children = (
 				E3573E6B29CC185A000F7877 /* Constants.swift */,
+				E349B13B29DFDD3C0097A338 /* RBError.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -180,6 +209,8 @@
 			isa = PBXGroup;
 			children = (
 				E3B1C73829CD205C00736C96 /* Recipe.swift */,
+				E39A757129DEA77C0009BA57 /* Ingredient.swift */,
+				E39A757329DEA7EE0009BA57 /* Instruction.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -275,17 +306,22 @@
 			files = (
 				E3573E4D29CC14B3000F7877 /* AppDelegate.swift in Sources */,
 				E3573E4F29CC14B3000F7877 /* SceneDelegate.swift in Sources */,
+				E39A757229DEA77C0009BA57 /* Ingredient.swift in Sources */,
+				E349B13A29DFDB2D0097A338 /* PersistenceManager.swift in Sources */,
 				E3B1C74029CE22AD00736C96 /* RecipeVC.swift in Sources */,
+				E39A757429DEA7EE0009BA57 /* Instruction.swift in Sources */,
 				E34B4D0529D154AF0063A9A2 /* RecipeFormVC.swift in Sources */,
 				E3B1C73929CD205C00736C96 /* Recipe.swift in Sources */,
 				E34B4CEA29CEEA3E0063A9A2 /* RBTextFieldAlert.swift in Sources */,
 				E34B4CEC29CF77320063A9A2 /* RBErrorAlert.swift in Sources */,
+				E349B13F29DFE2390097A338 /* RBEmptyStateView.swift in Sources */,
 				E3B1C73E29CE1E9600736C96 /* RecipeCell.swift in Sources */,
 				E3573E6929CC16DC000F7877 /* GroceryListVC.swift in Sources */,
 				E3573E6629CC16C1000F7877 /* RecipeListVC.swift in Sources */,
 				E34B4CF429CF80060063A9A2 /* RBTextField.swift in Sources */,
 				E3B1C74529CE6A9400736C96 /* RBTitleLabel.swift in Sources */,
 				E3B1C73C29CE1CF600736C96 /* UITableView+Ext.swift in Sources */,
+				E349B13C29DFDD3C0097A338 /* RBError.swift in Sources */,
 				E3B1C74729CE6CC900736C96 /* UIView+Ext.swift in Sources */,
 				E3573E6329CC161C000F7877 /* RBTabBarController.swift in Sources */,
 				E3B1C74229CE68BC00736C96 /* RBBodyLabel.swift in Sources */,
