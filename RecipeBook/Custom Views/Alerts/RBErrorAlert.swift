@@ -12,7 +12,10 @@ class RBErrorAlert {
     var alertController: UIAlertController!
 
     init(title: String, message: String?) {
-        self.alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        self.alertController = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .alert)
         self.addAction()
     }
 

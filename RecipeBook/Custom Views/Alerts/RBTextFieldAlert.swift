@@ -17,7 +17,10 @@ class RBTextFieldAlert {
     weak var delegate: RBTextFieldAlertDelegate!
 
     init(title: String, message: String?, placeholder: String) {
-        self.alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        self.alertController = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .alert)
         let textFieldConfig = { (textField: UITextField) in
             textField.placeholder = placeholder
         }

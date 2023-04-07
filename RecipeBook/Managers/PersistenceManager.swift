@@ -30,13 +30,14 @@ enum PersistenceManager {
         }
     }
 
-    static func saveRecipes(recipes: [Recipe]) throws {
+    static func saveRecipes(recipes: [Recipe], completed: @escaping (RBError?) -> Void) {
         do {
             let encoder = JSONEncoder()
             let encodedRecipes = try encoder.encode(recipes)
             defaults.set(encodedRecipes, forKey: Keys.recipes)
+            completed(nil)
         } catch {
-            throw RBError.failedToSaveRecipes
+            completed(.failedToSaveRecipes)
         }
     }
 }

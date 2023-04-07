@@ -130,19 +130,55 @@ extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
         recipeVC.recipe = recipe
         self.navigationController?.pushViewController(recipeVC, animated: true)
     }
+
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let contextItem = UIContextualAction(style: .destructive, title: "Delete") {  (action, view, actionPerformed) in
+            let alert = RBDeleteRecipeAlert { [weak self] () in
+                guard let self = self else { return }
+                // save the initial recipe state in case PersistenceManager throws
+                let previous_recipes = self.recipes
+
+                self.recipes.remove(at: indexPath.row)
+                PersistenceManager.saveRecipes(recipes: recipes) { [weak self] (error) in
+                    guard let self else { return }
+                    if let error {
+                        // restore the original recipe state
+                        self.recipes = previous_recipes
+                        actionPerformed(false)
+                        self.presentErrorAlert(error)
+                    } else {
+                        self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                        // if this was the last recipe, show the empty state view
+                        if self.recipes.isEmpty {
+                            self.showEmptyStateView(in: self.view)
+                        }
+                        actionPerformed(true)
+                    }
+                }
+            }
+            self.present(alert.alertController, animated: true)
+        }
+        return UISwipeActionsConfiguration(actions: [contextItem])
+    }
 }
 
 extension RecipeListVC: RecipeFormVCDelegate {
 
     func savedRecipe(recipe: Recipe) {
-        print("saved recipe")
-        do {
-            self.recipes.append(recipe)
-            try PersistenceManager.saveRecipes(recipes: self.recipes)
-            self.removeEmptyStateView(in: self.view)
-            self.tableView.reloadData()
-        } catch {
-            self.presentErrorAlert(.failedToSaveRecipes)
+        self.recipes.append(recipe)
+        PersistenceManager.saveRecipes(recipes: recipes) { [weak self] (error) in
+            guard let self else { return }
+            // save the initial recipe state in case PersistenceManager throws
+            let previous_recipes = self.recipes
+
+            if let error {
+                // restore the original recipe state
+                self.recipes = previous_recipes
+                self.presentErrorAlert(error)
+            } else {
+                self.removeEmptyStateView(in: self.view)
+                self.tableView.reloadData()
+            }
         }
     }
 }
