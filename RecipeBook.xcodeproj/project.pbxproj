@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E304964429E09D0400ED1541 /* RBBulletedListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E304964329E09D0400ED1541 /* RBBulletedListView.swift */; };
+		E304964629E0AF1200ED1541 /* RBNumberedListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E304964529E0AF1200ED1541 /* RBNumberedListView.swift */; };
 		E349B13A29DFDB2D0097A338 /* PersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E349B13929DFDB2D0097A338 /* PersistenceManager.swift */; };
 		E349B13C29DFDD3C0097A338 /* RBError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E349B13B29DFDD3C0097A338 /* RBError.swift */; };
 		E349B13F29DFE2390097A338 /* RBEmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E349B13E29DFE2390097A338 /* RBEmptyStateView.swift */; };
@@ -38,6 +40,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E304964329E09D0400ED1541 /* RBBulletedListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBBulletedListView.swift; sourceTree = "<group>"; };
+		E304964529E0AF1200ED1541 /* RBNumberedListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBNumberedListView.swift; sourceTree = "<group>"; };
 		E349B13929DFDB2D0097A338 /* PersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManager.swift; sourceTree = "<group>"; };
 		E349B13B29DFDD3C0097A338 /* RBError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBError.swift; sourceTree = "<group>"; };
 		E349B13E29DFE2390097A338 /* RBEmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBEmptyStateView.swift; sourceTree = "<group>"; };
@@ -92,7 +96,9 @@
 		E349B13D29DFE20E0097A338 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				E304964329E09D0400ED1541 /* RBBulletedListView.swift */,
 				E349B13E29DFE2390097A338 /* RBEmptyStateView.swift */,
+				E304964529E0AF1200ED1541 /* RBNumberedListView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -312,6 +318,7 @@
 				E39A757229DEA77C0009BA57 /* Ingredient.swift in Sources */,
 				E349B13A29DFDB2D0097A338 /* PersistenceManager.swift in Sources */,
 				E3B1C74029CE22AD00736C96 /* RecipeVC.swift in Sources */,
+				E304964429E09D0400ED1541 /* RBBulletedListView.swift in Sources */,
 				E349B14229E002100097A338 /* RBDeleteRecipeAlert.swift in Sources */,
 				E39A757429DEA7EE0009BA57 /* Instruction.swift in Sources */,
 				E34B4D0529D154AF0063A9A2 /* RecipeFormVC.swift in Sources */,
@@ -326,6 +333,7 @@
 				E3B1C74529CE6A9400736C96 /* RBTitleLabel.swift in Sources */,
 				E3B1C73C29CE1CF600736C96 /* UITableView+Ext.swift in Sources */,
 				E349B13C29DFDD3C0097A338 /* RBError.swift in Sources */,
+				E304964629E0AF1200ED1541 /* RBNumberedListView.swift in Sources */,
 				E3B1C74729CE6CC900736C96 /* UIView+Ext.swift in Sources */,
 				E3573E6329CC161C000F7877 /* RBTabBarController.swift in Sources */,
 				E3B1C74229CE68BC00736C96 /* RBBodyLabel.swift in Sources */,
@@ -477,6 +485,7 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -503,6 +512,7 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

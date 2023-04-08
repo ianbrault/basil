@@ -14,7 +14,7 @@ class RecipeListVC: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.configureNavigationBarOnAppear()
+        self.configureNavigationBar()
         self.loadRecipes()
     }
 
@@ -24,21 +24,19 @@ class RecipeListVC: UIViewController {
         self.configureTableView()
     }
 
-    func configureNavigationBarOnAppear() {
+    private func configureNavigationBar() {
         self.title = "Recipes"
         self.navigationController?.navigationBar.prefersLargeTitles = true
-        self.navigationController?.setNavigationBarHidden(false, animated: true)
+        self.navigationController?.navigationBar.tintColor = .systemYellow
+
+        let appearance = UINavigationBarAppearance()
+        appearance.largeTitleTextAttributes = [
+            NSAttributedString.Key.font: UIFont.systemFont(ofSize: 32, weight: .bold),
+        ]
+        self.navigationController?.navigationBar.standardAppearance = appearance
     }
 
-    func configureNavigationBarOnDisappear() {
-        // clear the title to avoid it overlapping the following view when pushed
-        self.title = ""
-        let backButton = UIBarButtonItem()
-        backButton.title = "Recipes"
-        self.navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
-    }
-
-    func configureViewController() {
+    private func configureViewController() {
         self.view.backgroundColor = .systemBackground
 
         // add an add button to add new recipes
@@ -46,7 +44,7 @@ class RecipeListVC: UIViewController {
         self.navigationItem.rightBarButtonItem = addButton
     }
 
-    func configureTableView() {
+    private func configureTableView() {
         self.view.addSubview(self.tableView)
 
         self.tableView.frame = self.view.bounds
@@ -123,8 +121,6 @@ extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.configureNavigationBarOnDisappear()
-
         let recipe = self.recipes[indexPath.row]
         let recipeVC = RecipeVC()
         recipeVC.recipe = recipe

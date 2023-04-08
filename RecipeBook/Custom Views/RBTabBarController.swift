@@ -11,12 +11,13 @@ class RBTabBarController: UITabBarController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        UITabBar.appearance().tintColor = .systemYellow
         self.viewControllers = [self.createRecipeListVC(), self.createGroceryListVC()]
     }
 
     func createRecipeListVC() -> UINavigationController {
         let recipeListVC = RecipeListVC()
-        recipeListVC.tabBarItem = UITabBarItem(title: "Recipes", image: SFSymbols.recipes, tag: 0)
+        recipeListVC.tabBarItem = UITabBarItem(title: "Recipes", image: SFSymbols.recipeBook, tag: 0)
 
         return UINavigationController(rootViewController: recipeListVC)
     }

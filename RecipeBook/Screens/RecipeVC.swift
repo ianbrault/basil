@@ -8,53 +8,102 @@
 import UIKit
 
 class RecipeVC: UIViewController {
+    static let padding: CGFloat = 20
+    static let headingTextSize: CGFloat = 18
+    static let bodyTextSize: CGFloat = 16
 
     let scrollView = UIScrollView()
-    let contentView = UIView()
-    let recipeTitleLabel = RBTitleLabel(fontSize: 24)
+    let stackView = UIStackView()
+    let ingredientsTitleLabel = RBTitleLabel(fontSize: RecipeVC.headingTextSize, weight: .semibold)
+    let ingredientsListView = RBBulletedListView(fontSize: RecipeVC.bodyTextSize)
+    let instructionsTitleLabel = RBTitleLabel(fontSize: RecipeVC.headingTextSize, weight: .semibold)
+    let instructionsListView = RBNumberedListView(fontSize: RecipeVC.bodyTextSize)
 
     var recipe: Recipe!
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.configureNavigationBar()
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configureViewController()
         self.configureScrollView()
-        self.configureRecipeTitleLabel()
+        self.configureIngredientsTitleLabel()
+        self.configureIngredientsListView()
+        self.configureInstructionsTitleLabel()
+        self.configureInstructionsListView()
     }
 
-    func configureViewController() {
+    private func configureNavigationBar() {
+        self.title = recipe.title
+        self.navigationController?.navigationBar.prefersLargeTitles = true
+
+        let appearance = UINavigationBarAppearance()
+        appearance.largeTitleTextAttributes = [
+            NSAttributedString.Key.font: UIFont.systemFont(ofSize: 24, weight: .bold),
+        ]
+        self.navigationController?.navigationBar.standardAppearance = appearance
+    }
+
+    private func configureViewController() {
         self.view.backgroundColor = .systemBackground
-        self.navigationController?.navigationBar.prefersLargeTitles = false
     }
 
-    func configureScrollView() {
+    private func configureScrollView() {
         self.view.addSubview(self.scrollView)
-        self.scrollView.addSubview(self.contentView)
         self.scrollView.pinToEdges(of: self.view)
-        self.contentView.pinToEdges(of: self.scrollView)
+
+        self.scrollView.addSubview(self.stackView)
+        self.stackView.axis = .vertical
+        self.stackView.spacing = 20
+        self.stackView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            self.contentView.widthAnchor.constraint(equalTo: self.scrollView.widthAnchor),
+            self.stackView.topAnchor.constraint(equalTo: self.scrollView.topAnchor, constant: RecipeVC.padding / 2),
+            self.stackView.leadingAnchor.constraint(equalTo: self.scrollView.leadingAnchor, constant: RecipeVC.padding),
+            self.stackView.trailingAnchor.constraint(equalTo: self.scrollView.trailingAnchor, constant: -RecipeVC.padding),
+            self.stackView.widthAnchor.constraint(equalTo: self.scrollView.widthAnchor, constant: -RecipeVC.padding * 2),
         ])
     }
 
-    func configureRecipeTitleLabel() {
-        self.contentView.addSubview(self.recipeTitleLabel)
-        self.recipeTitleLabel.text = self.recipe.title
-        // dynamic sizing for recipe title
-        var recipeTitleLines: CGFloat = 1
-        if self.recipe.title.count > 24 {
-            recipeTitleLines = 2
-        }
-        self.recipeTitleLabel.numberOfLines = Int(recipeTitleLines)
-        let recipeTitleHeight = 36 * recipeTitleLines
+    private func configureIngredientsTitleLabel() {
+        self.stackView.addArrangedSubview(self.ingredientsTitleLabel)
+        self.stackView.setCustomSpacing(4, after: self.ingredientsTitleLabel)
+        self.ingredientsTitleLabel.text = "Ingredients"
+    }
 
-        let padding: CGFloat = 24
+    private func configureIngredientsListView() {
+        self.stackView.addArrangedSubview(self.ingredientsListView)
+
+        var ingredients: [String] = []
+        for ingredient in self.recipe.ingredients {
+            ingredients.append(ingredient.item)
+        }
+        self.ingredientsListView.setItems(items: ingredients)
+        self.ingredientsListView.sizeToFit()
+        self.ingredientsListView.isScrollEnabled = false
+    }
+
+    private func configureInstructionsTitleLabel() {
+        self.stackView.addArrangedSubview(self.instructionsTitleLabel)
+        self.stackView.setCustomSpacing(16, after: self.instructionsTitleLabel)
+        self.instructionsTitleLabel.text = "Instructions"
+    }
+
+    private func configureInstructionsListView() {
+        self.stackView.addArrangedSubview(self.instructionsListView)
+
+        var instructions: [String] = []
+        for instruction in self.recipe.instructions {
+            instructions.append(instruction.step)
+        }
+        self.instructionsListView.setItems(items: instructions)
         NSLayoutConstraint.activate([
-            self.recipeTitleLabel.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
-            self.recipeTitleLabel.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: padding),
-            self.recipeTitleLabel.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -padding),
-            self.recipeTitleLabel.heightAnchor.constraint(equalToConstant: recipeTitleHeight),
+            self.instructionsListView.leadingAnchor.constraint(equalTo: self.stackView.leadingAnchor),
+            self.instructionsListView.trailingAnchor.constraint(equalTo: self.stackView.trailingAnchor),
+            self.instructionsListView.widthAnchor.constraint(equalTo: self.stackView.widthAnchor),
         ])
     }
 }
