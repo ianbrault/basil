@@ -2,23 +2,28 @@
 //  RecipeVC.swift
 //  RecipeBook
 //
-//  Created by Ian Brault on 3/24/23.
+//  Created by Ian Brault on 4/8/23.
 //
 
 import UIKit
 
 class RecipeVC: UIViewController {
-    static let padding: CGFloat = 20
-    static let headingTextSize: CGFloat = 18
-    static let bodyTextSize: CGFloat = 16
 
-    let scrollView = UIScrollView()
-    let stackView = UIStackView()
-    let ingredientsTitleLabel = RBTitleLabel(fontSize: RecipeVC.headingTextSize, weight: .semibold)
-    let ingredientsListView = RBBulletedListView(fontSize: RecipeVC.bodyTextSize)
-    let instructionsTitleLabel = RBTitleLabel(fontSize: RecipeVC.headingTextSize, weight: .semibold)
-    let instructionsListView = RBNumberedListView(fontSize: RecipeVC.bodyTextSize)
+    enum Section: Int {
+        case ingredients
+        case instructions
 
+        var title: String {
+            switch self {
+            case .ingredients:
+                return "Ingredients"
+            case .instructions:
+                return "Instructions"
+            }
+        }
+    }
+
+    let tableView = UITableView()
     var recipe: Recipe!
 
     override func viewWillAppear(_ animated: Bool) {
@@ -29,11 +34,7 @@ class RecipeVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configureViewController()
-        self.configureScrollView()
-        self.configureIngredientsTitleLabel()
-        self.configureIngredientsListView()
-        self.configureInstructionsTitleLabel()
-        self.configureInstructionsListView()
+        self.configureTableView()
     }
 
     private func configureNavigationBar() {
@@ -51,59 +52,64 @@ class RecipeVC: UIViewController {
         self.view.backgroundColor = .systemBackground
     }
 
-    private func configureScrollView() {
-        self.view.addSubview(self.scrollView)
-        self.scrollView.pinToEdges(of: self.view)
+    private func configureTableView() {
+        self.view.addSubview(self.tableView)
 
-        self.scrollView.addSubview(self.stackView)
-        self.stackView.axis = .vertical
-        self.stackView.spacing = 20
-        self.stackView.translatesAutoresizingMaskIntoConstraints = false
+        self.tableView.delegate = self
+        self.tableView.dataSource = self
 
-        NSLayoutConstraint.activate([
-            self.stackView.topAnchor.constraint(equalTo: self.scrollView.topAnchor, constant: RecipeVC.padding / 2),
-            self.stackView.leadingAnchor.constraint(equalTo: self.scrollView.leadingAnchor, constant: RecipeVC.padding),
-            self.stackView.trailingAnchor.constraint(equalTo: self.scrollView.trailingAnchor, constant: -RecipeVC.padding),
-            self.stackView.widthAnchor.constraint(equalTo: self.scrollView.widthAnchor, constant: -RecipeVC.padding * 2),
-        ])
+        self.tableView.frame = self.view.bounds
+        self.tableView.allowsSelection = false
+        self.tableView.separatorStyle = .none
+        self.tableView.removeExcessCells()
+
+        self.tableView.register(
+            RecipeIngredientCell.self,
+            forCellReuseIdentifier: RecipeIngredientCell.reuseID)
+        self.tableView.register(
+            RecipeInstructionCell.self,
+            forCellReuseIdentifier: RecipeInstructionCell.reuseID)
+    }
+}
+
+extension RecipeVC: UITableViewDataSource, UITableViewDelegate {
+
+    func numberOfSections(in tableView: UITableView) -> Int {
+        // ingredients and instructions
+        return 2
     }
 
-    private func configureIngredientsTitleLabel() {
-        self.stackView.addArrangedSubview(self.ingredientsTitleLabel)
-        self.stackView.setCustomSpacing(4, after: self.ingredientsTitleLabel)
-        self.ingredientsTitleLabel.text = "Ingredients"
-    }
-
-    private func configureIngredientsListView() {
-        self.stackView.addArrangedSubview(self.ingredientsListView)
-
-        var ingredients: [String] = []
-        for ingredient in self.recipe.ingredients {
-            ingredients.append(ingredient.item)
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        let section = Section(rawValue: section)!
+        switch section {
+        case .ingredients:
+            return self.recipe.ingredients.count
+        case .instructions:
+            return self.recipe.instructions.count
         }
-        self.ingredientsListView.setItems(items: ingredients)
-        self.ingredientsListView.sizeToFit()
-        self.ingredientsListView.isScrollEnabled = false
     }
 
-    private func configureInstructionsTitleLabel() {
-        self.stackView.addArrangedSubview(self.instructionsTitleLabel)
-        self.stackView.setCustomSpacing(16, after: self.instructionsTitleLabel)
-        self.instructionsTitleLabel.text = "Instructions"
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        let section = Section(rawValue: section)!
+        return section.title
     }
 
-    private func configureInstructionsListView() {
-        self.stackView.addArrangedSubview(self.instructionsListView)
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let section = Section(rawValue: indexPath.section)!
+        let i = indexPath.row
 
-        var instructions: [String] = []
-        for instruction in self.recipe.instructions {
-            instructions.append(instruction.step)
+        switch section {
+        case .ingredients:
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: RecipeIngredientCell.reuseID) as! RecipeIngredientCell
+            cell.set(ingredient: self.recipe.ingredients[i].item)
+            return cell
+
+        case .instructions:
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: RecipeInstructionCell.reuseID) as! RecipeInstructionCell
+            cell.set(n: i + 1, instruction: self.recipe.instructions[i].step)
+            return cell
         }
-        self.instructionsListView.setItems(items: instructions)
-        NSLayoutConstraint.activate([
-            self.instructionsListView.leadingAnchor.constraint(equalTo: self.stackView.leadingAnchor),
-            self.instructionsListView.trailingAnchor.constraint(equalTo: self.stackView.trailingAnchor),
-            self.instructionsListView.widthAnchor.constraint(equalTo: self.stackView.widthAnchor),
-        ])
     }
 }
