@@ -10,7 +10,10 @@ import UIKit
 enum SFSymbols {
     static let add = UIImage(systemName: "plus")
     static let addRecipe = UIImage(systemName: "plus.circle")
+    static let contextMenu = UIImage(systemName: "ellipsis.circle")
+    static let editRecipe = UIImage(systemName: "square.and.pencil")
     static let groceries = UIImage(systemName: "cart")
     static let importRecipe = UIImage(systemName: "tray.and.arrow.down")
     static let recipeBook = UIImage(systemName: "text.book.closed")
+    static let trash = UIImage(systemName: "trash")
 }

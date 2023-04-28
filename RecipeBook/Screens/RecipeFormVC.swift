@@ -8,7 +8,7 @@
 import UIKit
 
 protocol RecipeFormVCDelegate: AnyObject {
-    func savedRecipe(recipe: Recipe)
+    func didSaveRecipe(recipe: Recipe)
 }
 
 class RecipeFormVC: UIViewController {
@@ -61,6 +61,7 @@ class RecipeFormVC: UIViewController {
     let tableTopPadding: CGFloat = 20
     let tableBottomPadding: CGFloat = 100
 
+    var uuid: UUID?
     weak var delegate: RecipeFormVCDelegate?
 
     override func viewDidLoad() {
@@ -114,6 +115,35 @@ class RecipeFormVC: UIViewController {
         self.addNotificationObserver(name: UIResponder.keyboardWillHideNotification, selector: #selector(onKeyboardDisappear))
     }
 
+    func set(recipe: Recipe) {
+        self.uuid = recipe.uuid
+
+        let titleSection = Section.title.rawValue
+        let ingredientsSection = Section.ingredients.rawValue
+        let instructionsSection = Section.instructions.rawValue
+
+        // add the title cell
+        let titleCell = RecipeFormCell.Content.createInput(text: recipe.title)
+        self.tableCells[titleSection].removeAll()
+        self.tableCells[titleSection].append(titleCell)
+
+        // add the ingredients cells
+        self.tableCells[ingredientsSection].removeAll()
+        for ingredient in recipe.ingredients {
+            let ingredientCell = RecipeFormCell.Content.createInput(text: ingredient.item)
+            self.tableCells[ingredientsSection].append(ingredientCell)
+        }
+        self.tableCells[ingredientsSection].append(RecipeFormCell.Content.createButton())
+
+        // add the instructions cells
+        self.tableCells[instructionsSection].removeAll()
+        for instruction in recipe.instructions {
+            let instructionCell = RecipeFormCell.Content.createInput(text: instruction.step)
+            self.tableCells[instructionsSection].append(instructionCell)
+        }
+        self.tableCells[instructionsSection].append(RecipeFormCell.Content.createButton())
+    }
+
     func appendInputCell(section: Section) {
         // TODO: focus (and scroll to) the new input
         let input = RecipeFormCell.Content.createInput()
@@ -138,14 +168,14 @@ class RecipeFormVC: UIViewController {
     @objc func onKeyboardAppear() {
         DispatchQueue.main.async {
             UIView.animate(withDuration: 0.1) {
-                self.tableView.contentInset.bottom = 380
+                self.tableView.contentInset.bottom = 420
             }
         }
     }
 
     @objc func onKeyboardDisappear() {
         DispatchQueue.main.async {
-            UIView.animate(withDuration: 0.2) {
+            UIView.animate(withDuration: 0.1) {
                 self.tableView.contentInset.bottom = self.tableBottomPadding
             }
         }
@@ -166,26 +196,30 @@ class RecipeFormVC: UIViewController {
         // gather the ingredients
         var ingredients: [Ingredient] = []
         for cell in self.tableCells[Section.ingredients.rawValue] {
-            switch cell {
-            case .input(_, let text):
-                ingredients.append(Ingredient(item: text))
-            case .actionButton(_):
+            switch cell.type {
+            case .input:
+                ingredients.append(Ingredient(item: cell.text!))
+            case .actionButton:
                 continue
             }
         }
         // gather the instructions
         var instructions: [Instruction] = []
         for cell in self.tableCells[Section.instructions.rawValue] {
-            switch cell {
-            case .input(_, let text):
-                instructions.append(Instruction(step: text))
-            case .actionButton(_):
+            switch cell.type {
+            case .input:
+                instructions.append(Instruction(step: cell.text!))
+            case .actionButton:
                 continue
             }
         }
 
-        let recipe = Recipe(title: title, ingredients: ingredients, instructions: instructions)
-        self.delegate?.savedRecipe(recipe: recipe)
+        let recipe = Recipe(
+            uuid: self.uuid ?? UUID(),
+            title: title,
+            ingredients: ingredients,
+            instructions: instructions)
+        self.delegate?.didSaveRecipe(recipe: recipe)
         self.dismissVC()
     }
 }
@@ -227,11 +261,11 @@ extension RecipeFormVC: UITableViewDataSource, UITableViewDelegate {
             return nil
         }
 
-        switch self.tableCells[indexPath.section][indexPath.row] {
+        switch self.tableCells[indexPath.section][indexPath.row].type {
         // do not allow buttons to be deleted
-        case .actionButton(_):
+        case .actionButton:
             return nil
-        case .input(_, _):
+        case .input:
             return UISwipeActionsConfiguration(actions: [contextItem])
         }
     }

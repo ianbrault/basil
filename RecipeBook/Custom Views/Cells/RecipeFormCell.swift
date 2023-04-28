@@ -17,26 +17,31 @@ protocol RecipeFormCellDelegate: AnyObject {
 class RecipeFormCell: UITableViewCell {
     static let reuseID = "RecipeFormCell"
 
-    enum Content {
-        case input(UUID, String)
-        case actionButton(UUID)
+    enum ContentType {
+        case input
+        case actionButton
+    }
 
-        var uuid: UUID {
-            switch self  {
-            case .input(let uuid, _):
-                return uuid
-            case .actionButton(let uuid):
-                return uuid
-            }
+    struct Content {
+        var type: ContentType
+        var uuid: UUID
+        var text: String? = nil
+
+        static func createInput() -> Content {
+            return Content(type: .input, uuid: UUID(), text: "")
         }
 
-        var text: String? {
-            switch self  {
-            case .input(_, let text):
-                return text
-            case .actionButton(_):
-                return nil
-            }
+        static func createInput(text: String) -> Content {
+            return Content(type: .input, uuid: UUID(), text: text)
+
+        }
+
+        static func createInput(uuid: UUID, text: String) -> Content {
+            return Content(type: .input, uuid: uuid, text: text)
+        }
+
+        static func createButton() -> Content {
+            return Content(type: .actionButton, uuid: UUID())
         }
     }
 
@@ -93,11 +98,11 @@ class RecipeFormCell: UITableViewCell {
     func set(section: RecipeFormVC.Section, content: Content) {
         self.contentView.isUserInteractionEnabled = false
 
-        switch content {
-        case .input(let uuid, let text):
-            self.setInput(section: section, uuid: uuid, text: text)
-        case .actionButton(let uuid):
-            self.setActionButton(section: section, uuid: uuid)
+        switch content.type {
+        case .input:
+            self.setInput(section: section, uuid: content.uuid, text: content.text!)
+        case .actionButton:
+            self.setActionButton(section: section, uuid: content.uuid)
         }
     }
 
@@ -123,20 +128,5 @@ extension RecipeFormCell: UITextFieldDelegate {
 
     func textFieldDidBeginEditing(_ textField: UITextField) {
         self.delegate?.textFieldDidBeginEditing(self.uuid!)
-    }
-}
-
-extension RecipeFormCell.Content {
-
-    static func createInput() -> RecipeFormCell.Content {
-        return .input(UUID(), "")
-    }
-
-    static func createInput(uuid: UUID, text: String) -> RecipeFormCell.Content {
-        return .input(uuid, text)
-    }
-
-    static func createButton() -> RecipeFormCell.Content {
-        return .actionButton(UUID())
     }
 }

@@ -8,6 +8,7 @@
 import Foundation
 
 struct Recipe: Codable {
+    let uuid: UUID
     let title: String
     let ingredients: [Ingredient]
     let instructions: [Instruction]

@@ -36,6 +36,15 @@ class RecipeListVC: UIViewController {
         self.navigationController?.navigationBar.standardAppearance = appearance
     }
 
+    private func createAddButtonContextMenu() -> UIMenu {
+        let menuItems = [
+            UIAction(title: "Add new recipe", image: SFSymbols.addRecipe, handler: self.addNewRecipe),
+            UIAction(title: "Import recipe", image: SFSymbols.importRecipe, handler: self.importRecipe),
+        ]
+
+        return UIMenu(title: "", image: nil, identifier: nil, options: [], children: menuItems)
+    }
+
     private func configureViewController() {
         self.view.backgroundColor = .systemBackground
 
@@ -83,15 +92,6 @@ class RecipeListVC: UIViewController {
         }
     }
 
-    func createAddButtonContextMenu() -> UIMenu {
-        let menuItems = [
-            UIAction(title: "Add new recipe", image: SFSymbols.addRecipe, handler: self.addNewRecipe),
-            UIAction(title: "Import recipe", image: SFSymbols.importRecipe, handler: self.importRecipe),
-        ]
-
-        return UIMenu(title: "", image: nil, identifier: nil, options: [], children: menuItems)
-    }
-
     func addNewRecipe(_ action: UIAction) {
         let destVC = RecipeFormVC()
         destVC.delegate = self
@@ -103,6 +103,7 @@ class RecipeListVC: UIViewController {
     func importRecipe(_ action: UIAction) {
         let alert = RBTextFieldAlert(title: "Import a recipe", message: nil, placeholder: "URL")
         alert.delegate = self
+
         self.present(alert.alertController, animated: true)
     }
 }
@@ -124,6 +125,8 @@ extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
         let recipe = self.recipes[indexPath.row]
         let recipeVC = RecipeVC()
         recipeVC.recipe = recipe
+        recipeVC.delegate = self
+
         self.navigationController?.pushViewController(recipeVC, animated: true)
     }
 
@@ -160,7 +163,7 @@ extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
 
 extension RecipeListVC: RecipeFormVCDelegate {
 
-    func savedRecipe(recipe: Recipe) {
+    func didSaveRecipe(recipe: Recipe) {
         self.recipes.append(recipe)
         PersistenceManager.saveRecipes(recipes: recipes) { [weak self] (error) in
             guard let self else { return }
@@ -175,6 +178,45 @@ extension RecipeListVC: RecipeFormVCDelegate {
                 self.removeEmptyStateView(in: self.view)
                 self.tableView.reloadData()
             }
+        }
+    }
+}
+
+extension RecipeListVC: RecipeVCDelegate {
+
+    func didDeleteRecipe(recipe: Recipe) {
+        // remove the recipe view first
+        self.navigationController?.popViewController(animated: true)
+
+        // save the initial recipe state in case PersistenceManager throws
+        let previous_recipes = self.recipes
+
+        // find the index path for the recipe
+        var indexPath: IndexPath? = nil
+        for (index, storedRecipe) in self.recipes.enumerated() {
+            if storedRecipe.uuid == recipe.uuid {
+                indexPath = IndexPath(row: index, section: 0)
+            }
+        }
+
+        if let indexPath {
+            self.recipes.remove(at: indexPath.row)
+            PersistenceManager.saveRecipes(recipes: recipes) { [weak self] (error) in
+                guard let self else { return }
+                if let error {
+                    // restore the original recipe state
+                    self.recipes = previous_recipes
+                    self.presentErrorAlert(error)
+                } else {
+                    self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                    // if this was the last recipe, show the empty state view
+                    if self.recipes.isEmpty {
+                        self.showEmptyStateView(in: self.view)
+                    }
+                }
+            }
+        } else {
+            self.presentErrorAlert(.missingRecipe(recipe.uuid))
         }
     }
 }

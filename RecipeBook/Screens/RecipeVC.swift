@@ -7,6 +7,10 @@
 
 import UIKit
 
+protocol RecipeVCDelegate: AnyObject {
+    func didDeleteRecipe(recipe: Recipe)
+}
+
 class RecipeVC: UIViewController {
 
     enum Section: Int {
@@ -25,6 +29,7 @@ class RecipeVC: UIViewController {
 
     let tableView = UITableView()
     var recipe: Recipe!
+    weak var delegate: RecipeVCDelegate?
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -37,6 +42,15 @@ class RecipeVC: UIViewController {
         self.configureTableView()
     }
 
+    private func createContextMenu() -> UIMenu {
+        let menuItems = [
+            UIAction(title: "Edit recipe", image: SFSymbols.editRecipe, handler: self.editRecipe),
+            UIAction(title: "Delete recipe", image: SFSymbols.trash, attributes: .destructive, handler: self.deleteRecipe),
+        ]
+
+        return UIMenu(title: "", image: nil, identifier: nil, options: [], children: menuItems)
+    }
+
     private func configureNavigationBar() {
         self.title = recipe.title
         self.navigationController?.navigationBar.prefersLargeTitles = true
@@ -46,6 +60,11 @@ class RecipeVC: UIViewController {
             NSAttributedString.Key.font: UIFont.systemFont(ofSize: 24, weight: .bold),
         ]
         self.navigationController?.navigationBar.standardAppearance = appearance
+
+        // add a button for the context menu
+        let menuButton = UIBarButtonItem(image: SFSymbols.contextMenu, menu: createContextMenu())
+        
+        self.navigationItem.rightBarButtonItem = menuButton
     }
 
     private func configureViewController() {
@@ -69,6 +88,23 @@ class RecipeVC: UIViewController {
         self.tableView.register(
             RecipeInstructionCell.self,
             forCellReuseIdentifier: RecipeInstructionCell.reuseID)
+    }
+
+    func editRecipe(_ action: UIAction) {
+        let destVC = RecipeFormVC()
+        destVC.delegate = self
+        destVC.set(recipe: self.recipe)
+
+        let navController = UINavigationController(rootViewController: destVC)
+        self.present(navController, animated: true)
+    }
+
+    func deleteRecipe(_ action: UIAction) {
+        let alert = RBDeleteRecipeAlert { [weak self] () in
+            guard let self = self else { return }
+            self.delegate?.didDeleteRecipe(recipe: self.recipe)
+        }
+        self.present(alert.alertController, animated: true)
     }
 }
 
@@ -110,6 +146,23 @@ extension RecipeVC: UITableViewDataSource, UITableViewDelegate {
                 withIdentifier: RecipeInstructionCell.reuseID) as! RecipeInstructionCell
             cell.set(n: i + 1, instruction: self.recipe.instructions[i].step)
             return cell
+        }
+    }
+}
+
+extension RecipeVC: RecipeFormVCDelegate {
+
+    func didSaveRecipe(recipe: Recipe) {
+        PersistenceManager.saveRecipe(recipe: recipe) { [weak self] (error) in
+            guard let self else { return }
+            // save the initial recipe state in case PersistenceManager throws
+
+            if let error {
+                self.presentErrorAlert(error)
+            } else {
+                self.recipe = recipe
+                self.tableView.reloadData()
+            }
         }
     }
 }

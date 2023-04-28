@@ -11,6 +11,7 @@ enum RBError: Error {
     case failedToLoadRecipes
     case failedToSaveRecipes
     case missingInput(UUID)
+    case missingRecipe(UUID)
     case missingTitle
 
     var title: String {
@@ -20,6 +21,8 @@ enum RBError: Error {
         case .failedToSaveRecipes:
             return "Something went wrong"
         case .missingInput(_):
+            return "Something went wrong"
+        case .missingRecipe(_):
             return "Something went wrong"
         case .missingTitle:
             return "Missing title"
@@ -34,6 +37,8 @@ enum RBError: Error {
             return "Something went wrong"
         case .missingInput(let uuid):
             return "Missing input \(uuid)"
+        case .missingRecipe(let uuid):
+            return "Missing recipe \(uuid)"
         case .missingTitle:
             return "Add a title to the recipe and try again"
         }

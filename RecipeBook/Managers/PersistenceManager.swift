@@ -40,4 +40,23 @@ enum PersistenceManager {
             completed(.failedToSaveRecipes)
         }
     }
+
+    static func saveRecipe(recipe: Recipe, completed: @escaping (RBError?) -> Void) {
+        fetchRecipes { (result) in
+            switch result {
+            case .success(var recipes):
+                if let i = recipes.firstIndex(where: { $0.uuid == recipe.uuid }) {
+                    recipes[i] = recipe
+                    saveRecipes(recipes: recipes) { (error) in
+                        completed(error)
+                    }
+                } else {
+                    completed(.missingRecipe(recipe.uuid))
+                }
+
+            case .failure(let error):
+                completed(error)
+            }
+        }
+    }
 }
