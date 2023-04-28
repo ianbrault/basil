@@ -13,6 +13,20 @@ protocol RecipeFormVCDelegate: AnyObject {
 
 class RecipeFormVC: UIViewController {
 
+    enum Style {
+        case new
+        case edit
+
+        var title: String {
+            switch self {
+            case .new:
+                return "New Recipe"
+            case .edit:
+                return "Edit Recipe"
+            }
+        }
+    }
+
     enum Section: Int {
         case title = 0
         case ingredients = 1
@@ -61,8 +75,18 @@ class RecipeFormVC: UIViewController {
     let tableTopPadding: CGFloat = 20
     let tableBottomPadding: CGFloat = 100
 
+    var style: Style!
     var uuid: UUID?
     weak var delegate: RecipeFormVCDelegate?
+
+    init(style: Style) {
+        super.init(nibName: nil, bundle: nil)
+        self.style = style
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -74,7 +98,7 @@ class RecipeFormVC: UIViewController {
     }
 
     func configureNavigationController() {
-        self.title = "New Recipe"
+        self.title = self.style.title
         self.navigationController?.navigationBar.prefersLargeTitles = true
         self.navigationController?.setNavigationBarHidden(false, animated: true)
     }

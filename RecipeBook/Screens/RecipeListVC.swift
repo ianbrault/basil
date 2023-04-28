@@ -93,7 +93,7 @@ class RecipeListVC: UIViewController {
     }
 
     func addNewRecipe(_ action: UIAction) {
-        let destVC = RecipeFormVC()
+        let destVC = RecipeFormVC(style: .new)
         destVC.delegate = self
 
         let navController = UINavigationController(rootViewController: destVC)

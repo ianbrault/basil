@@ -91,7 +91,7 @@ class RecipeVC: UIViewController {
     }
 
     func editRecipe(_ action: UIAction) {
-        let destVC = RecipeFormVC()
+        let destVC = RecipeFormVC(style: .edit)
         destVC.delegate = self
         destVC.set(recipe: self.recipe)
 
