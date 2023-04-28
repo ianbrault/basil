@@ -111,8 +111,12 @@ class RecipeFormVC: UIViewController {
     }
 
     func createKeyboardNotificationObservers() {
-        self.addNotificationObserver(name: UIResponder.keyboardWillShowNotification, selector: #selector(onKeyboardAppear))
-        self.addNotificationObserver(name: UIResponder.keyboardWillHideNotification, selector: #selector(onKeyboardDisappear))
+        self.addNotificationObserver(
+            name: UIResponder.keyboardWillShowNotification,
+            selector: #selector(onKeyboardAppear))
+        self.addNotificationObserver(
+            name: UIResponder.keyboardWillHideNotification,
+            selector: #selector(onKeyboardDisappear))
     }
 
     func set(recipe: Recipe) {
@@ -145,13 +149,18 @@ class RecipeFormVC: UIViewController {
     }
 
     func appendInputCell(section: Section) {
-        // TODO: focus (and scroll to) the new input
         let input = RecipeFormCell.Content.createInput()
         let index = self.tableCells[section.rawValue].count - 1
 
         self.tableCells[section.rawValue].insert(input, at: index)
         let indexPath = IndexPath(row: index, section: section.rawValue)
         self.tableView.insertRows(at: [indexPath], with: .automatic)
+
+        // scroll to the new input
+        self.tableView.scrollToRow(at: indexPath, at: .top, animated: true)
+        // and focus the new input
+        let cell = self.tableView.cellForRow(at: indexPath) as! RecipeFormCell
+        cell.textField?.becomeFirstResponder()
     }
 
     func indexPathFromUuid(uuid: UUID) -> IndexPath? {
@@ -165,10 +174,13 @@ class RecipeFormVC: UIViewController {
         return nil
     }
 
-    @objc func onKeyboardAppear() {
-        DispatchQueue.main.async {
-            UIView.animate(withDuration: 0.1) {
-                self.tableView.contentInset.bottom = 420
+    @objc func onKeyboardAppear(_ notification: Notification) {
+        if let keyboardFrame: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
+            let keyboardHeight = keyboardFrame.cgRectValue.height
+            DispatchQueue.main.async {
+                UIView.animate(withDuration: 0.1) {
+                    self.tableView.contentInset.bottom = keyboardHeight + self.tableBottomPadding
+                }
             }
         }
     }
@@ -283,7 +295,8 @@ extension RecipeFormVC: RecipeFormCellDelegate {
 
     func textFieldDidBeginEditing(_ uuid: UUID) {
         if let indexPath = self.indexPathFromUuid(uuid: uuid) {
-            DispatchQueue.main.async {
+            // add a slight delay to allow the keyboard to displace the screen
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 self.tableView.scrollToRow(at: indexPath, at: .top, animated: true)
             }
         } else {

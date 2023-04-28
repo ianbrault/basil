@@ -14,6 +14,19 @@ enum PersistenceManager {
         static let recipes = "recipes"
     }
 
+    // TODO: debug function, delete later
+    static func deleteRecipes(completed: @escaping (RBError?) -> Void) {
+        do {
+            let encoder = JSONEncoder()
+            let recipes: [Recipe] = []
+            let encodedRecipes = try encoder.encode(recipes)
+            defaults.set(encodedRecipes, forKey: Keys.recipes)
+            completed(nil)
+        } catch {
+            completed(.failedToSaveRecipes)
+        }
+    }
+
     static func fetchRecipes(completed: @escaping (Result<[Recipe], RBError>) -> Void) {
         guard let recipesData = defaults.object(forKey: Keys.recipes) as? Data else {
             // if this is nil, nothing has been saved before
