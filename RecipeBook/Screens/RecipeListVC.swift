@@ -10,12 +10,14 @@ import UIKit
 class RecipeListVC: UIViewController {
 
     let tableView = UITableView()
-    var recipes: [Recipe] = []
+
+    var folderId: UUID!
+    var items: [RecipeItem] = []
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.configureNavigationBar()
-        self.loadRecipes()
+        self.loadItems()
     }
 
     override func viewDidLoad() {
@@ -64,37 +66,39 @@ class RecipeListVC: UIViewController {
         self.tableView.register(RecipeCell.self, forCellReuseIdentifier: RecipeCell.reuseID)
     }
 
-    func loadRecipes() {
-        PersistenceManager.fetchRecipes { [weak self] (result) in
-            guard let self else { return }
+    func loadItems() {
+        // FIXME: filter out recipes until folders are supported cells
+        let folderItems = State.manager.getFolderItems(uuid: self.folderId)!.filter { $0.isRecipe }
 
-            switch result {
-            case .success(let recipes):
-                // show the empty state view if there are no favorites
-                if recipes.isEmpty {
-                    self.showEmptyStateView(in: self.view)
-                } else {
-                    self.recipes = recipes
-                    // reload table view data on the main thread
-                    DispatchQueue.main.async {
-                        self.tableView.reloadData()
-                        // ensure that the table view is brought to the front in case the empty state view is still there
-                        self.view.bringSubviewToFront(self.tableView)
-                    }
-                }
-
-            case .failure(let error):
-                // update UI on the main thread
-                DispatchQueue.main.async {
-                    self.presentErrorAlert(error)
-                }
+        // show the empty state view if there are no items
+        if folderItems.isEmpty {
+            self.showEmptyStateView(in: self.view)
+        } else {
+            self.items = folderItems
+            // reload table view data on the main thread
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+                // ensure that the table view is brought to the front in case the empty state view is still there
+                self.view.bringSubviewToFront(self.tableView)
             }
         }
+    }
+
+    func findItem(uuid: UUID) -> IndexPath? {
+        var indexPath: IndexPath? = nil
+        for (index, item) in self.items.enumerated() {
+            if item.uuid == uuid {
+                indexPath = IndexPath(row: index, section: 0)
+                break
+            }
+        }
+        return indexPath
     }
 
     func addNewRecipe(_ action: UIAction) {
         let destVC = RecipeFormVC(style: .new)
         destVC.delegate = self
+        destVC.folderId = self.folderId
 
         let navController = UINavigationController(rootViewController: destVC)
         self.present(navController, animated: true)
@@ -111,18 +115,20 @@ class RecipeListVC: UIViewController {
 extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.recipes.count
+        return self.items.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: RecipeCell.reuseID) as! RecipeCell
-        let recipe = self.recipes[indexPath.row]
-        cell.set(recipe: recipe)
+        let item = self.items[indexPath.row]
+        cell.set(item: item)
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let recipe = self.recipes[indexPath.row]
+        // TODO: add folder handling
+        let item = self.items[indexPath.row]
+        let recipe = item.intoRecipe()!
         let recipeVC = RecipeVC()
         recipeVC.recipe = recipe
         recipeVC.delegate = self
@@ -130,33 +136,38 @@ extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
         self.navigationController?.pushViewController(recipeVC, animated: true)
     }
 
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+    func tableView(
+        _ tableView: UITableView,
+        trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
+    ) -> UISwipeActionsConfiguration? {
+        // TODO: add folder handling
+        let item = self.items[indexPath.row]
+
         let contextItem = UIContextualAction(style: .destructive, title: "Delete") {  (action, view, actionPerformed) in
             let alert = RBDeleteRecipeAlert { [weak self] () in
                 guard let self = self else { return }
-                // save the initial recipe state in case PersistenceManager throws
-                let previous_recipes = self.recipes
 
-                self.recipes.remove(at: indexPath.row)
-                PersistenceManager.saveRecipes(recipes: recipes) { [weak self] (error) in
-                    guard let self else { return }
-                    if let error {
-                        // restore the original recipe state
-                        self.recipes = previous_recipes
-                        actionPerformed(false)
-                        self.presentErrorAlert(error)
-                    } else {
-                        self.tableView.deleteRows(at: [indexPath], with: .automatic)
-                        // if this was the last recipe, show the empty state view
-                        if self.recipes.isEmpty {
-                            self.showEmptyStateView(in: self.view)
-                        }
-                        actionPerformed(true)
+                // save the initial items in case we get an error
+                let previousItems = self.items
+
+                self.items.remove(at: indexPath.row)
+                if let error = State.manager.deleteRecipe(uuid: item.uuid) {
+                    // restore the original items
+                    self.items = previousItems
+                    self.presentErrorAlert(error)
+                    actionPerformed(false)
+                } else {
+                    self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                    // if this was the last recipe, show the empty state view
+                    if self.items.isEmpty {
+                        self.showEmptyStateView(in: self.view)
                     }
+                    actionPerformed(true)
                 }
             }
             self.present(alert.alertController, animated: true)
         }
+
         return UISwipeActionsConfiguration(actions: [contextItem])
     }
 }
@@ -164,20 +175,17 @@ extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
 extension RecipeListVC: RecipeFormVCDelegate {
 
     func didSaveRecipe(recipe: Recipe) {
-        self.recipes.append(recipe)
-        PersistenceManager.saveRecipes(recipes: recipes) { [weak self] (error) in
-            guard let self else { return }
-            // save the initial recipe state in case PersistenceManager throws
-            let previous_recipes = self.recipes
+        // save the initial items in case we get an error
+        let previousItems = self.items
 
-            if let error {
-                // restore the original recipe state
-                self.recipes = previous_recipes
-                self.presentErrorAlert(error)
-            } else {
-                self.removeEmptyStateView(in: self.view)
-                self.tableView.reloadData()
-            }
+        self.items.append(.recipe(recipe))
+        if let error = State.manager.addRecipe(recipe: recipe) {
+            // restore the original items
+            self.items = previousItems
+            self.presentErrorAlert(error)
+        } else {
+            self.removeEmptyStateView(in: self.view)
+            self.tableView.reloadData()
         }
     }
 }
@@ -188,29 +196,20 @@ extension RecipeListVC: RecipeVCDelegate {
         // remove the recipe view first
         self.navigationController?.popViewController(animated: true)
 
-        // save the initial recipe state in case PersistenceManager throws
-        let previous_recipes = self.recipes
+        // save the initial items in case we get an error
+        let previousItems = self.items
 
-        // find the index path for the recipe
-        var indexPath: IndexPath? = nil
-        for (index, storedRecipe) in self.recipes.enumerated() {
-            if storedRecipe.uuid == recipe.uuid {
-                indexPath = IndexPath(row: index, section: 0)
-            }
-        }
-
-        if let indexPath {
-            self.recipes.remove(at: indexPath.row)
-            PersistenceManager.saveRecipes(recipes: recipes) { [weak self] (error) in
-                guard let self else { return }
-                if let error {
-                    // restore the original recipe state
-                    self.recipes = previous_recipes
-                    self.presentErrorAlert(error)
-                } else {
+        if let indexPath = self.findItem(uuid: recipe.uuid) {
+            self.items.remove(at: indexPath.row)
+            if let error = State.manager.deleteRecipe(uuid: recipe.uuid) {
+                // restore the original items
+                self.items = previousItems
+                self.presentErrorAlert(error)
+            } else {
+                DispatchQueue.main.async {
                     self.tableView.deleteRows(at: [indexPath], with: .automatic)
                     // if this was the last recipe, show the empty state view
-                    if self.recipes.isEmpty {
+                    if self.items.isEmpty {
                         self.showEmptyStateView(in: self.view)
                     }
                 }

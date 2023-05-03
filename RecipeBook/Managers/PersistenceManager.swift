@@ -11,65 +11,34 @@ enum PersistenceManager {
     static private let defaults = UserDefaults.standard
 
     enum Keys {
-        static let recipes = "recipes"
+        static let state = "state"
     }
 
-    // TODO: debug function, delete later
-    static func deleteRecipes(completed: @escaping (RBError?) -> Void) {
-        do {
-            let encoder = JSONEncoder()
-            let recipes: [Recipe] = []
-            let encodedRecipes = try encoder.encode(recipes)
-            defaults.set(encodedRecipes, forKey: Keys.recipes)
-            completed(nil)
-        } catch {
-            completed(.failedToSaveRecipes)
-        }
-    }
-
-    static func fetchRecipes(completed: @escaping (Result<[Recipe], RBError>) -> Void) {
-        guard let recipesData = defaults.object(forKey: Keys.recipes) as? Data else {
+    static func loadState() -> Result<State.Data, RBError> {
+        guard let stateData = defaults.object(forKey: Keys.state) as? Data else {
             // if this is nil, nothing has been saved before
-            completed(.success([]))
-            return
+            return .success(.empty())
         }
 
         do {
             let decoder = JSONDecoder()
-            let recipes = try decoder.decode([Recipe].self, from: recipesData)
-            completed(.success(recipes))
+            let state = try decoder.decode(State.Data.self, from: stateData)
+            return .success(state)
         } catch {
-            completed(.failure(.failedToLoadRecipes))
+            // NOTE: this should be updated at some point in the future, but since we are
+            // iterating at the moment, clear out the state when the data format changes
+            return .success(.empty())
         }
     }
 
-    static func saveRecipes(recipes: [Recipe], completed: @escaping (RBError?) -> Void) {
+    static func storeState(state: State.Data) -> RBError? {
         do {
             let encoder = JSONEncoder()
-            let encodedRecipes = try encoder.encode(recipes)
-            defaults.set(encodedRecipes, forKey: Keys.recipes)
-            completed(nil)
+            let encodedState = try encoder.encode(state)
+            defaults.set(encodedState, forKey: Keys.state)
+            return nil
         } catch {
-            completed(.failedToSaveRecipes)
-        }
-    }
-
-    static func saveRecipe(recipe: Recipe, completed: @escaping (RBError?) -> Void) {
-        fetchRecipes { (result) in
-            switch result {
-            case .success(var recipes):
-                if let i = recipes.firstIndex(where: { $0.uuid == recipe.uuid }) {
-                    recipes[i] = recipe
-                    saveRecipes(recipes: recipes) { (error) in
-                        completed(error)
-                    }
-                } else {
-                    completed(.missingRecipe(recipe.uuid))
-                }
-
-            case .failure(let error):
-                completed(error)
-            }
+            return .failedToSaveRecipes
         }
     }
 }

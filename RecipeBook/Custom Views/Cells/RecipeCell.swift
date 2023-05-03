@@ -21,7 +21,9 @@ class RecipeCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func set(recipe: Recipe) {
+    func set(item: RecipeItem) {
+        // TODO: add folder handling
+        let recipe = item.intoRecipe()!
         self.recipeTitleLabel.text = recipe.title
     }
 

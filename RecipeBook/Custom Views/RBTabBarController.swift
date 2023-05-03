@@ -12,11 +12,22 @@ class RBTabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         UITabBar.appearance().tintColor = .systemYellow
-        self.viewControllers = [self.createRecipeListVC(), self.createGroceryListVC()]
+        // load the state before creating the view controllers
+        if let _ = State.manager.load() {
+            // TODO: add better error handling
+            print("ERROR: failed to load state")
+        } else {
+            print("DEBUG: loaded state")
+            self.viewControllers = [
+                self.createRecipeListVC(),
+                self.createGroceryListVC(),
+            ]
+        }
     }
 
     func createRecipeListVC() -> UINavigationController {
         let recipeListVC = RecipeListVC()
+        recipeListVC.folderId = State.manager.root!
         recipeListVC.tabBarItem = UITabBarItem(title: "Recipes", image: SFSymbols.recipeBook, tag: 0)
 
         return UINavigationController(rootViewController: recipeListVC)

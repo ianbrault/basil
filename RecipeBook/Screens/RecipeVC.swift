@@ -153,16 +153,11 @@ extension RecipeVC: UITableViewDataSource, UITableViewDelegate {
 extension RecipeVC: RecipeFormVCDelegate {
 
     func didSaveRecipe(recipe: Recipe) {
-        PersistenceManager.saveRecipe(recipe: recipe) { [weak self] (error) in
-            guard let self else { return }
-            // save the initial recipe state in case PersistenceManager throws
-
-            if let error {
-                self.presentErrorAlert(error)
-            } else {
-                self.recipe = recipe
-                self.tableView.reloadData()
-            }
+        if let error = State.manager.updateRecipe(recipe: recipe) {
+            self.presentErrorAlert(error)
+        } else {
+            self.recipe = recipe
+            self.tableView.reloadData()
         }
     }
 }

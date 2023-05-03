@@ -77,6 +77,7 @@ class RecipeFormVC: UIViewController {
 
     var style: Style!
     var uuid: UUID?
+    var folderId: UUID?
     weak var delegate: RecipeFormVCDelegate?
 
     init(style: Style) {
@@ -145,6 +146,7 @@ class RecipeFormVC: UIViewController {
 
     func set(recipe: Recipe) {
         self.uuid = recipe.uuid
+        self.folderId = recipe.folderId
 
         let titleSection = Section.title.rawValue
         let ingredientsSection = Section.ingredients.rawValue
@@ -252,6 +254,7 @@ class RecipeFormVC: UIViewController {
 
         let recipe = Recipe(
             uuid: self.uuid ?? UUID(),
+            folderId: self.folderId ?? UUID(),
             title: title,
             ingredients: ingredients,
             instructions: instructions)
