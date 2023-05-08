@@ -14,6 +14,7 @@ enum RBError: Error {
     case missingInput(UUID)
     case missingRecipe(UUID)
     case missingTitle
+    case notImplemented
 
     var title: String {
         switch self {
@@ -29,6 +30,8 @@ enum RBError: Error {
             return "Something went wrong"
         case .missingTitle:
             return "Missing title"
+        case .notImplemented:
+            return "Not implemented!"
         }
     }
 
@@ -46,6 +49,8 @@ enum RBError: Error {
             return "Missing recipe \(uuid)"
         case .missingTitle:
             return "Add a title to the recipe and try again"
+        case .notImplemented:
+            return "This feature is not implemented. Try again later..."
         }
     }
 }

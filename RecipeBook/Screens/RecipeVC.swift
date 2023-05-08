@@ -104,7 +104,7 @@ class RecipeVC: UIViewController {
             guard let self = self else { return }
             self.delegate?.didDeleteRecipe(recipe: self.recipe)
         }
-        self.present(alert.alertController, animated: true)
+        self.present(alert, animated: true)
     }
 }
 

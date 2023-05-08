@@ -10,13 +10,12 @@ import UIKit
 extension UIViewController {
 
     func presentErrorAlert(_ error: RBError) {
-        let alert = RBErrorAlert(title: error.title, message: error.message)
-        self.present(alert.alertController, animated: true)
+        let alert = RBErrorAlertController(error: error)
+        self.present(alert, animated: true)
     }
 
     func notImplementedAlert() {
-        let alert = RBErrorAlert(title: "Not implemented!", message: "This feature is not implemented. Try again later...")
-        self.present(alert.alertController, animated: true)
+        self.presentErrorAlert(.notImplemented)
     }
 
     func addNotificationObserver(name: NSNotification.Name?, selector: Selector) {

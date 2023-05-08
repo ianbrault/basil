@@ -157,7 +157,7 @@ class RecipeListVC: UIViewController {
                 self.insertItem(item: .folder(folder))
             }
         }
-        self.present(alert.alertController, animated: true)
+        self.present(alert, animated: true)
     }
 
     func importRecipe(_ action: UIAction) {
@@ -171,7 +171,7 @@ class RecipeListVC: UIViewController {
             // TODO: not implemented
             self.notImplementedAlert()
         }
-        self.present(alert.alertController, animated: true)
+        self.present(alert, animated: true)
     }
 }
 
@@ -221,7 +221,7 @@ extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
                     actionPerformed(true)
                 }
             }
-            self.present(alert.alertController, animated: true)
+            self.present(alert, animated: true)
         }
 
         return UISwipeActionsConfiguration(actions: [contextItem])

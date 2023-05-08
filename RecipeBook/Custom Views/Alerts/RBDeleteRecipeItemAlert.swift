@@ -7,12 +7,9 @@
 
 import UIKit
 
-// TODO: refactor alert classes
-class RBDeleteRecipeItemAlert {
+class RBDeleteRecipeItemAlert: UIAlertController {
 
-    var alertController: UIAlertController!
-
-    init(item: RecipeItem, deleteAction: @escaping () -> Void) {
+    convenience init(item: RecipeItem, deleteAction: @escaping () -> Void) {
         var title: String!
         switch item {
         case .recipe(_):
@@ -20,24 +17,17 @@ class RBDeleteRecipeItemAlert {
         case .folder(_):
             title = "Are you sure you want to delete this folder and all of its recipes?"
         }
-        self.alertController = UIAlertController(
-            title: title,
-            message: nil,
-            preferredStyle: .actionSheet)
+        self.init(title: title, message: nil, preferredStyle: .actionSheet)
         self.addActions(actionHandler: deleteAction)
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 
     func addActions(actionHandler: @escaping () -> Void) {
         let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { (_) in
             actionHandler()
         }
-        self.alertController.addAction(deleteAction)
+        self.addAction(deleteAction)
 
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
-        self.alertController.addAction(cancelAction)
+        self.addAction(cancelAction)
     }
 }
