@@ -40,7 +40,7 @@ class RBTextField: UITextField {
         self.font = UIFont.systemFont(ofSize: 16)
 
         self.backgroundColor = .tertiarySystemBackground
-        self.autocorrectionType = .no
+        self.autocorrectionType = .yes
         self.returnKeyType = .go
         self.clearButtonMode = .whileEditing
         if let placeholder {

@@ -72,6 +72,18 @@ class State {
         return self.store()
     }
 
+    func addFolder(folder: RecipeFolder) -> RBError? {
+        let item = RecipeItem.folder(folder)
+        self.items[folder.uuid] = item
+
+        // add to the parent folder
+        // unwrapping because we should never add more roots
+        let folderItem = self.getItem(uuid: folder.folderId!).intoFolder()!
+        folderItem.addItem(uuid: folder.uuid)
+
+        return self.store()
+    }
+
     func updateRecipe(recipe: Recipe) -> RBError? {
         let item = RecipeItem.recipe(recipe)
         self.items[recipe.uuid] = item
@@ -79,7 +91,7 @@ class State {
         return self.store()
     }
 
-    func deleteRecipe(uuid: UUID) -> RBError? {
+    func deleteItem(uuid: UUID) -> RBError? {
         let item = self.getItem(uuid: uuid)
 
         // first unhook from the parent folder

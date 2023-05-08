@@ -96,6 +96,7 @@ class RecipeFormVC: UIViewController {
         self.configureTableView()
         self.createDismissKeyboardTapGesture()
         self.createKeyboardNotificationObservers()
+        // TODO: autofocus title input if empty
     }
 
     func configureNavigationController() {
@@ -324,6 +325,8 @@ extension RecipeFormVC: RecipeFormCellDelegate {
         if let indexPath = self.indexPathFromUuid(uuid: uuid) {
             // add a slight delay to allow the keyboard to displace the screen
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                // FIXME: this can cause an overlap with the view controller large title
+                // update to check the safe area vs. scroll offset or whatever
                 self.tableView.scrollToRow(at: indexPath, at: .top, animated: true)
             }
         } else {

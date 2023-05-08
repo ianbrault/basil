@@ -10,7 +10,7 @@ import UIKit
 class RecipeCell: UITableViewCell {
     static let reuseID = "RecipeCell"
 
-    let recipeTitleLabel = RBBodyLabel(fontSize: 16)
+    let titleLabel = RBBodyLabel(fontSize: 16)
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -21,24 +21,45 @@ class RecipeCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
+    private func setRecipe(recipe: Recipe) {
+        self.titleLabel.text = recipe.title
+    }
+
+    private func setFolder(folder: RecipeFolder) {
+        self.accessoryType = .disclosureIndicator
+
+        let imageAttachment = NSTextAttachment()
+        imageAttachment.image = SFSymbols.folder?.withTintColor(.systemYellow)
+
+        let padding = NSTextAttachment()
+        padding.bounds = CGRect(x: 0, y: 0, width: 10, height: 0)
+
+        let message = NSMutableAttributedString(attachment: imageAttachment)
+        message.append(NSMutableAttributedString(attachment: padding))
+        message.append(NSMutableAttributedString(string: folder.name))
+
+        self.titleLabel.attributedText = NSMutableAttributedString(attributedString: message)
+    }
+
     func set(item: RecipeItem) {
-        // TODO: add folder handling
-        let recipe = item.intoRecipe()!
-        self.recipeTitleLabel.text = recipe.title
+        switch item {
+        case .recipe(let recipe):
+            self.setRecipe(recipe: recipe)
+        case .folder(let folder):
+            self.setFolder(folder: folder)
+        }
     }
 
     private func configure() {
-        self.addSubview(self.recipeTitleLabel)
+        self.addSubview(self.titleLabel)
 
-        self.accessoryType = .disclosureIndicator
-
-        self.recipeTitleLabel.lineBreakMode = .byTruncatingTail
+        self.titleLabel.lineBreakMode = .byTruncatingTail
 
         NSLayoutConstraint.activate([
-            self.recipeTitleLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor),
-            self.recipeTitleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 24),
-            self.recipeTitleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -45),
-            self.recipeTitleLabel.heightAnchor.constraint(equalToConstant: 24),
+            self.titleLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+            self.titleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 24),
+            self.titleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -45),
+            self.titleLabel.heightAnchor.constraint(equalToConstant: 24),
         ])
     }
 }

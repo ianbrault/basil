@@ -13,15 +13,15 @@ class RecipeFolder: Codable {
     let name: String
     var items: [UUID]
 
-    init(uuid: UUID, folderId: UUID?, name: String, items: [UUID]) {
-        self.uuid = uuid
+    init(folderId: UUID?, name: String, items: [UUID] = []) {
+        self.uuid = UUID()
         self.folderId = folderId
         self.name = name
         self.items = items
     }
 
     static func root() -> RecipeFolder {
-        return RecipeFolder(uuid: UUID(), folderId: nil, name: "", items: [])
+        return RecipeFolder(folderId: nil, name: "")
     }
 
     func addItem(uuid: UUID) {
@@ -30,5 +30,9 @@ class RecipeFolder: Codable {
 
     func removeItem(uuid: UUID) {
         self.items.removeAll { $0 == uuid }
+    }
+
+    static func sort(_ this: RecipeFolder, _ that: RecipeFolder) -> Bool {
+        return this.name < that.name
     }
 }

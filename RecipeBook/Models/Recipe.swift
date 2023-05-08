@@ -13,4 +13,8 @@ struct Recipe: Codable {
     let title: String
     let ingredients: [Ingredient]
     let instructions: [Instruction]
+
+    static func sort(_ this: Recipe, _ that: Recipe) -> Bool {
+        return this.title < that.title
+    }
 }

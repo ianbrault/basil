@@ -11,8 +11,17 @@ class RecipeListVC: UIViewController {
 
     let tableView = UITableView()
 
-    var folderId: UUID!
+    var folder: RecipeFolder!
     var items: [RecipeItem] = []
+
+    init(folderId: UUID) {
+        super.init(nibName: nil, bundle: nil)
+        self.folder = State.manager.getItem(uuid: folderId).intoFolder()!
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -27,7 +36,7 @@ class RecipeListVC: UIViewController {
     }
 
     private func configureNavigationBar() {
-        self.title = "Recipes"
+        self.title = self.folder.name.isEmpty ? "Recipes" : self.folder.name
         self.navigationController?.navigationBar.prefersLargeTitles = true
         self.navigationController?.navigationBar.tintColor = .systemYellow
 
@@ -41,6 +50,7 @@ class RecipeListVC: UIViewController {
     private func createAddButtonContextMenu() -> UIMenu {
         let menuItems = [
             UIAction(title: "Add new recipe", image: SFSymbols.addRecipe, handler: self.addNewRecipe),
+            UIAction(title: "Add new folder", image: SFSymbols.folder, handler: self.addNewFolder),
             UIAction(title: "Import recipe", image: SFSymbols.importRecipe, handler: self.importRecipe),
         ]
 
@@ -67,18 +77,17 @@ class RecipeListVC: UIViewController {
     }
 
     func loadItems() {
-        // FIXME: filter out recipes until folders are supported cells
-        let folderItems = State.manager.getFolderItems(uuid: self.folderId)!.filter { $0.isRecipe }
-
+        let folderItems = State.manager.getFolderItems(uuid: self.folder.uuid)!
         // show the empty state view if there are no items
         if folderItems.isEmpty {
             self.showEmptyStateView(in: self.view)
         } else {
-            self.items = folderItems
+            self.items = folderItems.sorted(by: RecipeItem.sort)
             // reload table view data on the main thread
             DispatchQueue.main.async {
                 self.tableView.reloadData()
-                // ensure that the table view is brought to the front in case the empty state view is still there
+                // ensure that the table view is brought to the front in case the empty state
+                // view is still there
                 self.view.bringSubviewToFront(self.tableView)
             }
         }
@@ -95,19 +104,73 @@ class RecipeListVC: UIViewController {
         return indexPath
     }
 
+    func insertItem(item: RecipeItem) {
+        // find the sorted position for the item
+        let pos = self.items.firstIndex { RecipeItem.sort(item, $0) } ?? self.items.endIndex
+        let indexPath = IndexPath(row: pos, section: 0)
+
+        self.items.insert(item, at: pos)
+        DispatchQueue.main.async {
+            self.removeEmptyStateView(in: self.view)
+            self.tableView.insertRows(at: [indexPath], with: .automatic)
+        }
+    }
+
+    func removeItem(uuid: UUID) {
+        // find the item using the given UUID
+        if let indexPath = self.findItem(uuid: uuid) {
+            self.items.remove(at: indexPath.row)
+            DispatchQueue.main.async {
+                self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                // if this was the last recipe, show the empty state view
+                if self.items.isEmpty {
+                    self.showEmptyStateView(in: self.view)
+                }
+            }
+        } else {
+            self.presentErrorAlert(.missingRecipe(uuid))
+        }
+    }
+
     func addNewRecipe(_ action: UIAction) {
         let destVC = RecipeFormVC(style: .new)
         destVC.delegate = self
-        destVC.folderId = self.folderId
+        destVC.folderId = self.folder.uuid
 
         let navController = UINavigationController(rootViewController: destVC)
         self.present(navController, animated: true)
     }
 
-    func importRecipe(_ action: UIAction) {
-        let alert = RBTextFieldAlert(title: "Import a recipe", message: nil, placeholder: "URL")
-        alert.delegate = self
+    func addNewFolder(_ action: UIAction) {
+        let alert = RBTextFieldAlert(
+            title: "Add a new folder",
+            message: nil,
+            placeholder: "Enter folder name",
+            buttonText: "Create"
+        ) { [weak self] (text) in
+            guard let self else { return }
 
+            let folder = RecipeFolder(folderId: self.folder.uuid, name: text)
+            if let error = State.manager.addFolder(folder: folder) {
+                self.presentErrorAlert(error)
+            } else {
+                self.insertItem(item: .folder(folder))
+            }
+        }
+        self.present(alert.alertController, animated: true)
+    }
+
+    func importRecipe(_ action: UIAction) {
+        let alert = RBTextFieldAlert(
+            title: "Import a recipe",
+            message: nil,
+            placeholder: "URL",
+            buttonText: "Import"
+        ) { [weak self] (_) in
+            guard let self else { return }
+            // TODO: not implemented
+            self.notImplementedAlert()
+        }
         self.present(alert.alertController, animated: true)
     }
 }
@@ -126,42 +189,35 @@ extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // TODO: add folder handling
         let item = self.items[indexPath.row]
-        let recipe = item.intoRecipe()!
-        let recipeVC = RecipeVC()
-        recipeVC.recipe = recipe
-        recipeVC.delegate = self
+        switch item {
+        case .recipe(let recipe):
+            let recipeVC = RecipeVC()
+            recipeVC.recipe = recipe
+            recipeVC.delegate = self
+            self.navigationController?.pushViewController(recipeVC, animated: true)
 
-        self.navigationController?.pushViewController(recipeVC, animated: true)
+        case .folder(let folder):
+            let recipeListVC = RecipeListVC(folderId: folder.uuid)
+            self.navigationController?.pushViewController(recipeListVC, animated: true)
+        }
     }
 
     func tableView(
         _ tableView: UITableView,
         trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
     ) -> UISwipeActionsConfiguration? {
-        // TODO: add folder handling
         let item = self.items[indexPath.row]
 
         let contextItem = UIContextualAction(style: .destructive, title: "Delete") {  (action, view, actionPerformed) in
-            let alert = RBDeleteRecipeAlert { [weak self] () in
+            let alert = RBDeleteRecipeItemAlert(item: item) { [weak self] () in
                 guard let self = self else { return }
 
-                // save the initial items in case we get an error
-                let previousItems = self.items
-
-                self.items.remove(at: indexPath.row)
-                if let error = State.manager.deleteRecipe(uuid: item.uuid) {
-                    // restore the original items
-                    self.items = previousItems
+                if let error = State.manager.deleteItem(uuid: item.uuid) {
                     self.presentErrorAlert(error)
                     actionPerformed(false)
                 } else {
-                    self.tableView.deleteRows(at: [indexPath], with: .automatic)
-                    // if this was the last recipe, show the empty state view
-                    if self.items.isEmpty {
-                        self.showEmptyStateView(in: self.view)
-                    }
+                    self.removeItem(uuid: item.uuid)
                     actionPerformed(true)
                 }
             }
@@ -175,17 +231,13 @@ extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
 extension RecipeListVC: RecipeFormVCDelegate {
 
     func didSaveRecipe(recipe: Recipe) {
-        // save the initial items in case we get an error
-        let previousItems = self.items
+        // NOTE: this assumes that this is a new recipe being added each time; this function will
+        // need to be re-worked if it is updated to handle editing/saving existing recipes as well
 
-        self.items.append(.recipe(recipe))
         if let error = State.manager.addRecipe(recipe: recipe) {
-            // restore the original items
-            self.items = previousItems
             self.presentErrorAlert(error)
         } else {
-            self.removeEmptyStateView(in: self.view)
-            self.tableView.reloadData()
+            self.insertItem(item: .recipe(recipe))
         }
     }
 }
@@ -196,33 +248,10 @@ extension RecipeListVC: RecipeVCDelegate {
         // remove the recipe view first
         self.navigationController?.popViewController(animated: true)
 
-        // save the initial items in case we get an error
-        let previousItems = self.items
-
-        if let indexPath = self.findItem(uuid: recipe.uuid) {
-            self.items.remove(at: indexPath.row)
-            if let error = State.manager.deleteRecipe(uuid: recipe.uuid) {
-                // restore the original items
-                self.items = previousItems
-                self.presentErrorAlert(error)
-            } else {
-                DispatchQueue.main.async {
-                    self.tableView.deleteRows(at: [indexPath], with: .automatic)
-                    // if this was the last recipe, show the empty state view
-                    if self.items.isEmpty {
-                        self.showEmptyStateView(in: self.view)
-                    }
-                }
-            }
+        if let error = State.manager.deleteItem(uuid: recipe.uuid) {
+            self.presentErrorAlert(error)
         } else {
-            self.presentErrorAlert(.missingRecipe(recipe.uuid))
+            self.removeItem(uuid: recipe.uuid)
         }
-    }
-}
-
-extension RecipeListVC: RBTextFieldAlertDelegate {
-
-    func didSubmitText(text: String) {
-        self.notImplementedAlert()
     }
 }

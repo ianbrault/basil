@@ -55,4 +55,18 @@ enum RecipeItem: Codable {
             return folder
         }
     }
+
+    static func sort(_ this: RecipeItem, _ that: RecipeItem) -> Bool {
+        // folders always come before recipes
+        switch (this, that) {
+        case (.recipe(let recipeA), .recipe(let recipeB)):
+            return Recipe.sort(recipeA, recipeB)
+        case (.recipe(_), .folder(_)):
+            return false
+        case (.folder(_), .recipe(_)):
+            return true
+        case (.folder(let folderA), .folder(let folderB)):
+            return RecipeFolder.sort(folderA, folderB)
+        }
+    }
 }

@@ -100,7 +100,7 @@ class RecipeVC: UIViewController {
     }
 
     func deleteRecipe(_ action: UIAction) {
-        let alert = RBDeleteRecipeAlert { [weak self] () in
+        let alert = RBDeleteRecipeItemAlert(item: .recipe(self.recipe)) { [weak self] () in
             guard let self = self else { return }
             self.delegate?.didDeleteRecipe(recipe: self.recipe)
         }

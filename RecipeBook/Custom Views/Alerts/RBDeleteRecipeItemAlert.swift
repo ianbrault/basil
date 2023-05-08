@@ -7,13 +7,21 @@
 
 import UIKit
 
-class RBDeleteRecipeAlert {
+// TODO: refactor alert classes
+class RBDeleteRecipeItemAlert {
 
     var alertController: UIAlertController!
 
-    init(deleteAction: @escaping () -> Void) {
+    init(item: RecipeItem, deleteAction: @escaping () -> Void) {
+        var title: String!
+        switch item {
+        case .recipe(_):
+            title = "Are you sure you want to delete this recipe?"
+        case .folder(_):
+            title = "Are you sure you want to delete this folder and all of its recipes?"
+        }
         self.alertController = UIAlertController(
-            title: "Are you sure you want to delete this recipe?",
+            title: title,
             message: nil,
             preferredStyle: .actionSheet)
         self.addActions(actionHandler: deleteAction)
