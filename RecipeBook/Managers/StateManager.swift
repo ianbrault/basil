@@ -91,6 +91,13 @@ class State {
         return self.store()
     }
 
+    func updateFolder(folder: RecipeFolder) -> RBError? {
+        let item = RecipeItem.folder(folder)
+        self.items[folder.uuid] = item
+
+        return self.store()
+    }
+
     func deleteItem(uuid: UUID) -> RBError? {
         let item = self.getItem(uuid: uuid)
 

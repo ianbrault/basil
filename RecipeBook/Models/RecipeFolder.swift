@@ -10,7 +10,7 @@ import Foundation
 class RecipeFolder: Codable {
     let uuid: UUID
     let folderId: UUID?
-    let name: String
+    var name: String
     var items: [UUID]
 
     init(folderId: UUID?, name: String, items: [UUID] = []) {

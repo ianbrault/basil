@@ -47,16 +47,6 @@ class RecipeListVC: UIViewController {
         self.navigationController?.navigationBar.standardAppearance = appearance
     }
 
-    private func createAddButtonContextMenu() -> UIMenu {
-        let menuItems = [
-            UIAction(title: "Add new recipe", image: SFSymbols.addRecipe, handler: self.addNewRecipe),
-            UIAction(title: "Add new folder", image: SFSymbols.folder, handler: self.addNewFolder),
-            UIAction(title: "Import recipe", image: SFSymbols.importRecipe, handler: self.importRecipe),
-        ]
-
-        return UIMenu(title: "", image: nil, identifier: nil, options: [], children: menuItems)
-    }
-
     private func configureViewController() {
         self.view.backgroundColor = .systemBackground
 
@@ -74,6 +64,93 @@ class RecipeListVC: UIViewController {
         self.tableView.removeExcessCells()
 
         self.tableView.register(RecipeCell.self, forCellReuseIdentifier: RecipeCell.reuseID)
+    }
+
+    private func createAddButtonContextMenu() -> UIMenu {
+        let menuItems = [
+            UIAction(title: "Add new recipe", image: SFSymbols.addRecipe, handler: self.addNewRecipe),
+            UIAction(title: "Add new folder", image: SFSymbols.folder, handler: self.addNewFolder),
+            UIAction(title: "Import recipe", image: SFSymbols.importRecipe, handler: self.importRecipe),
+        ]
+
+        return UIMenu(title: "", image: nil, identifier: nil, options: [], children: menuItems)
+    }
+
+    private func createRecipeLongPressContextMenu(recipe: Recipe) -> UIContextMenuConfiguration {
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { (_) in
+            let editAction = UIAction(title: "Edit recipe", image: SFSymbols.editRecipe) { (_) in
+                let destVC = RecipeFormVC(style: .edit)
+                destVC.delegate = self
+                destVC.set(recipe: recipe)
+
+                let navController = UINavigationController(rootViewController: destVC)
+                self.present(navController, animated: true)
+            }
+            let moveAction = UIAction(title: "Move to folder", image: SFSymbols.folder) { (_) in
+                // TODO: unimplemented
+                print("move")
+            }
+            let deleteAction = UIAction(title: "Delete recipe", image: SFSymbols.trash, attributes: .destructive) { (_) in
+                let alert = RBDeleteRecipeItemAlert(item: .recipe(recipe)) { [weak self] () in
+                    guard let self = self else { return }
+
+                    if let error = State.manager.deleteItem(uuid: recipe.uuid) {
+                        self.presentErrorAlert(error)
+                    } else {
+                        self.removeItem(uuid: recipe.uuid)
+                    }
+                }
+                self.present(alert, animated: true)
+            }
+            return UIMenu(title: "", children: [editAction, moveAction, deleteAction])
+        }
+    }
+
+    private func createFolderLongPressContextMenu(folder: RecipeFolder) -> UIContextMenuConfiguration {
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { (_) in
+            let editAction = UIAction(title: "Edit folder", image: SFSymbols.editRecipe) { (_) in
+                let alert = RBTextFieldAlert(
+                    title: "Edit folder",
+                    placeholder: "Enter folder name",
+                    text: folder.name,
+                    confirmButtonText: "Save"
+                ) { [weak self] (text) in
+                    guard let self else { return }
+                    folder.name = text
+                    if let error = State.manager.updateFolder(folder: folder) {
+                        self.presentErrorAlert(error)
+                    } else {
+                        // update the items array with the updated folder
+                        if let indexPath = self.findItem(uuid: folder.uuid) {
+                            self.items[indexPath.row] = .folder(folder)
+                            DispatchQueue.main.async {
+                                self.tableView.reloadRows(at: [indexPath], with: .automatic)
+                            }
+                        } else {
+                            self.presentErrorAlert(.missingRecipe(folder.uuid))
+                        }
+                    }
+                }
+                self.present(alert, animated: true)
+            }
+            let moveAction = UIAction(title: "Move to folder", image: SFSymbols.folder) { (_) in
+                // TODO: unimplemented
+                print("move")
+            }
+            let deleteAction = UIAction(title: "Delete folder", image: SFSymbols.trash, attributes: .destructive) { (_) in
+                let alert = RBDeleteRecipeItemAlert(item: .folder(folder)) { [weak self] () in
+                    guard let self = self else { return }
+
+                    if let error = State.manager.deleteItem(uuid: folder.uuid) {
+                        self.presentErrorAlert(error)
+                    } else {
+                        self.removeItem(uuid: folder.uuid)
+                    }
+                }
+                self.present(alert, animated: true)
+            }
+            return UIMenu(title: "", children: [editAction, moveAction, deleteAction])
+        }
     }
 
     func loadItems() {
@@ -144,9 +221,8 @@ class RecipeListVC: UIViewController {
     func addNewFolder(_ action: UIAction) {
         let alert = RBTextFieldAlert(
             title: "Add a new folder",
-            message: nil,
             placeholder: "Enter folder name",
-            buttonText: "Create"
+            confirmButtonText: "Create"
         ) { [weak self] (text) in
             guard let self else { return }
 
@@ -163,9 +239,8 @@ class RecipeListVC: UIViewController {
     func importRecipe(_ action: UIAction) {
         let alert = RBTextFieldAlert(
             title: "Import a recipe",
-            message: nil,
             placeholder: "URL",
-            buttonText: "Import"
+            confirmButtonText: "Import"
         ) { [weak self] (_) in
             guard let self else { return }
             // TODO: not implemented
@@ -226,18 +301,44 @@ extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
 
         return UISwipeActionsConfiguration(actions: [contextItem])
     }
+
+    func tableView(
+        _ tableView: UITableView,
+        contextMenuConfigurationForRowAt indexPath: IndexPath,
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        let item = self.items[indexPath.row]
+        switch item {
+        case .recipe(let recipe):
+            return self.createRecipeLongPressContextMenu(recipe: recipe)
+        case .folder(let folder):
+            return self.createFolderLongPressContextMenu(folder: folder)
+        }
+    }
 }
 
 extension RecipeListVC: RecipeFormVCDelegate {
 
-    func didSaveRecipe(recipe: Recipe) {
-        // NOTE: this assumes that this is a new recipe being added each time; this function will
-        // need to be re-worked if it is updated to handle editing/saving existing recipes as well
+    func didSaveRecipe(style: RecipeFormVC.Style, recipe: Recipe) {
+        switch style {
+        case .new:
+            if let error = State.manager.addRecipe(recipe: recipe) {
+                self.presentErrorAlert(error)
+            } else {
+                self.insertItem(item: .recipe(recipe))
+            }
 
-        if let error = State.manager.addRecipe(recipe: recipe) {
-            self.presentErrorAlert(error)
-        } else {
-            self.insertItem(item: .recipe(recipe))
+        case .edit:
+            if let error = State.manager.updateRecipe(recipe: recipe) {
+                self.presentErrorAlert(error)
+            } else {
+                // update the items array with the new recipe contents
+                if let indexPath = self.findItem(uuid: recipe.uuid) {
+                    self.items[indexPath.row] = .recipe(recipe)
+                } else {
+                    self.presentErrorAlert(.missingRecipe(recipe.uuid))
+                }
+            }
         }
     }
 }

@@ -8,7 +8,7 @@
 import UIKit
 
 protocol RecipeFormVCDelegate: AnyObject {
-    func didSaveRecipe(recipe: Recipe)
+    func didSaveRecipe(style: RecipeFormVC.Style, recipe: Recipe)
 }
 
 class RecipeFormVC: UIViewController {
@@ -259,7 +259,7 @@ class RecipeFormVC: UIViewController {
             title: title,
             ingredients: ingredients,
             instructions: instructions)
-        self.delegate?.didSaveRecipe(recipe: recipe)
+        self.delegate?.didSaveRecipe(style: self.style, recipe: recipe)
         self.dismissVC()
     }
 }

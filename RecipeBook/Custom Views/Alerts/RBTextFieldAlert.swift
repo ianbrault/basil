@@ -9,22 +9,32 @@ import UIKit
 
 class RBTextFieldAlert: UIAlertController {
 
-    var buttonText: String!
+    convenience init(title: String, placeholder: String, confirmButtonText: String, completed: @escaping (String) -> Void) {
+        self.init(title: title, message: nil, preferredStyle: UIAlertController.Style.alert)
+        self.configure(placeholder: placeholder, text: nil, confirmButtonText: confirmButtonText, completed: completed)
+    }
 
-    convenience init(title: String, message: String?, placeholder: String, buttonText: String, completed: @escaping (String) -> Void) {
-        self.init(title: title, message: message, preferredStyle: UIAlertController.Style.alert)
+    convenience init(title: String, placeholder: String, text: String, confirmButtonText: String, completed: @escaping (String) -> Void) {
+        self.init(title: title, message: nil, preferredStyle: UIAlertController.Style.alert)
+        self.configure(placeholder: placeholder, text: text,  confirmButtonText: confirmButtonText, completed: completed)
+    }
+
+    private func configure(placeholder: String, text: String?, confirmButtonText: String, completed: @escaping (String) -> Void) {
         let textFieldConfig = { (textField: UITextField) in
             textField.autocapitalizationType = .sentences
             textField.autocorrectionType = .yes
             textField.placeholder = placeholder
+            if let text {
+                textField.text = text
+            }
         }
         self.addTextField(configurationHandler: textFieldConfig)
-        self.buttonText = buttonText
-        self.addActions(completed: completed)
+
+        self.addActions(confirmButtonText: confirmButtonText,  completed: completed)
     }
 
-    func addActions(completed: @escaping (String) -> Void) {
-        let confirmAction = UIAlertAction(title: self.buttonText, style: .default) { (_) in
+    private func addActions(confirmButtonText: String, completed: @escaping (String) -> Void) {
+        let confirmAction = UIAlertAction(title: confirmButtonText, style: .default) { (_) in
             if let textField = self.textFields?.first, let text = textField.text {
                 completed(text)
             }
