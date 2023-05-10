@@ -31,9 +31,10 @@ class RBPlainButton: UIButton {
     final func set(title: String, systemImageName: String?) {
         self.configuration?.title = title
         self.configuration?.buttonSize = .mini
+        self.configuration?.baseForegroundColor = .systemYellow
 
         if let systemImageName {
-            self.configuration?.image = UIImage(systemName: systemImageName)
+            self.configuration?.image = UIImage(systemName: systemImageName)?.withTintColor(.systemYellow)
             self.configuration?.imagePadding = 6
             self.configuration?.imagePlacement = .leading
         }

@@ -102,6 +102,7 @@ class RecipeFormVC: UIViewController {
     func configureNavigationController() {
         self.title = self.style.title
         self.navigationController?.navigationBar.prefersLargeTitles = true
+        self.navigationController?.navigationBar.tintColor = .systemYellow
         self.navigationController?.setNavigationBarHidden(false, animated: true)
     }
 
