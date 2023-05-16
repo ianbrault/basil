@@ -67,13 +67,17 @@ class RecipeListVC: UIViewController {
     }
 
     private func createAddButtonContextMenu() -> UIMenu {
-        let menuItems = [
+        let recipeMenuItems = [
             UIAction(title: "Add new recipe", image: SFSymbols.addRecipe, handler: self.addNewRecipe),
-            UIAction(title: "Add new folder", image: SFSymbols.folder, handler: self.addNewFolder),
             UIAction(title: "Import recipe", image: SFSymbols.importRecipe, handler: self.importRecipe),
         ]
+        let folderMenuItems = [
+            UIAction(title: "Add new folder", image: SFSymbols.folder, handler: self.addNewFolder),
+        ]
 
-        return UIMenu(title: "", image: nil, identifier: nil, options: [], children: menuItems)
+        let recipeMenu = UIMenu(title: "", image: nil, identifier: nil, options: .displayInline, children: recipeMenuItems)
+        let folderMenu = UIMenu(title: "", image: nil, identifier: nil, options: .displayInline, children: folderMenuItems)
+        return UIMenu(title: "", image: nil, identifier: nil, options: [], children: [recipeMenu, folderMenu])
     }
 
     private func createRecipeLongPressContextMenu(recipe: Recipe) -> UIContextMenuConfiguration {
