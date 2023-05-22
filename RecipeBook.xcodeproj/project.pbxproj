@@ -40,6 +40,7 @@
 		E3C4660429FF4AE500791576 /* StateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C4660329FF4AE500791576 /* StateManager.swift */; };
 		E3C466062A00B2D100791576 /* RecipeItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C466052A00B2D100791576 /* RecipeItem.swift */; };
 		E3E3E9632A0892F7006A9E00 /* RBErrorAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E3E9622A0892F7006A9E00 /* RBErrorAlertController.swift */; };
+		E3FD19FA2A1323E300ACA346 /* FolderTreeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3FD19F92A1323E300ACA346 /* FolderTreeVC.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -78,6 +79,7 @@
 		E3C4660329FF4AE500791576 /* StateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateManager.swift; sourceTree = "<group>"; };
 		E3C466052A00B2D100791576 /* RecipeItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeItem.swift; sourceTree = "<group>"; };
 		E3E3E9622A0892F7006A9E00 /* RBErrorAlertController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBErrorAlertController.swift; sourceTree = "<group>"; };
+		E3FD19F92A1323E300ACA346 /* FolderTreeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderTreeVC.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -208,6 +210,7 @@
 				E34B4D0429D154AF0063A9A2 /* RecipeFormVC.swift */,
 				E3573E6529CC16C1000F7877 /* RecipeListVC.swift */,
 				E3427C0D29E158FC002C81E2 /* RecipeVC.swift */,
+				E3FD19F92A1323E300ACA346 /* FolderTreeVC.swift */,
 			);
 			path = Screens;
 			sourceTree = "<group>";
@@ -340,6 +343,7 @@
 				E3B1C73E29CE1E9600736C96 /* RecipeCell.swift in Sources */,
 				E3573E6929CC16DC000F7877 /* GroceryListVC.swift in Sources */,
 				E3573E6629CC16C1000F7877 /* RecipeListVC.swift in Sources */,
+				E3FD19FA2A1323E300ACA346 /* FolderTreeVC.swift in Sources */,
 				E34B4CF429CF80060063A9A2 /* RBTextField.swift in Sources */,
 				E3B1C74529CE6A9400736C96 /* RBTitleLabel.swift in Sources */,
 				E3B1C73C29CE1CF600736C96 /* UITableView+Ext.swift in Sources */,

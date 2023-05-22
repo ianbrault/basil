@@ -5,11 +5,11 @@
 //  Created by Ian Brault on 4/29/23.
 //
 
-import Foundation
+import UIKit
 
 class RecipeFolder: Codable {
     let uuid: UUID
-    let folderId: UUID?
+    var folderId: UUID?
     var name: String
     var items: [UUID]
 
@@ -21,7 +21,7 @@ class RecipeFolder: Codable {
     }
 
     static func root() -> RecipeFolder {
-        return RecipeFolder(folderId: nil, name: "")
+        return RecipeFolder(folderId: nil, name: "Recipes")
     }
 
     func addItem(uuid: UUID) {
@@ -30,6 +30,20 @@ class RecipeFolder: Codable {
 
     func removeItem(uuid: UUID) {
         self.items.removeAll { $0 == uuid }
+    }
+
+    func attributedText() -> NSAttributedString {
+        let imageAttachment = NSTextAttachment()
+        imageAttachment.image = SFSymbols.folder?.withTintColor(.systemYellow)
+
+        let padding = NSTextAttachment()
+        padding.bounds = CGRect(x: 0, y: 0, width: 10, height: 0)
+
+        let message = NSMutableAttributedString(attachment: imageAttachment)
+        message.append(NSMutableAttributedString(attachment: padding))
+        message.append(NSMutableAttributedString(string: self.name))
+
+        return message
     }
 
     static func sort(_ this: RecipeFolder, _ that: RecipeFolder) -> Bool {

@@ -21,24 +21,26 @@ class RecipeCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
+    private func configure() {
+        self.addSubview(self.titleLabel)
+        self.titleLabel.lineBreakMode = .byTruncatingTail
+
+        NSLayoutConstraint.activate([
+            self.titleLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+            self.titleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 24),
+            self.titleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -45),
+            self.titleLabel.heightAnchor.constraint(equalToConstant: 24),
+        ])
+    }
+
     private func setRecipe(recipe: Recipe) {
+        self.accessoryType = .none
         self.titleLabel.text = recipe.title
     }
 
     private func setFolder(folder: RecipeFolder) {
         self.accessoryType = .disclosureIndicator
-
-        let imageAttachment = NSTextAttachment()
-        imageAttachment.image = SFSymbols.folder?.withTintColor(.systemYellow)
-
-        let padding = NSTextAttachment()
-        padding.bounds = CGRect(x: 0, y: 0, width: 10, height: 0)
-
-        let message = NSMutableAttributedString(attachment: imageAttachment)
-        message.append(NSMutableAttributedString(attachment: padding))
-        message.append(NSMutableAttributedString(string: folder.name))
-
-        self.titleLabel.attributedText = NSMutableAttributedString(attributedString: message)
+        self.titleLabel.attributedText = folder.attributedText()
     }
 
     func set(item: RecipeItem) {
@@ -48,18 +50,5 @@ class RecipeCell: UITableViewCell {
         case .folder(let folder):
             self.setFolder(folder: folder)
         }
-    }
-
-    private func configure() {
-        self.addSubview(self.titleLabel)
-
-        self.titleLabel.lineBreakMode = .byTruncatingTail
-
-        NSLayoutConstraint.activate([
-            self.titleLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor),
-            self.titleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 24),
-            self.titleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -45),
-            self.titleLabel.heightAnchor.constraint(equalToConstant: 24),
-        ])
     }
 }

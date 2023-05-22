@@ -9,7 +9,7 @@ import Foundation
 
 struct Recipe: Codable {
     let uuid: UUID
-    let folderId: UUID
+    var folderId: UUID
     let title: String
     let ingredients: [Ingredient]
     let instructions: [Instruction]

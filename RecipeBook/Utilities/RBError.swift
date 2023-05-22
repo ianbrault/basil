@@ -8,7 +8,7 @@
 import Foundation
 
 enum RBError: Error {
-    case cannotDeleteRoot
+    case cannotModifyRoot
     case failedToLoadRecipes
     case failedToSaveRecipes
     case missingInput(UUID)
@@ -18,8 +18,8 @@ enum RBError: Error {
 
     var title: String {
         switch self {
-        case .cannotDeleteRoot:
-            return "Failed to delete item"
+        case .cannotModifyRoot:
+            return "Something went wrong"
         case .failedToLoadRecipes:
             return "Something went wrong"
         case .failedToSaveRecipes:
@@ -37,8 +37,8 @@ enum RBError: Error {
 
     var message: String {
         switch self {
-        case .cannotDeleteRoot:
-            return "You cannot delete the root folder. How did you even get in this situation in the first place?"
+        case .cannotModifyRoot:
+            return "You cannot modify the root folder. How did you even get in this situation in the first place?"
         case .failedToLoadRecipes:
             return "Something went wrong"
         case .failedToSaveRecipes:

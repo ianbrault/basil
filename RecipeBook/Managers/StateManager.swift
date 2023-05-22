@@ -47,17 +47,29 @@ class State {
         return PersistenceManager.storeState(state: data)
     }
 
-    func getItem(uuid: UUID) -> RecipeItem {
-        return self.items[uuid]!
+    func getItem(uuid: UUID) -> RecipeItem? {
+        return self.items[uuid]
     }
 
     func getFolderItems(uuid: UUID) -> [RecipeItem]? {
-        switch self.getItem(uuid: uuid) {
+        guard let item = self.getItem(uuid: uuid) else { return [] }
+
+        switch item {
         case .recipe(_):
             return nil
 
         case .folder(let folder):
-            return folder.items.map { self.getItem(uuid: $0) }
+            var items: [RecipeItem] = []
+            for itemId in folder.items {
+                // if we somehow end up in a situation with a folder containing a non-existent
+                // item, remove it
+                if let item = self.getItem(uuid: itemId) {
+                    items.append(item)
+                } else  {
+                    folder.removeItem(uuid: itemId)
+                }
+            }
+            return items
         }
     }
 
@@ -66,7 +78,7 @@ class State {
         self.items[recipe.uuid] = item
 
         // add to the parent folder
-        let folderItem = self.getItem(uuid: recipe.folderId).intoFolder()!
+        let folderItem = self.getItem(uuid: recipe.folderId)!.intoFolder()!
         folderItem.addItem(uuid: recipe.uuid)
 
         return self.store()
@@ -78,7 +90,7 @@ class State {
 
         // add to the parent folder
         // unwrapping because we should never add more roots
-        let folderItem = self.getItem(uuid: folder.folderId!).intoFolder()!
+        let folderItem = self.getItem(uuid: folder.folderId!)!.intoFolder()!
         folderItem.addItem(uuid: folder.uuid)
 
         return self.store()
@@ -99,20 +111,41 @@ class State {
     }
 
     func deleteItem(uuid: UUID) -> RBError? {
-        let item = self.getItem(uuid: uuid)
+        let item = self.getItem(uuid: uuid)!
 
         // first unhook from the parent folder
         if let folderId = item.folderId {
-            let folderItem = self.getItem(uuid: folderId).intoFolder()!
+            let folderItem = self.getItem(uuid: folderId)!.intoFolder()!
             folderItem.removeItem(uuid: uuid)
         } else {
-            // folder ID should only be nil for the root, which should never be deleted
+            // folder ID should only be nil for the root, which should never be modified
             // this branch should never be hit...
-            return .cannotDeleteRoot
+            return .cannotModifyRoot
         }
 
         // then remove the item itself
         self.items.removeValue(forKey: uuid)
+
+        return self.store()
+    }
+
+    func moveItemToFolder(uuid: UUID, folderId: UUID) -> RBError? {
+        var item = self.getItem(uuid: uuid)!
+
+        // first unhook from the parent folder
+        if let parentFolderId = item.folderId {
+            let folderItem = self.getItem(uuid: parentFolderId)!.intoFolder()!
+            folderItem.removeItem(uuid: uuid)
+        } else {
+            // folder ID should only be nil for the root, which should never be modified
+            // this branch should never be hit...
+            return .cannotModifyRoot
+        }
+
+        // then add it to the new parent folder
+        item.folderId = folderId
+        let parentFolder = self.getItem(uuid: folderId)!.intoFolder()!
+        parentFolder.addItem(uuid: item.uuid)
 
         return self.store()
     }

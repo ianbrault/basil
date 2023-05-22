@@ -37,7 +37,7 @@ class RBEmptyStateView: UIView {
 
         let message = NSMutableAttributedString(string: "Add a recipe using the ")
         message.append(NSAttributedString(attachment: imageAttachment))
-        message.append(NSAttributedString(string: " button in the top-right to get started!"))
+        message.append(NSAttributedString(string: " button in the top-right"))
 
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .center

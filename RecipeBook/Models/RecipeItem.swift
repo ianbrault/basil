@@ -21,11 +21,21 @@ enum RecipeItem: Codable {
     }
 
     var folderId: UUID? {
-        switch self {
-        case .recipe(let recipe):
-            return recipe.folderId
-        case .folder(let folder):
-            return folder.folderId
+        get {
+            switch self {
+            case .recipe(let recipe):
+                return recipe.folderId
+            case .folder(let folder):
+                return folder.folderId
+            }
+        }
+        set {
+            switch self {
+            case .recipe(var recipe):
+                recipe.folderId = newValue!
+            case .folder(var folder):
+                folder.folderId = newValue
+            }
         }
     }
 
@@ -36,6 +46,10 @@ enum RecipeItem: Codable {
         case .folder(_):
             return false
         }
+    }
+
+    var isFolder: Bool {
+        return !self.isRecipe
     }
 
     func intoRecipe() -> Recipe? {
@@ -68,5 +82,9 @@ enum RecipeItem: Codable {
         case (.folder(let folderA), .folder(let folderB)):
             return RecipeFolder.sort(folderA, folderB)
         }
+    }
+
+    static func sortReverse(_ this: RecipeItem, _ that: RecipeItem) -> Bool {
+        return !RecipeItem.sort(this, that)
     }
 }

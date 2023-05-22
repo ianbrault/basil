@@ -16,7 +16,7 @@ class RecipeListVC: UIViewController {
 
     init(folderId: UUID) {
         super.init(nibName: nil, bundle: nil)
-        self.folder = State.manager.getItem(uuid: folderId).intoFolder()!
+        self.folder = State.manager.getItem(uuid: folderId)!.intoFolder()!
     }
 
     required init?(coder: NSCoder) {
@@ -81,7 +81,9 @@ class RecipeListVC: UIViewController {
     }
 
     private func createRecipeLongPressContextMenu(recipe: Recipe) -> UIContextMenuConfiguration {
-        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { (_) in
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] (_) in
+            guard let self = self else { return UIMenu() }
+
             let editAction = UIAction(title: "Edit recipe", image: SFSymbols.editRecipe) { (_) in
                 let destVC = RecipeFormVC(style: .edit)
                 destVC.delegate = self
@@ -91,13 +93,19 @@ class RecipeListVC: UIViewController {
                 self.present(navController, animated: true)
             }
             let moveAction = UIAction(title: "Move to folder", image: SFSymbols.folder) { (_) in
-                // TODO: unimplemented
-                print("move")
+                let destVC = FolderTreeVC { (selectedFolder) in
+                    if let error = State.manager.moveItemToFolder(uuid: recipe.uuid, folderId: selectedFolder.uuid) {
+                        self.presentErrorAlert(error)
+                    } else if selectedFolder.uuid != self.folder.uuid {
+                        // item has been moved to a folder on another screen so remove it
+                        self.removeItem(uuid: recipe.uuid)
+                    }
+                }
+                let navController = UINavigationController(rootViewController: destVC)
+                self.present(navController, animated: true)
             }
             let deleteAction = UIAction(title: "Delete recipe", image: SFSymbols.trash, attributes: .destructive) { (_) in
-                let alert = RBDeleteRecipeItemAlert(item: .recipe(recipe)) { [weak self] () in
-                    guard let self = self else { return }
-
+                let alert = RBDeleteRecipeItemAlert(item: .recipe(recipe)) { () in
                     if let error = State.manager.deleteItem(uuid: recipe.uuid) {
                         self.presentErrorAlert(error)
                     } else {
@@ -111,15 +119,16 @@ class RecipeListVC: UIViewController {
     }
 
     private func createFolderLongPressContextMenu(folder: RecipeFolder) -> UIContextMenuConfiguration {
-        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { (_) in
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] (_) in
+            guard let self = self else { return UIMenu() }
+
             let editAction = UIAction(title: "Edit folder", image: SFSymbols.editRecipe) { (_) in
                 let alert = RBTextFieldAlert(
                     title: "Edit folder",
                     placeholder: "Enter folder name",
                     text: folder.name,
                     confirmButtonText: "Save"
-                ) { [weak self] (text) in
-                    guard let self else { return }
+                ) { (text) in
                     folder.name = text
                     if let error = State.manager.updateFolder(folder: folder) {
                         self.presentErrorAlert(error)
@@ -138,13 +147,19 @@ class RecipeListVC: UIViewController {
                 self.present(alert, animated: true)
             }
             let moveAction = UIAction(title: "Move to folder", image: SFSymbols.folder) { (_) in
-                // TODO: unimplemented
-                print("move")
+                let destVC = FolderTreeVC { (selectedFolder) in
+                    if let error = State.manager.moveItemToFolder(uuid: folder.uuid, folderId: selectedFolder.uuid) {
+                        self.presentErrorAlert(error)
+                    } else if selectedFolder.uuid != self.folder.uuid {
+                        // item has been moved to a folder on another screen so remove it
+                        self.removeItem(uuid: folder.uuid)
+                    }
+                }
+                let navController = UINavigationController(rootViewController: destVC)
+                self.present(navController, animated: true)
             }
             let deleteAction = UIAction(title: "Delete folder", image: SFSymbols.trash, attributes: .destructive) { (_) in
-                let alert = RBDeleteRecipeItemAlert(item: .folder(folder)) { [weak self] () in
-                    guard let self = self else { return }
-
+                let alert = RBDeleteRecipeItemAlert(item: .folder(folder)) { () in
                     if let error = State.manager.deleteItem(uuid: folder.uuid) {
                         self.presentErrorAlert(error)
                     } else {
