@@ -41,7 +41,7 @@ class FolderTreeVC: UIViewController {
         guard let root = State.manager.root else { return }
         let rootItem = State.manager.getItem(uuid: root)!.intoFolder()!
         self.items.append(Item(folder: rootItem, indentLevel: 0))
-        
+
         var queue = self.getFolderItems(folderId: root, indentLevel: 1)
         while !queue.isEmpty {
             // create an item for the folder
@@ -97,7 +97,6 @@ extension FolderTreeVC: UITableViewDataSource, UITableViewDelegate {
 
         var content = cell.defaultContentConfiguration()
         content.attributedText = item.folder.attributedText()
-        content.textProperties.font = .systemFont(ofSize: 16)
         cell.contentConfiguration = content
 
         return cell
