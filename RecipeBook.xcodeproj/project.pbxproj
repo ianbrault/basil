@@ -29,6 +29,8 @@
 		E3573E6629CC16C1000F7877 /* RecipeListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6529CC16C1000F7877 /* RecipeListVC.swift */; };
 		E3573E6929CC16DC000F7877 /* GroceryListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6829CC16DC000F7877 /* GroceryListVC.swift */; };
 		E3573E6C29CC185A000F7877 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6B29CC185A000F7877 /* Constants.swift */; };
+		E38FF6672AA3F37900D8ED7A /* RBDeleteMultipleRecipeItemsAlertViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38FF6662AA3F37900D8ED7A /* RBDeleteMultipleRecipeItemsAlertViewController.swift */; };
+		E38FF6692AA5369F00D8ED7A /* RBWarningAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38FF6682AA5369F00D8ED7A /* RBWarningAlert.swift */; };
 		E39A757229DEA77C0009BA57 /* Ingredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39A757129DEA77C0009BA57 /* Ingredient.swift */; };
 		E39A757429DEA7EE0009BA57 /* Instruction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39A757329DEA7EE0009BA57 /* Instruction.swift */; };
 		E3B1C73929CD205C00736C96 /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73829CD205C00736C96 /* Recipe.swift */; };
@@ -68,6 +70,8 @@
 		E3573E6529CC16C1000F7877 /* RecipeListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeListVC.swift; sourceTree = "<group>"; };
 		E3573E6829CC16DC000F7877 /* GroceryListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryListVC.swift; sourceTree = "<group>"; };
 		E3573E6B29CC185A000F7877 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		E38FF6662AA3F37900D8ED7A /* RBDeleteMultipleRecipeItemsAlertViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBDeleteMultipleRecipeItemsAlertViewController.swift; sourceTree = "<group>"; };
+		E38FF6682AA5369F00D8ED7A /* RBWarningAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBWarningAlert.swift; sourceTree = "<group>"; };
 		E39A757129DEA77C0009BA57 /* Ingredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ingredient.swift; sourceTree = "<group>"; };
 		E39A757329DEA7EE0009BA57 /* Instruction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Instruction.swift; sourceTree = "<group>"; };
 		E3B1C73829CD205C00736C96 /* Recipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
@@ -116,6 +120,8 @@
 				E3E3E9622A0892F7006A9E00 /* RBErrorAlertController.swift */,
 				E34B4CE929CEEA3E0063A9A2 /* RBTextFieldAlert.swift */,
 				E349B14129E002100097A338 /* RBDeleteRecipeItemAlert.swift */,
+				E38FF6682AA5369F00D8ED7A /* RBWarningAlert.swift */,
+				E38FF6662AA3F37900D8ED7A /* RBDeleteMultipleRecipeItemsAlertViewController.swift */,
 			);
 			path = Alerts;
 			sourceTree = "<group>";
@@ -328,6 +334,7 @@
 				E3011DD329E38D7D00490919 /* RecipeInstructionCell.swift in Sources */,
 				E3573E4D29CC14B3000F7877 /* AppDelegate.swift in Sources */,
 				E3573E4F29CC14B3000F7877 /* SceneDelegate.swift in Sources */,
+				E38FF6692AA5369F00D8ED7A /* RBWarningAlert.swift in Sources */,
 				E3C4660429FF4AE500791576 /* StateManager.swift in Sources */,
 				E39A757229DEA77C0009BA57 /* Ingredient.swift in Sources */,
 				E349B13A29DFDB2D0097A338 /* PersistenceManager.swift in Sources */,
@@ -339,6 +346,7 @@
 				E34B4CEA29CEEA3E0063A9A2 /* RBTextFieldAlert.swift in Sources */,
 				E349B13F29DFE2390097A338 /* RBEmptyStateView.swift in Sources */,
 				E336B63829FDF7D20025CC38 /* RecipeFolder.swift in Sources */,
+				E38FF6672AA3F37900D8ED7A /* RBDeleteMultipleRecipeItemsAlertViewController.swift in Sources */,
 				E3E3E9632A0892F7006A9E00 /* RBErrorAlertController.swift in Sources */,
 				E3B1C73E29CE1E9600736C96 /* RecipeCell.swift in Sources */,
 				E3573E6929CC16DC000F7877 /* GroceryListVC.swift in Sources */,

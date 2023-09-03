@@ -10,6 +10,14 @@ import UIKit
 class RecipeCell: UITableViewCell {
     static let reuseID = "RecipeCell"
 
+    private func configure() {
+        self.tintColor = .systemYellow
+
+        let selectedBackground = UIView()
+        selectedBackground.backgroundColor = .systemGray6
+        self.selectedBackgroundView = selectedBackground
+    }
+
     private func setRecipe(recipe: Recipe) {
         self.accessoryType = .none
 
@@ -27,6 +35,8 @@ class RecipeCell: UITableViewCell {
     }
 
     func set(item: RecipeItem) {
+        self.configure()
+
         switch item {
         case .recipe(let recipe):
             self.setRecipe(recipe: recipe)

@@ -11,8 +11,19 @@ class RecipeListVC: UIViewController {
 
     let tableView = UITableView()
 
+    var addButton: UIBarButtonItem!
+    var editButton: UIBarButtonItem!
+    var doneButton: UIBarButtonItem!
+    var moveButton: UIBarButtonItem!
+    var deleteButton: UIBarButtonItem!
+    var nukeButton: UIBarButtonItem!
+
     var folder: RecipeFolder!
     var items: [RecipeItem] = []
+
+    // set this flag to enable development mode debug features
+    // NOTE: ensure that this is unset before releasing
+    let development: Bool = true
 
     init(folderId: UUID) {
         super.init(nibName: nil, bundle: nil)
@@ -50,9 +61,41 @@ class RecipeListVC: UIViewController {
     private func configureViewController() {
         self.view.backgroundColor = .systemBackground
 
-        // add an add button to add new recipes
-        let addButton = UIBarButtonItem(systemItem: .add, menu: createAddButtonContextMenu())
-        self.navigationItem.rightBarButtonItem = addButton
+        // create an add button to add new recipes
+        self.addButton = UIBarButtonItem(systemItem: .add, menu: self.createAddButtonContextMenu())
+
+        // create an edit button to enable edit mode on the table
+        self.editButton = UIBarButtonItem(
+            title: nil, image: SFSymbols.contextMenu, target: self, action: #selector(self.enableEditMode))
+
+        // create a done button to disable edit mode on the table
+        self.doneButton = UIBarButtonItem(
+            title: nil, image: SFSymbols.checkmarkCircle, target: self, action: #selector(self.disableEditMode))
+
+        // create a move button to move selected items
+        self.moveButton = UIBarButtonItem(
+            title: nil, image: SFSymbols.folder, target: self, action: #selector(self.moveSelectedItems))
+        self.moveButton.isEnabled = false
+
+        // create a delete button to delete selected items
+        self.deleteButton = UIBarButtonItem(
+            title: nil, image: SFSymbols.trash, target: self, action: #selector(self.deleteSelectedItems))
+        self.deleteButton.tintColor = .systemRed
+        self.deleteButton.isEnabled = false
+
+        // create the "nuke" button to clear all state
+        // NOTE: this will only be used in development mode
+        self.nukeButton = UIBarButtonItem(
+            title: nil, image: SFSymbols.atom, target: self, action: #selector(self.clearState))
+        self.nukeButton.tintColor = .systemRed
+
+        // start with the add/edit buttons in the navigation bar
+        // these will be swapped out when the table edit mode is toggled
+        if self.development {
+            self.navigationItem.rightBarButtonItems = [self.editButton, self.addButton, self.nukeButton]
+        } else {
+            self.navigationItem.rightBarButtonItems = [self.editButton, self.addButton]
+        }
     }
 
     private func configureTableView() {
@@ -62,6 +105,9 @@ class RecipeListVC: UIViewController {
         self.tableView.delegate = self
         self.tableView.dataSource = self
         self.tableView.removeExcessCells()
+
+        self.tableView.allowsMultipleSelection = true
+        self.tableView.allowsMultipleSelectionDuringEditing = true
 
         self.tableView.register(RecipeCell.self, forCellReuseIdentifier: RecipeCell.reuseID)
     }
@@ -228,6 +274,30 @@ class RecipeListVC: UIViewController {
         }
     }
 
+    func removeItems(uuids: [UUID]) {
+        // find the items using the given UUIDs
+        var indexPaths: [IndexPath] = []
+        for uuid in uuids {
+            if let indexPath = self.findItem(uuid: uuid) {
+                indexPaths.append(indexPath)
+            } else {
+                self.presentErrorAlert(.missingRecipe(uuid))
+            }
+        }
+
+        // remove the items from the list
+        let rows = Set(indexPaths.map { $0.row })
+        let newItems = self.items.enumerated().filter { !rows.contains($0.offset) }.map { $0.element }
+        self.items = newItems
+        DispatchQueue.main.async {
+            self.tableView.deleteRows(at: indexPaths, with: .automatic)
+            // if these were the last recipes, show the empty state view
+            if self.items.isEmpty {
+                self.showEmptyStateView(in: self.view)
+            }
+        }
+    }
+
     func addNewRecipe(_ action: UIAction) {
         let destVC = RecipeFormVC(style: .new)
         destVC.delegate = self
@@ -267,6 +337,79 @@ class RecipeListVC: UIViewController {
         }
         self.present(alert, animated: true)
     }
+
+    @objc func clearState(_ action: UIAction) {
+        // NOTE: can only be used in development mode
+        if self.development {
+            let alert = RBWarningAlert(
+                message: "Are you sure you want to fully wipe all recipe data?",
+                actionStyle: .destructive
+            ) { [weak self] () in
+                guard let self = self else { return }
+                State.manager.clear()
+                DispatchQueue.main.async {
+                    self.items = []
+                    self.tableView.reloadData()
+                    self.showEmptyStateView(in: self.view)
+                }
+            }
+            self.present(alert, animated: true)
+        }
+    }
+
+    @objc func enableEditMode(_ action: UIAction? = nil) {
+        self.tableView.setEditing(true, animated: true)
+        // navigation bar should contain the delete and move and done buttons when edit mode is enabled
+        self.navigationItem.rightBarButtonItems = [self.doneButton, self.moveButton, self.deleteButton]
+    }
+
+    @objc func disableEditMode(_ action: UIAction? = nil) {
+        self.tableView.setEditing(false, animated: true)
+        // navigation bar should contain the add and edit buttons when edit mode is disabled
+        if self.development {
+            self.navigationItem.rightBarButtonItems = [self.editButton, self.addButton, self.nukeButton]
+        } else {
+            self.navigationItem.rightBarButtonItems = [self.editButton, self.addButton]
+        }
+    }
+
+    @objc func moveSelectedItems(_ action: UIAction) {
+        if let selectedRows = tableView.indexPathsForSelectedRows, !selectedRows.isEmpty {
+            let uuids = selectedRows.map { self.items[$0.row] }.map { $0.uuid }
+
+            let destVC = FolderTreeVC { (selectedFolder) in
+                if let error = State.manager.moveItemsToFolder(uuids: uuids, folderId: selectedFolder.uuid) {
+                    self.presentErrorAlert(error)
+                } else if selectedFolder.uuid != self.folder.uuid {
+                    // items have been moved to a folder on another screen so remove them
+                    self.removeItems(uuids: uuids)
+                    // disable edit mode once the action has completed
+                    self.disableEditMode()
+                }
+            }
+            let navController = UINavigationController(rootViewController: destVC)
+            self.present(navController, animated: true)
+        }
+    }
+
+    @objc func deleteSelectedItems(_ action: UIAction) {
+        if let selectedRows = tableView.indexPathsForSelectedRows, !selectedRows.isEmpty {
+            let uuids = selectedRows.map { self.items[$0.row] }.map { $0.uuid }
+
+            let alert = RBDeleteMultipleRecipeItemsAlertViewController(count: uuids.count) { [weak self] () in
+                guard let self = self else { return }
+
+                if let error = State.manager.deleteItems(uuids: uuids) {
+                    self.presentErrorAlert(error)
+                } else {
+                    self.removeItems(uuids: uuids)
+                    // disable edit mode once the action has completed
+                    self.disableEditMode()
+                }
+            }
+            self.present(alert, animated: true)
+        }
+    }
 }
 
 extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
@@ -283,6 +426,17 @@ extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // prevent items from being opened while in edit mode
+        if tableView.isEditing {
+            let selected = tableView.indexPathsForSelectedRows?.count ?? 0
+            // enable move/delete buttons if items are selected
+            if selected > 0 {
+                self.moveButton.isEnabled = true
+                self.deleteButton.isEnabled = true
+            }
+            return
+        }
+
         let item = self.items[indexPath.row]
         switch item {
         case .recipe(let recipe):
@@ -294,6 +448,18 @@ extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
         case .folder(let folder):
             let recipeListVC = RecipeListVC(folderId: folder.uuid)
             self.navigationController?.pushViewController(recipeListVC, animated: true)
+        }
+    }
+
+    func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
+        // table should already be in edit mode, guard just in case
+        if tableView.isEditing {
+            let selected = tableView.indexPathsForSelectedRows?.count ?? 0
+            // disable move/delete buttons if no more items are selected
+            if selected == 0 {
+                self.moveButton.isEnabled = false
+                self.deleteButton.isEnabled = false
+            }
         }
     }
 

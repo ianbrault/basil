@@ -111,42 +111,64 @@ class State {
     }
 
     func deleteItem(uuid: UUID) -> RBError? {
-        let item = self.getItem(uuid: uuid)!
+        return self.deleteItems(uuids: [uuid])
+    }
 
-        // first unhook from the parent folder
-        if let folderId = item.folderId {
-            let folderItem = self.getItem(uuid: folderId)!.intoFolder()!
-            folderItem.removeItem(uuid: uuid)
-        } else {
-            // folder ID should only be nil for the root, which should never be modified
-            // this branch should never be hit...
-            return .cannotModifyRoot
+    func deleteItems(uuids: [UUID]) -> RBError? {
+        for uuid in uuids {
+            let item = self.getItem(uuid: uuid)!
+            // if this is a folder, first recursively delete its sub-items
+            if item.isFolder {
+                if let error = self.deleteItems(uuids: item.intoFolder()!.items) {
+                    return error
+                }
+            }
+
+            // first unhook from the parent folder
+            if let folderId = item.folderId {
+                let folderItem = self.getItem(uuid: folderId)!.intoFolder()!
+                folderItem.removeItem(uuid: uuid)
+            } else {
+                // folder ID should only be nil for the root, which should never be modified
+                // this branch should never be hit...
+                return .cannotModifyRoot
+            }
+            // then remove the item itself
+            self.items.removeValue(forKey: uuid)
         }
-
-        // then remove the item itself
-        self.items.removeValue(forKey: uuid)
 
         return self.store()
     }
 
     func moveItemToFolder(uuid: UUID, folderId: UUID) -> RBError? {
-        var item = self.getItem(uuid: uuid)!
+        return self.moveItemsToFolder(uuids: [uuid], folderId: folderId)
+    }
 
-        // first unhook from the parent folder
-        if let parentFolderId = item.folderId {
-            let folderItem = self.getItem(uuid: parentFolderId)!.intoFolder()!
-            folderItem.removeItem(uuid: uuid)
-        } else {
-            // folder ID should only be nil for the root, which should never be modified
-            // this branch should never be hit...
-            return .cannotModifyRoot
+    func moveItemsToFolder(uuids: [UUID], folderId: UUID) -> RBError? {
+        for uuid in uuids {
+            var item = self.getItem(uuid: uuid)!
+
+            // first unhook from the parent folder
+            if let parentFolderId = item.folderId {
+                let folderItem = self.getItem(uuid: parentFolderId)!.intoFolder()!
+                folderItem.removeItem(uuid: uuid)
+            } else {
+                // folder ID should only be nil for the root, which should never be modified
+                // this branch should never be hit...
+                return .cannotModifyRoot
+            }
+            // then add it to the new parent folder
+            item.folderId = folderId
+            let parentFolder = self.getItem(uuid: folderId)!.intoFolder()!
+            parentFolder.addItem(uuid: item.uuid)
         }
 
-        // then add it to the new parent folder
-        item.folderId = folderId
-        let parentFolder = self.getItem(uuid: folderId)!.intoFolder()!
-        parentFolder.addItem(uuid: item.uuid)
-
         return self.store()
+    }
+
+    func clear() {
+        // NOTE: this should only be used for development debugging
+        let root = self.getItem(uuid: self.root!)!
+        let _ = self.deleteItems(uuids: root.intoFolder()!.items)
     }
 }
