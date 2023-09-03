@@ -69,6 +69,9 @@ class RecipeFormCell: UITableViewCell {
         self.textField = RBTextField(placeholder: section.textFieldPlaceholder, horizontalPadding: 20)
         self.textField?.delegate = self
         self.textField?.text = text
+        if section == .title {
+            self.textField?.autocapitalizationType = .words
+        }
         self.textField?.addTarget(self, action: #selector(self.textFieldDidChange(_:)), for: .editingChanged)
         self.addSubview(self.textField!)
 

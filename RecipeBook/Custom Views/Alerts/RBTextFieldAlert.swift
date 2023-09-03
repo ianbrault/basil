@@ -21,7 +21,7 @@ class RBTextFieldAlert: UIAlertController {
 
     private func configure(placeholder: String, text: String?, confirmButtonText: String, completed: @escaping (String) -> Void) {
         let textFieldConfig = { (textField: UITextField) in
-            textField.autocapitalizationType = .sentences
+            textField.autocapitalizationType = .words
             textField.autocorrectionType = .yes
             textField.placeholder = placeholder
             if let text {
