@@ -11,6 +11,7 @@ enum SFSymbols {
     static let add = UIImage(systemName: "plus")
     static let addRecipe = UIImage(systemName: "plus.circle")
     static let atom = UIImage(systemName: "atom")
+    static let bug = UIImage(systemName: "ladybug")
     static let checkmarkCircle = UIImage(systemName: "checkmark.circle")
     static let contextMenu = UIImage(systemName: "ellipsis.circle")
     static let editRecipe = UIImage(systemName: "square.and.pencil")

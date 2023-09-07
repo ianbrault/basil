@@ -9,8 +9,13 @@ import Foundation
 
 enum RBError: Error {
     case cannotModifyRoot
+    case failedToDecode
     case failedToLoadRecipes
+    case failedToParseRecipe(String?)
     case failedToSaveRecipes
+    case httpError(Error)
+    case invalidURL(String)
+    case missingHTTPData
     case missingInput(UUID)
     case missingRecipe(UUID)
     case missingTitle
@@ -18,20 +23,23 @@ enum RBError: Error {
 
     var title: String {
         switch self {
-        case .cannotModifyRoot:
-            return "Something went wrong"
-        case .failedToLoadRecipes:
-            return "Something went wrong"
-        case .failedToSaveRecipes:
-            return "Something went wrong"
-        case .missingInput(_):
-            return "Something went wrong"
-        case .missingRecipe(_):
-            return "Something went wrong"
+        case .httpError(_):
+            return "Failed to get webpage"
+        case .invalidURL(_):
+            return "Invalid URL"
         case .missingTitle:
             return "Missing title"
         case .notImplemented:
             return "Not implemented!"
+        case .cannotModifyRoot,
+             .failedToDecode,
+             .failedToLoadRecipes,
+             .failedToParseRecipe(_),
+             .failedToSaveRecipes,
+             .missingHTTPData,
+             .missingInput(_),
+             .missingRecipe(_):
+            return "Something went wrong"
         }
     }
 
@@ -39,10 +47,18 @@ enum RBError: Error {
         switch self {
         case .cannotModifyRoot:
             return "You cannot modify the root folder. How did you even get in this situation in the first place?"
-        case .failedToLoadRecipes:
+        case .failedToDecode:
+            return "Invalid UTF-8 response body"
+        case .failedToLoadRecipes, .failedToSaveRecipes:
             return "Something went wrong"
-        case .failedToSaveRecipes:
-            return "Something went wrong"
+        case .failedToParseRecipe(let message):
+            return message ?? "Error while parsing recipe"
+        case .httpError(let error):
+            return error.localizedDescription
+        case .invalidURL(let string):
+            return string
+        case .missingHTTPData:
+            return "Empty response body"
         case .missingInput(let uuid):
             return "Missing input \(uuid)"
         case .missingRecipe(let uuid):

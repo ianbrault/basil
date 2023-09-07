@@ -31,6 +31,9 @@
 		E3573E6C29CC185A000F7877 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6B29CC185A000F7877 /* Constants.swift */; };
 		E38FF6672AA3F37900D8ED7A /* RBDeleteMultipleRecipeItemsAlertViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38FF6662AA3F37900D8ED7A /* RBDeleteMultipleRecipeItemsAlertViewController.swift */; };
 		E38FF6692AA5369F00D8ED7A /* RBWarningAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38FF6682AA5369F00D8ED7A /* RBWarningAlert.swift */; };
+		E38FF66C2AA5466B00D8ED7A /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = E38FF66B2AA5466B00D8ED7A /* SwiftSoup */; };
+		E38FF66E2AA5472A00D8ED7A /* Parse.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38FF66D2AA5472A00D8ED7A /* Parse.swift */; };
+		E38FF6702AA584A500D8ED7A /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38FF66F2AA584A500D8ED7A /* Network.swift */; };
 		E39A757229DEA77C0009BA57 /* Ingredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39A757129DEA77C0009BA57 /* Ingredient.swift */; };
 		E39A757429DEA7EE0009BA57 /* Instruction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39A757329DEA7EE0009BA57 /* Instruction.swift */; };
 		E3B1C73929CD205C00736C96 /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73829CD205C00736C96 /* Recipe.swift */; };
@@ -72,6 +75,8 @@
 		E3573E6B29CC185A000F7877 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		E38FF6662AA3F37900D8ED7A /* RBDeleteMultipleRecipeItemsAlertViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBDeleteMultipleRecipeItemsAlertViewController.swift; sourceTree = "<group>"; };
 		E38FF6682AA5369F00D8ED7A /* RBWarningAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBWarningAlert.swift; sourceTree = "<group>"; };
+		E38FF66D2AA5472A00D8ED7A /* Parse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parse.swift; sourceTree = "<group>"; };
+		E38FF66F2AA584A500D8ED7A /* Network.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
 		E39A757129DEA77C0009BA57 /* Ingredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ingredient.swift; sourceTree = "<group>"; };
 		E39A757329DEA7EE0009BA57 /* Instruction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Instruction.swift; sourceTree = "<group>"; };
 		E3B1C73829CD205C00736C96 /* Recipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
@@ -91,6 +96,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E38FF66C2AA5466B00D8ED7A /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,6 +232,8 @@
 			children = (
 				E3573E6B29CC185A000F7877 /* Constants.swift */,
 				E349B13B29DFDD3C0097A338 /* RBError.swift */,
+				E38FF66D2AA5472A00D8ED7A /* Parse.swift */,
+				E38FF66F2AA584A500D8ED7A /* Network.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -277,6 +285,9 @@
 			dependencies = (
 			);
 			name = RecipeBook;
+			packageProductDependencies = (
+				E38FF66B2AA5466B00D8ED7A /* SwiftSoup */,
+			);
 			productName = RecipeBook;
 			productReference = E3573E4929CC14B3000F7877 /* RecipeBook.app */;
 			productType = "com.apple.product-type.application";
@@ -305,6 +316,9 @@
 				Base,
 			);
 			mainGroup = E3573E4029CC14B3000F7877;
+			packageReferences = (
+				E38FF66A2AA5466B00D8ED7A /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+			);
 			productRefGroup = E3573E4A29CC14B3000F7877 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -345,6 +359,7 @@
 				E3B1C73929CD205C00736C96 /* Recipe.swift in Sources */,
 				E34B4CEA29CEEA3E0063A9A2 /* RBTextFieldAlert.swift in Sources */,
 				E349B13F29DFE2390097A338 /* RBEmptyStateView.swift in Sources */,
+				E38FF6702AA584A500D8ED7A /* Network.swift in Sources */,
 				E336B63829FDF7D20025CC38 /* RecipeFolder.swift in Sources */,
 				E38FF6672AA3F37900D8ED7A /* RBDeleteMultipleRecipeItemsAlertViewController.swift in Sources */,
 				E3E3E9632A0892F7006A9E00 /* RBErrorAlertController.swift in Sources */,
@@ -357,6 +372,7 @@
 				E3B1C73C29CE1CF600736C96 /* UITableView+Ext.swift in Sources */,
 				E3C466062A00B2D100791576 /* RecipeItem.swift in Sources */,
 				E349B13C29DFDD3C0097A338 /* RBError.swift in Sources */,
+				E38FF66E2AA5472A00D8ED7A /* Parse.swift in Sources */,
 				E3B1C74729CE6CC900736C96 /* UIView+Ext.swift in Sources */,
 				E3573E6329CC161C000F7877 /* RBTabBarController.swift in Sources */,
 				E3427C0E29E158FC002C81E2 /* RecipeVC.swift in Sources */,
@@ -572,6 +588,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E38FF66A2AA5466B00D8ED7A /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/scinfu/SwiftSoup";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E38FF66B2AA5466B00D8ED7A /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E38FF66A2AA5466B00D8ED7A /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E3573E4129CC14B3000F7877 /* Project object */;
 }
