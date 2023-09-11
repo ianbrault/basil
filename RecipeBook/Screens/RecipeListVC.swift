@@ -603,6 +603,9 @@ extension RecipeListVC: RecipeFormVCDelegate {
                 // update the items array with the new recipe contents
                 if let indexPath = self.findItem(uuid: recipe.uuid) {
                     self.items[indexPath.row] = .recipe(recipe)
+                    DispatchQueue.main.async {
+                        self.tableView.reloadRows(at: [indexPath], with: .automatic)
+                    }
                 } else {
                     self.presentErrorAlert(.missingRecipe(recipe.uuid))
                 }

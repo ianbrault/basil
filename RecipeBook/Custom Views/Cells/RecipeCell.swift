@@ -18,10 +18,17 @@ class RecipeCell: UITableViewCell {
         self.selectedBackgroundView = selectedBackground
     }
 
+    private func contentConfiguration() -> UIListContentConfiguration {
+        var content = self.defaultContentConfiguration()
+        content.textProperties.lineBreakMode = .byTruncatingTail
+        content.textProperties.numberOfLines = 1
+        return content
+    }
+
     private func setRecipe(recipe: Recipe) {
         self.accessoryType = .none
 
-        var content = self.defaultContentConfiguration()
+        var content = self.contentConfiguration()
         content.text = recipe.title
         self.contentConfiguration = content
     }
@@ -29,7 +36,7 @@ class RecipeCell: UITableViewCell {
     private func setFolder(folder: RecipeFolder) {
         self.accessoryType = .disclosureIndicator
 
-        var content = self.defaultContentConfiguration()
+        var content = self.contentConfiguration()
         content.attributedText = folder.attributedText()
         self.contentConfiguration = content
     }

@@ -31,7 +31,8 @@ class RecipeIngredientCell: UITableViewCell {
         let itemStart = bulletSize.width + 8
         paragraphStyle.headIndent = itemStart
         paragraphStyle.tabStops = [NSTextTab(textAlignment: .left, location: itemStart)]
-        paragraphStyle.paragraphSpacing = 6
+        paragraphStyle.lineSpacing = 4
+        paragraphStyle.paragraphSpacing = 10
 
         let attributedText = NSAttributedString(
             string: string,
