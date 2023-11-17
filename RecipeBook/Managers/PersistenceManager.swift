@@ -12,10 +12,19 @@ enum PersistenceManager {
 
     enum Keys {
         static let state = "state"
+        static let userId = "userId"
+    }
+
+    static func loadUserId() -> Int? {
+        return self.defaults.integer(forKey: Keys.userId)
+    }
+
+    static func storeUserId(userId: Int) {
+        self.defaults.set(userId, forKey: Keys.userId)
     }
 
     static func loadState() -> Result<State.Data, RBError> {
-        guard let stateData = defaults.object(forKey: Keys.state) as? Data else {
+        guard let stateData = self.defaults.object(forKey: Keys.state) as? Data else {
             // if this is nil, nothing has been saved before
             return .success(.empty())
         }
@@ -35,7 +44,7 @@ enum PersistenceManager {
         do {
             let encoder = JSONEncoder()
             let encodedState = try encoder.encode(state)
-            defaults.set(encodedState, forKey: Keys.state)
+            self.defaults.set(encodedState, forKey: Keys.state)
             return nil
         } catch {
             return .failedToSaveRecipes

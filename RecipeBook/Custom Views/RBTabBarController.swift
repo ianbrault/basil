@@ -13,9 +13,8 @@ class RBTabBarController: UITabBarController {
         super.viewDidLoad()
         UITabBar.appearance().tintColor = .systemYellow
         // load the state before creating the view controllers
-        if let _ = State.manager.load() {
-            // TODO: add better error handling
-            print("ERROR: failed to load state")
+        if let error = State.manager.load() {
+            self.presentErrorAlert(error)
         } else {
             self.viewControllers = [
                 self.createRecipeListVC(),

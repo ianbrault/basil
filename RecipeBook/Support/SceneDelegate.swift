@@ -18,10 +18,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let stackViewAppearance = UIStackView.appearance(whenContainedInInstancesOf: [UINavigationBar.self])
         stackViewAppearance.spacing = -4
 
-        window = UIWindow(frame: windowScene.coordinateSpace.bounds)
-        window?.windowScene = windowScene
-        window?.rootViewController = RBTabBarController()
-        window?.makeKeyAndVisible()
+        self.window = UIWindow(frame: windowScene.coordinateSpace.bounds)
+        self.window?.windowScene = windowScene
+        // check if the user has already been registered
+        if let userId = PersistenceManager.self.loadUserId(), userId > 0 {
+            self.window?.rootViewController = RBTabBarController()
+            self.window?.makeKeyAndVisible()
+        } else {
+            self.window?.rootViewController = OnboardingVC()
+            self.window?.makeKeyAndVisible()
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

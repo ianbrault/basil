@@ -49,7 +49,8 @@ enum RBError: Error {
             return "You cannot modify the root folder. How did you even get in this situation in the first place?"
         case .failedToDecode:
             return "Invalid UTF-8 response body"
-        case .failedToLoadRecipes, .failedToSaveRecipes:
+        case .failedToLoadRecipes,
+             .failedToSaveRecipes:
             return "Something went wrong"
         case .failedToParseRecipe(let message):
             return message ?? "Error while parsing recipe"
