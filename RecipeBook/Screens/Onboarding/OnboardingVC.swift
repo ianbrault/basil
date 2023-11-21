@@ -27,6 +27,7 @@ class OnboardingVC: UIPageViewController {
     }
 
     private func configure() {
+        // TODO: remove data source and manually control via buttons
         self.dataSource = self
         self.delegate = self
 
@@ -50,6 +51,7 @@ class OnboardingVC: UIPageViewController {
     }
 }
 
+// TODO: remove data source and manually control via buttons
 extension OnboardingVC: UIPageViewControllerDataSource {
 
     func pageViewController(
@@ -88,8 +90,8 @@ extension OnboardingVC: UIPageViewControllerDelegate {
         transitionCompleted completed: Bool
     ) {
         guard let viewControllers = pageViewController.viewControllers else { return }
-        guard let currentIndex = pages.firstIndex(of: viewControllers[0]) else { return }
+        guard let currentIndex = self.pages.firstIndex(of: viewControllers[0]) else { return }
 
-        pageControl.currentPage = currentIndex
+        self.pageControl.currentPage = currentIndex
     }
 }

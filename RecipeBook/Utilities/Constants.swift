@@ -18,6 +18,8 @@ enum SFSymbols {
     static let folder = UIImage(systemName: "folder")
     static let groceries = UIImage(systemName: "cart")
     static let importRecipe = UIImage(systemName: "tray.and.arrow.down")
+    static let login = UIImage(systemName: "person.crop.circle.fill.badge.checkmark")
     static let recipeBook = UIImage(systemName: "text.book.closed")
+    static let register = UIImage(systemName: "person.crop.circle.fill.badge.plus")
     static let trash = UIImage(systemName: "trash")
 }

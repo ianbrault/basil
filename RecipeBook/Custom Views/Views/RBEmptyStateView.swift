@@ -50,7 +50,7 @@ class RBEmptyStateView: UIView {
     }
 
     private func configureLogoImageView() {
-        addSubview(self.logoImageView)
+        self.addSubview(self.logoImageView)
 
         let symbol = UIImage(
             systemName: "text.book.closed",
@@ -69,7 +69,7 @@ class RBEmptyStateView: UIView {
     }
 
     private func configureMessageLabel() {
-        addSubview(self.messageLabel)
+        self.addSubview(self.messageLabel)
 
         self.messageLabel.attributedText = self.getMessageAttributedText()
         self.messageLabel.numberOfLines = 3

@@ -25,6 +25,7 @@ class RBPlainButton: UIButton {
 
     private func configure() {
         self.translatesAutoresizingMaskIntoConstraints = false
+
         self.configuration = .plain()
     }
 

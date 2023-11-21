@@ -47,6 +47,7 @@
 		E3C1D37A2B06FF30002E26D1 /* WelcomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C1D3792B06FF30002E26D1 /* WelcomeVC.swift */; };
 		E3C1D37C2B07001B002E26D1 /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C1D37B2B07001B002E26D1 /* LoginVC.swift */; };
 		E3C1D37E2B07004C002E26D1 /* RegisterVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C1D37D2B07004C002E26D1 /* RegisterVC.swift */; };
+		E3C1D3802B083004002E26D1 /* RBButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C1D37F2B083004002E26D1 /* RBButton.swift */; };
 		E3C4660429FF4AE500791576 /* StateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C4660329FF4AE500791576 /* StateManager.swift */; };
 		E3C466062A00B2D100791576 /* RecipeItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C466052A00B2D100791576 /* RecipeItem.swift */; };
 		E3E3E9632A0892F7006A9E00 /* RBErrorAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E3E9622A0892F7006A9E00 /* RBErrorAlertController.swift */; };
@@ -95,6 +96,7 @@
 		E3C1D3792B06FF30002E26D1 /* WelcomeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeVC.swift; sourceTree = "<group>"; };
 		E3C1D37B2B07001B002E26D1 /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		E3C1D37D2B07004C002E26D1 /* RegisterVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterVC.swift; sourceTree = "<group>"; };
+		E3C1D37F2B083004002E26D1 /* RBButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBButton.swift; sourceTree = "<group>"; };
 		E3C4660329FF4AE500791576 /* StateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateManager.swift; sourceTree = "<group>"; };
 		E3C466052A00B2D100791576 /* RecipeItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeItem.swift; sourceTree = "<group>"; };
 		E3E3E9622A0892F7006A9E00 /* RBErrorAlertController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBErrorAlertController.swift; sourceTree = "<group>"; };
@@ -157,6 +159,7 @@
 		E34B4CFC29CFEFBD0063A9A2 /* Buttons */ = {
 			isa = PBXGroup;
 			children = (
+				E3C1D37F2B083004002E26D1 /* RBButton.swift */,
 				E34B4CFD29CFEFD40063A9A2 /* RBPlainButton.swift */,
 			);
 			path = Buttons;
@@ -373,6 +376,7 @@
 				E3573E4F29CC14B3000F7877 /* SceneDelegate.swift in Sources */,
 				E38FF6692AA5369F00D8ED7A /* RBWarningAlert.swift in Sources */,
 				E3C4660429FF4AE500791576 /* StateManager.swift in Sources */,
+				E3C1D3802B083004002E26D1 /* RBButton.swift in Sources */,
 				E39A757229DEA77C0009BA57 /* Ingredient.swift in Sources */,
 				E349B13A29DFDB2D0097A338 /* PersistenceManager.swift in Sources */,
 				E3C1D3772B01F282002E26D1 /* OnboardingVC.swift in Sources */,
