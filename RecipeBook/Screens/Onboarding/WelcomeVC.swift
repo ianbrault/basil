@@ -22,6 +22,8 @@ class WelcomeVC: UIViewController {
     let bottomPadding: CGFloat = 64
     let buttonHeight: CGFloat = 58
 
+    weak var delegate: OnboardingVCDelegate?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configure()
@@ -86,6 +88,8 @@ class WelcomeVC: UIViewController {
     private func configureLoginButton() {
         self.view.addSubview(self.loginButton)
 
+        self.loginButton.addTarget(self, action: #selector(self.loginButtonPressed), for: .touchUpInside)
+
         NSLayoutConstraint.activate([
             self.loginButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -self.bottomPadding),
             self.loginButton.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: self.horizontalPadding),
@@ -97,11 +101,21 @@ class WelcomeVC: UIViewController {
     private func configureRegisterButton() {
         self.view.addSubview(self.registerButton)
 
+        self.registerButton.addTarget(self, action: #selector(self.registerButtonPressed), for: .touchUpInside)
+
         NSLayoutConstraint.activate([
             self.registerButton.bottomAnchor.constraint(equalTo: self.loginButton.topAnchor, constant: -self.spacing),
             self.registerButton.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: self.horizontalPadding),
             self.registerButton.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -self.horizontalPadding),
             self.registerButton.heightAnchor.constraint(equalToConstant: self.buttonHeight),
         ])
+    }
+
+    @objc func registerButtonPressed() {
+        self.delegate?.didChangePage(page: .register)
+    }
+
+    @objc func loginButtonPressed() {
+        self.delegate?.didChangePage(page: .login)
     }
 }

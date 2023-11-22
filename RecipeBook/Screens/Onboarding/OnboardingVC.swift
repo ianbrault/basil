@@ -7,11 +7,19 @@
 
 import UIKit
 
+protocol OnboardingVCDelegate: AnyObject {
+    func didChangePage(page: OnboardingVC.Page)
+}
+
 class OnboardingVC: UIPageViewController {
 
+    enum Page: Int {
+        case welcome
+        case register
+        case login
+    }
+
     var pages: [UIViewController] = []
-    let pageControl = UIPageControl()
-    let initialPage = 0
 
     init() {
         super.init(transitionStyle: .scroll, navigationOrientation: .horizontal)
@@ -26,72 +34,30 @@ class OnboardingVC: UIPageViewController {
         self.configure()
     }
 
+    private func setPage(_ page: Page) {
+        self.setViewControllers([self.pages[page.rawValue]], direction: .forward, animated: true, completion: nil)
+    }
+
     private func configure() {
-        // TODO: remove data source and manually control via buttons
-        self.dataSource = self
-        self.delegate = self
+        let welcomePage = WelcomeVC()
+        welcomePage.delegate = self
+        self.pages.append(welcomePage)
 
-        self.pages.append(WelcomeVC())
-        self.pages.append(RegisterVC())
-        self.pages.append(LoginVC())
+        let registerPage = RegisterVC()
+        registerPage.delegate = self
+        self.pages.append(registerPage)
 
-        self.setViewControllers([self.pages[self.initialPage]], direction: .forward, animated: true, completion: nil)
-    }
+        let loginPage = LoginVC()
+        loginPage.delegate = self
+        self.pages.append(loginPage)
 
-    private func configurePageControl() {
-        self.view.addSubview(self.pageControl)
-        self.pageControl.translatesAutoresizingMaskIntoConstraints = false
-
-        self.pageControl.currentPageIndicatorTintColor = .black
-        self.pageControl.pageIndicatorTintColor = .systemGray2
-        self.pageControl.numberOfPages = self.pages.count
-        self.pageControl.currentPage = self.initialPage
-
-        self.pageControl.pinToEdges(of: self.view)
+        self.setPage(.welcome)
     }
 }
 
-// TODO: remove data source and manually control via buttons
-extension OnboardingVC: UIPageViewControllerDataSource {
+extension OnboardingVC: OnboardingVCDelegate {
 
-    func pageViewController(
-        _ pageViewController: UIPageViewController,
-        viewControllerBefore viewController: UIViewController
-    ) -> UIViewController? {
-        guard let index = self.pages.firstIndex(of: viewController) else { return nil }
-
-        if index == 0 {
-            return self.pages.last
-        } else {
-            return self.pages[index - 1]
-        }
-    }
-
-    func pageViewController(
-        _ pageViewController: UIPageViewController,
-        viewControllerAfter viewController: UIViewController
-    ) -> UIViewController? {
-        guard let index = self.pages.firstIndex(of: viewController) else { return nil }
-
-        if index < self.pages.count - 1 {
-            return self.pages[index + 1]
-        } else {
-            return self.pages.first
-        }
-    }
-}
-
-extension OnboardingVC: UIPageViewControllerDelegate {
-
-    func pageViewController(
-        _ pageViewController: UIPageViewController,
-        didFinishAnimating finished: Bool,
-        previousViewControllers: [UIViewController],
-        transitionCompleted completed: Bool
-    ) {
-        guard let viewControllers = pageViewController.viewControllers else { return }
-        guard let currentIndex = self.pages.firstIndex(of: viewControllers[0]) else { return }
-
-        self.pageControl.currentPage = currentIndex
+    func didChangePage(page: Page) {
+        self.setPage(page)
     }
 }

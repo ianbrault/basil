@@ -9,6 +9,8 @@ import UIKit
 
 class LoginVC: UIViewController {
 
+    weak var delegate: OnboardingVCDelegate?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .systemBlue
