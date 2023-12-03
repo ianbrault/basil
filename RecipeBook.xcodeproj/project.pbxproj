@@ -17,7 +17,7 @@
 		E349B14229E002100097A338 /* RBDeleteRecipeItemAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = E349B14129E002100097A338 /* RBDeleteRecipeItemAlert.swift */; };
 		E34B4CEA29CEEA3E0063A9A2 /* RBTextFieldAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B4CE929CEEA3E0063A9A2 /* RBTextFieldAlert.swift */; };
 		E34B4CEE29CF77CC0063A9A2 /* UIViewController+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B4CED29CF77CC0063A9A2 /* UIViewController+Ext.swift */; };
-		E34B4CF429CF80060063A9A2 /* RBTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B4CF329CF80060063A9A2 /* RBTextField.swift */; };
+		E34B4CF429CF80060063A9A2 /* RBCellTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B4CF329CF80060063A9A2 /* RBCellTextField.swift */; };
 		E34B4CFE29CFEFD40063A9A2 /* RBPlainButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B4CFD29CFEFD40063A9A2 /* RBPlainButton.swift */; };
 		E34B4D0529D154AF0063A9A2 /* RecipeFormVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B4D0429D154AF0063A9A2 /* RecipeFormVC.swift */; };
 		E34B4D0729D15A480063A9A2 /* RecipeFormCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B4D0629D15A480063A9A2 /* RecipeFormCell.swift */; };
@@ -37,6 +37,8 @@
 		E391D8A82AAEB6E400265060 /* RecipeTitleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E391D8A72AAEB6E400265060 /* RecipeTitleCell.swift */; };
 		E39A757229DEA77C0009BA57 /* Ingredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39A757129DEA77C0009BA57 /* Ingredient.swift */; };
 		E39A757429DEA7EE0009BA57 /* Instruction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39A757329DEA7EE0009BA57 /* Instruction.swift */; };
+		E39D32A72B16DA4F00D7511B /* RBIconTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39D32A62B16DA4F00D7511B /* RBIconTextField.swift */; };
+		E39D32A92B1AC02100D7511B /* UIImage+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39D32A82B1AC02100D7511B /* UIImage+Ext.swift */; };
 		E3B1C73929CD205C00736C96 /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73829CD205C00736C96 /* Recipe.swift */; };
 		E3B1C73C29CE1CF600736C96 /* UITableView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73B29CE1CF600736C96 /* UITableView+Ext.swift */; };
 		E3B1C73E29CE1E9600736C96 /* RecipeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73D29CE1E9600736C96 /* RecipeCell.swift */; };
@@ -51,6 +53,7 @@
 		E3C4660429FF4AE500791576 /* StateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C4660329FF4AE500791576 /* StateManager.swift */; };
 		E3C466062A00B2D100791576 /* RecipeItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C466052A00B2D100791576 /* RecipeItem.swift */; };
 		E3E3E9632A0892F7006A9E00 /* RBErrorAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E3E9622A0892F7006A9E00 /* RBErrorAlertController.swift */; };
+		E3F3EF032B0EE96D0050991C /* RBTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3F3EF022B0EE96D0050991C /* RBTextField.swift */; };
 		E3FD19FA2A1323E300ACA346 /* FolderTreeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3FD19F92A1323E300ACA346 /* FolderTreeVC.swift */; };
 /* End PBXBuildFile section */
 
@@ -65,7 +68,7 @@
 		E349B14129E002100097A338 /* RBDeleteRecipeItemAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBDeleteRecipeItemAlert.swift; sourceTree = "<group>"; };
 		E34B4CE929CEEA3E0063A9A2 /* RBTextFieldAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBTextFieldAlert.swift; sourceTree = "<group>"; };
 		E34B4CED29CF77CC0063A9A2 /* UIViewController+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Ext.swift"; sourceTree = "<group>"; };
-		E34B4CF329CF80060063A9A2 /* RBTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBTextField.swift; sourceTree = "<group>"; };
+		E34B4CF329CF80060063A9A2 /* RBCellTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBCellTextField.swift; sourceTree = "<group>"; };
 		E34B4CFD29CFEFD40063A9A2 /* RBPlainButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBPlainButton.swift; sourceTree = "<group>"; };
 		E34B4D0429D154AF0063A9A2 /* RecipeFormVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeFormVC.swift; sourceTree = "<group>"; };
 		E34B4D0629D15A480063A9A2 /* RecipeFormCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeFormCell.swift; sourceTree = "<group>"; };
@@ -86,6 +89,8 @@
 		E391D8A72AAEB6E400265060 /* RecipeTitleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeTitleCell.swift; sourceTree = "<group>"; };
 		E39A757129DEA77C0009BA57 /* Ingredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ingredient.swift; sourceTree = "<group>"; };
 		E39A757329DEA7EE0009BA57 /* Instruction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Instruction.swift; sourceTree = "<group>"; };
+		E39D32A62B16DA4F00D7511B /* RBIconTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBIconTextField.swift; sourceTree = "<group>"; };
+		E39D32A82B1AC02100D7511B /* UIImage+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Ext.swift"; sourceTree = "<group>"; };
 		E3B1C73829CD205C00736C96 /* Recipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
 		E3B1C73B29CE1CF600736C96 /* UITableView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+Ext.swift"; sourceTree = "<group>"; };
 		E3B1C73D29CE1E9600736C96 /* RecipeCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeCell.swift; sourceTree = "<group>"; };
@@ -100,6 +105,7 @@
 		E3C4660329FF4AE500791576 /* StateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateManager.swift; sourceTree = "<group>"; };
 		E3C466052A00B2D100791576 /* RecipeItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeItem.swift; sourceTree = "<group>"; };
 		E3E3E9622A0892F7006A9E00 /* RBErrorAlertController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBErrorAlertController.swift; sourceTree = "<group>"; };
+		E3F3EF022B0EE96D0050991C /* RBTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBTextField.swift; sourceTree = "<group>"; };
 		E3FD19F92A1323E300ACA346 /* FolderTreeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderTreeVC.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -168,7 +174,9 @@
 		E34B4D0129D0FB660063A9A2 /* Inputs */ = {
 			isa = PBXGroup;
 			children = (
-				E34B4CF329CF80060063A9A2 /* RBTextField.swift */,
+				E34B4CF329CF80060063A9A2 /* RBCellTextField.swift */,
+				E3F3EF022B0EE96D0050991C /* RBTextField.swift */,
+				E39D32A62B16DA4F00D7511B /* RBIconTextField.swift */,
 			);
 			path = Inputs;
 			sourceTree = "<group>";
@@ -271,6 +279,7 @@
 				E3B1C73B29CE1CF600736C96 /* UITableView+Ext.swift */,
 				E3B1C74629CE6CC900736C96 /* UIView+Ext.swift */,
 				E34B4CED29CF77CC0063A9A2 /* UIViewController+Ext.swift */,
+				E39D32A82B1AC02100D7511B /* UIImage+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -385,6 +394,8 @@
 				E39A757429DEA7EE0009BA57 /* Instruction.swift in Sources */,
 				E3C1D37E2B07004C002E26D1 /* RegisterVC.swift in Sources */,
 				E34B4D0529D154AF0063A9A2 /* RecipeFormVC.swift in Sources */,
+				E3F3EF032B0EE96D0050991C /* RBTextField.swift in Sources */,
+				E39D32A92B1AC02100D7511B /* UIImage+Ext.swift in Sources */,
 				E3B1C73929CD205C00736C96 /* Recipe.swift in Sources */,
 				E34B4CEA29CEEA3E0063A9A2 /* RBTextFieldAlert.swift in Sources */,
 				E349B13F29DFE2390097A338 /* RBEmptyStateView.swift in Sources */,
@@ -397,9 +408,10 @@
 				E3573E6629CC16C1000F7877 /* RecipeListVC.swift in Sources */,
 				E391D8A82AAEB6E400265060 /* RecipeTitleCell.swift in Sources */,
 				E3FD19FA2A1323E300ACA346 /* FolderTreeVC.swift in Sources */,
-				E34B4CF429CF80060063A9A2 /* RBTextField.swift in Sources */,
+				E34B4CF429CF80060063A9A2 /* RBCellTextField.swift in Sources */,
 				E3B1C74529CE6A9400736C96 /* RBTitleLabel.swift in Sources */,
 				E3B1C73C29CE1CF600736C96 /* UITableView+Ext.swift in Sources */,
+				E39D32A72B16DA4F00D7511B /* RBIconTextField.swift in Sources */,
 				E3C466062A00B2D100791576 /* RecipeItem.swift in Sources */,
 				E349B13C29DFDD3C0097A338 /* RBError.swift in Sources */,
 				E38FF66E2AA5472A00D8ED7A /* Parse.swift in Sources */,

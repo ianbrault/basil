@@ -47,7 +47,7 @@ class RecipeFormCell: UITableViewCell {
 
     var section: RecipeFormVC.Section?
     var uuid: UUID?
-    var textField: RBTextField?
+    var textField: RBCellTextField?
     var actionButton: RBPlainButton?
 
     weak var delegate: RecipeFormCellDelegate?
@@ -66,7 +66,7 @@ class RecipeFormCell: UITableViewCell {
         self.section = section
         self.uuid = uuid
 
-        self.textField = RBTextField(placeholder: section.textFieldPlaceholder, horizontalPadding: 20)
+        self.textField = RBCellTextField(placeholder: section.textFieldPlaceholder, horizontalPadding: 20)
         self.textField?.delegate = self
         self.textField?.text = text
         if section == .title {

@@ -20,6 +20,7 @@ enum RBError: Error {
     case missingRecipe(UUID)
     case missingTitle
     case notImplemented
+    case passwordsDoNotMatch
 
     var title: String {
         switch self {
@@ -31,6 +32,8 @@ enum RBError: Error {
             return "Missing title"
         case .notImplemented:
             return "Not implemented!"
+        case .passwordsDoNotMatch:
+            return "Passwords do not Match"
         case .cannotModifyRoot,
              .failedToDecode,
              .failedToLoadRecipes,
@@ -68,6 +71,8 @@ enum RBError: Error {
             return "Add a title to the recipe and try again"
         case .notImplemented:
             return "This feature is not implemented. Try again later..."
+        case .passwordsDoNotMatch:
+            return "Re-enter your password and try again"
         }
     }
 }
