@@ -112,10 +112,10 @@ class WelcomeVC: UIViewController {
     }
 
     @objc func registerButtonPressed() {
-        self.delegate?.didChangePage(page: .register)
+        self.delegate?.didChangePage(page: .register, direction: .forward)
     }
 
     @objc func loginButtonPressed() {
-        self.delegate?.didChangePage(page: .login)
+        self.delegate?.didChangePage(page: .login, direction: .forward)
     }
 }

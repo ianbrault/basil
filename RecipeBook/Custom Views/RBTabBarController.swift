@@ -12,15 +12,10 @@ class RBTabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         UITabBar.appearance().tintColor = .systemYellow
-        // load the state before creating the view controllers
-        if let error = State.manager.load() {
-            self.presentErrorAlert(error)
-        } else {
-            self.viewControllers = [
-                self.createRecipeListVC(),
-                self.createGroceryListVC(),
-            ]
-        }
+        self.viewControllers = [
+            self.createRecipeListVC(),
+            self.createGroceryListVC(),
+        ]
     }
 
     func createRecipeListVC() -> UINavigationController {

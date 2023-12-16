@@ -87,7 +87,7 @@ class RecipeFormCell: UITableViewCell {
         self.section = section
         self.uuid = uuid
 
-        self.actionButton = RBPlainButton(title: section.actionButtonText!, systemImageName: "plus.circle")
+        self.actionButton = RBPlainButton(title: section.actionButtonText!, image: SFSymbols.addRecipe, buttonSize: .mini)
         self.actionButton!.addTarget(self, action: #selector(buttonPressed), for: .touchUpInside)
         self.addSubview(self.actionButton!)
 

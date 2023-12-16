@@ -39,6 +39,9 @@
 		E39A757429DEA7EE0009BA57 /* Instruction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39A757329DEA7EE0009BA57 /* Instruction.swift */; };
 		E39D32A72B16DA4F00D7511B /* RBIconTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39D32A62B16DA4F00D7511B /* RBIconTextField.swift */; };
 		E39D32A92B1AC02100D7511B /* UIImage+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39D32A82B1AC02100D7511B /* UIImage+Ext.swift */; };
+		E39D32AB2B1D70FF00D7511B /* Security.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39D32AA2B1D70FF00D7511B /* Security.swift */; };
+		E39D32AE2B23E17000D7511B /* SwiftEmailValidator in Frameworks */ = {isa = PBXBuildFile; productRef = E39D32AD2B23E17000D7511B /* SwiftEmailValidator */; };
+		E39D32B02B24037A00D7511B /* RBKeyboardToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39D32AF2B24037A00D7511B /* RBKeyboardToolbar.swift */; };
 		E3B1C73929CD205C00736C96 /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73829CD205C00736C96 /* Recipe.swift */; };
 		E3B1C73C29CE1CF600736C96 /* UITableView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73B29CE1CF600736C96 /* UITableView+Ext.swift */; };
 		E3B1C73E29CE1E9600736C96 /* RecipeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73D29CE1E9600736C96 /* RecipeCell.swift */; };
@@ -91,6 +94,8 @@
 		E39A757329DEA7EE0009BA57 /* Instruction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Instruction.swift; sourceTree = "<group>"; };
 		E39D32A62B16DA4F00D7511B /* RBIconTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBIconTextField.swift; sourceTree = "<group>"; };
 		E39D32A82B1AC02100D7511B /* UIImage+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Ext.swift"; sourceTree = "<group>"; };
+		E39D32AA2B1D70FF00D7511B /* Security.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Security.swift; sourceTree = "<group>"; };
+		E39D32AF2B24037A00D7511B /* RBKeyboardToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBKeyboardToolbar.swift; sourceTree = "<group>"; };
 		E3B1C73829CD205C00736C96 /* Recipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
 		E3B1C73B29CE1CF600736C96 /* UITableView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+Ext.swift"; sourceTree = "<group>"; };
 		E3B1C73D29CE1E9600736C96 /* RecipeCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeCell.swift; sourceTree = "<group>"; };
@@ -114,6 +119,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E39D32AE2B23E17000D7511B /* SwiftEmailValidator in Frameworks */,
 				E38FF66C2AA5466B00D8ED7A /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -134,6 +140,7 @@
 			isa = PBXGroup;
 			children = (
 				E349B13E29DFE2390097A338 /* RBEmptyStateView.swift */,
+				E39D32AF2B24037A00D7511B /* RBKeyboardToolbar.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -254,9 +261,10 @@
 			isa = PBXGroup;
 			children = (
 				E3573E6B29CC185A000F7877 /* Constants.swift */,
-				E349B13B29DFDD3C0097A338 /* RBError.swift */,
-				E38FF66D2AA5472A00D8ED7A /* Parse.swift */,
 				E38FF66F2AA584A500D8ED7A /* Network.swift */,
+				E38FF66D2AA5472A00D8ED7A /* Parse.swift */,
+				E349B13B29DFDD3C0097A338 /* RBError.swift */,
+				E39D32AA2B1D70FF00D7511B /* Security.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -322,6 +330,7 @@
 			name = RecipeBook;
 			packageProductDependencies = (
 				E38FF66B2AA5466B00D8ED7A /* SwiftSoup */,
+				E39D32AD2B23E17000D7511B /* SwiftEmailValidator */,
 			);
 			productName = RecipeBook;
 			productReference = E3573E4929CC14B3000F7877 /* RecipeBook.app */;
@@ -353,6 +362,7 @@
 			mainGroup = E3573E4029CC14B3000F7877;
 			packageReferences = (
 				E38FF66A2AA5466B00D8ED7A /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+				E39D32AC2B23E17000D7511B /* XCRemoteSwiftPackageReference "SwiftEmailValidator" */,
 			);
 			productRefGroup = E3573E4A29CC14B3000F7877 /* Products */;
 			projectDirPath = "";
@@ -393,6 +403,7 @@
 				E349B14229E002100097A338 /* RBDeleteRecipeItemAlert.swift in Sources */,
 				E39A757429DEA7EE0009BA57 /* Instruction.swift in Sources */,
 				E3C1D37E2B07004C002E26D1 /* RegisterVC.swift in Sources */,
+				E39D32AB2B1D70FF00D7511B /* Security.swift in Sources */,
 				E34B4D0529D154AF0063A9A2 /* RecipeFormVC.swift in Sources */,
 				E3F3EF032B0EE96D0050991C /* RBTextField.swift in Sources */,
 				E39D32A92B1AC02100D7511B /* UIImage+Ext.swift in Sources */,
@@ -420,6 +431,7 @@
 				E3573E6329CC161C000F7877 /* RBTabBarController.swift in Sources */,
 				E3427C0E29E158FC002C81E2 /* RecipeVC.swift in Sources */,
 				E3C1D37C2B07001B002E26D1 /* LoginVC.swift in Sources */,
+				E39D32B02B24037A00D7511B /* RBKeyboardToolbar.swift in Sources */,
 				E3B1C74229CE68BC00736C96 /* RBBodyLabel.swift in Sources */,
 				E34B4D0729D15A480063A9A2 /* RecipeFormCell.swift in Sources */,
 				E34B4CEE29CF77CC0063A9A2 /* UIViewController+Ext.swift in Sources */,
@@ -642,6 +654,14 @@
 				minimumVersion = 2.0.0;
 			};
 		};
+		E39D32AC2B23E17000D7511B /* XCRemoteSwiftPackageReference "SwiftEmailValidator" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ekscrypto/SwiftEmailValidator";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.3;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -649,6 +669,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E38FF66A2AA5466B00D8ED7A /* XCRemoteSwiftPackageReference "SwiftSoup" */;
 			productName = SwiftSoup;
+		};
+		E39D32AD2B23E17000D7511B /* SwiftEmailValidator */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E39D32AC2B23E17000D7511B /* XCRemoteSwiftPackageReference "SwiftEmailValidator" */;
+			productName = SwiftEmailValidator;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

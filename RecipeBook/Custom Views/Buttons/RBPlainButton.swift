@@ -18,9 +18,9 @@ class RBPlainButton: UIButton {
         fatalError("init(coder:) has not been implemented")
     }
 
-    convenience init(title: String, systemImageName: String? = nil) {
+    convenience init(title: String, image: UIImage? = nil, buttonSize: UIButton.Configuration.Size = .medium) {
         self.init(frame: .zero)
-        self.set(title: title, systemImageName: systemImageName)
+        self.set(title: title, image: image, buttonSize: buttonSize)
     }
 
     private func configure() {
@@ -29,13 +29,13 @@ class RBPlainButton: UIButton {
         self.configuration = .plain()
     }
 
-    final func set(title: String, systemImageName: String?) {
+    final func set(title: String, image: UIImage?, buttonSize: UIButton.Configuration.Size) {
         self.configuration?.title = title
-        self.configuration?.buttonSize = .mini
+        self.configuration?.buttonSize = buttonSize
         self.configuration?.baseForegroundColor = .systemYellow
 
-        if let systemImageName {
-            self.configuration?.image = UIImage(systemName: systemImageName)?.withTintColor(.systemYellow)
+        if let image {
+            self.configuration?.image = image.withTintColor(.systemYellow)
             self.configuration?.imagePadding = 6
             self.configuration?.imagePlacement = .leading
         }

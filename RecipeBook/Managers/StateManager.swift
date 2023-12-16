@@ -10,6 +10,7 @@ import Foundation
 class State {
     // use a separate data type for encoding/decoding
     struct Data: Codable {
+        let userId: String
         let root: UUID?
         let items: [UUID: RecipeItem]
 
@@ -17,12 +18,15 @@ class State {
             // create the root folder
             let rootFolder = RecipeFolder.root()
             let items = [rootFolder.uuid: RecipeItem.folder(rootFolder)]
-            return Data(root: rootFolder.uuid, items: items)
+            return Data(userId: "", root: rootFolder.uuid, items: items)
         }
     }
 
     static let manager = State()
 
+    // user ID and key
+    var userId: String = ""
+    var userKey: UUID?
     // ID of the root folder
     var root: UUID? = nil
     // maps IDs to items (recipes/folders)
@@ -43,7 +47,7 @@ class State {
     }
 
     func store() -> RBError? {
-        let data = Data(root: self.root, items: self.items)
+        let data = Data(userId: self.userId, root: self.root, items: self.items)
         return PersistenceManager.storeState(state: data)
     }
 
@@ -92,6 +96,13 @@ class State {
         // unwrapping because we should never add more roots
         let folderItem = self.getItem(uuid: folder.folderId!)!.intoFolder()!
         folderItem.addItem(uuid: folder.uuid)
+
+        return self.store()
+    }
+
+    func addUserInfo(id: String, key: UUID) -> RBError? {
+        self.userId = id
+        self.userKey = key
 
         return self.store()
     }
@@ -168,6 +179,8 @@ class State {
 
     func clear() {
         // NOTE: this should only be used for development debugging
+        self.userId = ""
+        self.userKey = nil
         let root = self.getItem(uuid: self.root!)!
         let _ = self.deleteItems(uuids: root.intoFolder()!.items)
     }

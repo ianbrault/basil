@@ -7,7 +7,11 @@
 
 import UIKit
 
-class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+protocol RBWindowSceneDelegate: UIWindowSceneDelegate {
+    func sceneDidAddUser()
+}
+
+class SceneDelegate: UIResponder, RBWindowSceneDelegate {
 
     var window: UIWindow?
 
@@ -18,16 +22,32 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let stackViewAppearance = UIStackView.appearance(whenContainedInInstancesOf: [UINavigationBar.self])
         stackViewAppearance.spacing = -4
 
+        // TODO: check if the stored data version is older than the current version
+
+        // load the stored app state
+        if let _ = State.manager.load() {
+            // TODO: handle error case
+        }
+
         self.window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         self.window?.windowScene = windowScene
-        // check if the user has already been registered
-        if let userId = PersistenceManager.self.loadUserId(), userId > 0 {
-            self.window?.rootViewController = RBTabBarController()
+        // check if the user has been registered
+        if State.manager.userId.isEmpty {
+            let vc = OnboardingVC()
+            vc.sceneDelegate = self
+            self.window?.rootViewController = vc
             self.window?.makeKeyAndVisible()
         } else {
-            self.window?.rootViewController = OnboardingVC()
+            self.window?.rootViewController = RBTabBarController()
             self.window?.makeKeyAndVisible()
         }
+    }
+
+    func sceneDidAddUser() {
+        guard let window = self.window else { return }
+
+        window.rootViewController = RBTabBarController()
+        UIView.transition(with: window, duration: 0.6, options: .transitionCrossDissolve, animations: {})
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

@@ -9,24 +9,25 @@ import Foundation
 
 enum PersistenceManager {
     static private let defaults = UserDefaults.standard
+    static private let dataVersion = 1
 
     enum Keys {
+        static let dataVersion = "dataVersion"
         static let state = "state"
-        static let userId = "userId"
     }
 
-    static func loadUserId() -> Int? {
-        return self.defaults.integer(forKey: Keys.userId)
-    }
-
-    static func storeUserId(userId: Int) {
-        self.defaults.set(userId, forKey: Keys.userId)
+    static func loadDataVersion() -> Int {
+        return self.defaults.integer(forKey: Keys.dataVersion)
     }
 
     static func loadState() -> Result<State.Data, RBError> {
         guard let stateData = self.defaults.object(forKey: Keys.state) as? Data else {
             // if this is nil, nothing has been saved before
             return .success(.empty())
+        }
+
+        if let string = String(data: stateData, encoding: String.Encoding.utf8) {
+          print(string)
         }
 
         do {
@@ -41,6 +42,9 @@ enum PersistenceManager {
     }
 
     static func storeState(state: State.Data) -> RBError? {
+        // store the data version alongside the state
+        self.defaults.set(self.dataVersion, forKey: Keys.dataVersion)
+
         do {
             let encoder = JSONEncoder()
             let encodedState = try encoder.encode(state)

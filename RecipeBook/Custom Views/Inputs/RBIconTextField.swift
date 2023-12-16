@@ -7,6 +7,10 @@
 
 import UIKit
 
+protocol RBIconTextFieldDelegate: AnyObject {
+    func textFieldDidBeginEditing(_ textField: UITextField)
+}
+
 class RBIconTextField: UIView {
 
     class TextField: UITextField {
@@ -66,6 +70,8 @@ class RBIconTextField: UIView {
     let imageSize: CGFloat = 24
     let textFieldHeight: CGFloat = 42
     let spacing: CGFloat = 8
+
+    weak var delegate: RBIconTextFieldDelegate?
 
     var text: String? {
         self.textField.text
@@ -145,10 +151,13 @@ class RBIconTextField: UIView {
 extension RBIconTextField: UITextFieldDelegate {
 
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        self.setTint(color: .systemYellow, animated: true)
+        // re-add animation later
+        self.setTint(color: .systemYellow, animated: false)
+        self.delegate?.textFieldDidBeginEditing(textField)
     }
 
     func textFieldDidEndEditing(_ textField: UITextField) {
-        self.removeTint(animated: true)
+        // re-add animation later
+        self.removeTint(animated: false)
     }
 }

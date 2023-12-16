@@ -7,6 +7,8 @@
 
 import UIKit
 
+fileprivate var containerView: UIView!
+
 extension UIViewController {
 
     func presentErrorAlert(_ error: RBError) {
@@ -35,6 +37,37 @@ extension UIViewController {
             if subview is RBEmptyStateView {
                 subview.removeFromSuperview()
             }
+        }
+    }
+
+    func showLoadingView() {
+        containerView = UIView(frame: view.bounds)
+        self.view.addSubview(containerView)
+
+        containerView.backgroundColor = .systemBackground
+        containerView.alpha = 0
+
+        UIView.animate(withDuration: 0.5) {
+            containerView.alpha = 0.8
+        }
+
+        let activityIndicator = UIActivityIndicatorView(style: .large)
+        containerView.addSubview(activityIndicator)
+
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            activityIndicator.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
+            activityIndicator.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+        ])
+
+        activityIndicator.startAnimating()
+    }
+
+    func dismissLoadingView() {
+        DispatchQueue.main.async {
+            containerView.removeFromSuperview()
+            containerView = nil
         }
     }
 }

@@ -342,30 +342,19 @@ class RecipeListVC: UIViewController {
             confirmButtonText: "Import"
         ) { [weak self] (text) in
             guard let self else { return }
-
-            // TODO: check if there is data on the clipboard
-            HTTPGet(url: text) { [weak self] (result) in
-                guard let self = self else { return }
-
-                switch result {
-                case .success(let body):
-                    switch parseNYTRecipe(body: body, folderId: self.folder.uuid) {
+            httpGet(url: text) { (response) in
+                let result = response.flatMap { (body) in
+                    parseNYTRecipe(body: body, folderId: self.folder.uuid)
+                }
+                DispatchQueue.main.async {
+                    switch result {
                     case .success(let recipe):
-                        DispatchQueue.main.async {
-                            if let error = State.manager.addRecipe(recipe: recipe) {
-                                self.presentErrorAlert(error)
-                            } else {
-                                self.insertItem(item: .recipe(recipe))
-                            }
+                        if let error = State.manager.addRecipe(recipe: recipe) {
+                            self.presentErrorAlert(error)
+                        } else {
+                            self.insertItem(item: .recipe(recipe))
                         }
                     case .failure(let error):
-                        DispatchQueue.main.async {
-                            self.presentErrorAlert(error)
-                        }
-                    }
-
-                case .failure(let error):
-                    DispatchQueue.main.async {
                         self.presentErrorAlert(error)
                     }
                 }

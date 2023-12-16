@@ -8,7 +8,7 @@
 import UIKit
 
 protocol OnboardingVCDelegate: AnyObject {
-    func didChangePage(page: OnboardingVC.Page)
+    func didChangePage(page: OnboardingVC.Page, direction: UIPageViewController.NavigationDirection)
 }
 
 class OnboardingVC: UIPageViewController {
@@ -20,6 +20,7 @@ class OnboardingVC: UIPageViewController {
     }
 
     var pages: [UIViewController] = []
+    weak var sceneDelegate: RBWindowSceneDelegate?
 
     init() {
         super.init(transitionStyle: .scroll, navigationOrientation: .horizontal)
@@ -34,8 +35,8 @@ class OnboardingVC: UIPageViewController {
         self.configure()
     }
 
-    private func setPage(_ page: Page) {
-        self.setViewControllers([self.pages[page.rawValue]], direction: .forward, animated: true, completion: nil)
+    private func setPage(_ page: Page, direction: UIPageViewController.NavigationDirection = .forward) {
+        self.setViewControllers([self.pages[page.rawValue]], direction: direction, animated: true, completion: nil)
     }
 
     private func configure() {
@@ -45,10 +46,12 @@ class OnboardingVC: UIPageViewController {
 
         let registerPage = RegisterVC()
         registerPage.delegate = self
+        registerPage.sceneDelegate = self.sceneDelegate
         self.pages.append(registerPage)
 
         let loginPage = LoginVC()
         loginPage.delegate = self
+        loginPage.sceneDelegate = self.sceneDelegate
         self.pages.append(loginPage)
 
         self.setPage(.welcome)
@@ -57,7 +60,7 @@ class OnboardingVC: UIPageViewController {
 
 extension OnboardingVC: OnboardingVCDelegate {
 
-    func didChangePage(page: Page) {
-        self.setPage(page)
+    func didChangePage(page: Page, direction: UIPageViewController.NavigationDirection) {
+        self.setPage(page, direction: direction)
     }
 }

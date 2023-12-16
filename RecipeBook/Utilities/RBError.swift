@@ -10,10 +10,11 @@ import Foundation
 enum RBError: Error {
     case cannotModifyRoot
     case failedToDecode
+    case failedToEncode
     case failedToLoadRecipes
     case failedToParseRecipe(String?)
     case failedToSaveRecipes
-    case httpError(Error)
+    case httpError(String)
     case invalidURL(String)
     case missingHTTPData
     case missingInput(UUID)
@@ -25,7 +26,7 @@ enum RBError: Error {
     var title: String {
         switch self {
         case .httpError(_):
-            return "Failed to get webpage"
+            return "An error occurred"
         case .invalidURL(_):
             return "Invalid URL"
         case .missingTitle:
@@ -36,6 +37,7 @@ enum RBError: Error {
             return "Passwords do not Match"
         case .cannotModifyRoot,
              .failedToDecode,
+             .failedToEncode,
              .failedToLoadRecipes,
              .failedToParseRecipe(_),
              .failedToSaveRecipes,
@@ -52,13 +54,15 @@ enum RBError: Error {
             return "You cannot modify the root folder. How did you even get in this situation in the first place?"
         case .failedToDecode:
             return "Invalid UTF-8 response body"
+        case .failedToEncode:
+            return "Failed to encode string"
         case .failedToLoadRecipes,
              .failedToSaveRecipes:
             return "Something went wrong"
         case .failedToParseRecipe(let message):
             return message ?? "Error while parsing recipe"
         case .httpError(let error):
-            return error.localizedDescription
+            return error
         case .invalidURL(let string):
             return string
         case .missingHTTPData:

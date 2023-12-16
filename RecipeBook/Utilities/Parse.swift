@@ -6,8 +6,12 @@
 //
 
 import Foundation
-
 import SwiftSoup
+
+struct UserLoginResponse: Decodable {
+    let id: String
+    let key: UUID
+}
 
 private func parseNYTRecipeTitle(_ document: Document) throws -> String {
     let headers = try document.select("h1.pantry--title-display")
@@ -70,10 +74,14 @@ private func parseNYTRecipeInstructions(_ document: Document) throws -> [Instruc
     return instructions
 }
 
-func parseNYTRecipe(body contents: String, folderId: UUID) -> Result<Recipe, RBError> {
+func parseNYTRecipe(body contents: Data, folderId: UUID) -> Result<Recipe, RBError> {
+    guard let body = String(data: contents, encoding: .utf8) else {
+        return .failure(.failedToDecode)
+    }
+
     var document: Document
     do {
-        document = try SwiftSoup.parse(contents)
+        document = try SwiftSoup.parse(body)
     } catch {
         return .failure(.failedToParseRecipe(error.localizedDescription))
     }

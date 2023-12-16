@@ -10,6 +10,9 @@ import UIKit
 enum SFSymbols {
     static let add = UIImage(systemName: "plus")
     static let addRecipe = UIImage(systemName: "plus.circle")
+    static let arrowBack = UIImage(systemName: "chevron.backward")
+    static let arrowDown = UIImage(systemName: "chevron.down")
+    static let arrowUp = UIImage(systemName: "chevron.up")
     static let atom = UIImage(systemName: "atom")
     static let bug = UIImage(systemName: "ladybug")
     static let checkmarkCircle = UIImage(systemName: "checkmark.circle")
