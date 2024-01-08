@@ -18,16 +18,16 @@ class RecipeListVC: UIViewController {
     var deleteButton: UIBarButtonItem!
     var debugButton: UIBarButtonItem!
 
-    var folder: RecipeFolder!
+    var folderId: UUID!
     var items: [RecipeItem] = []
 
     // set this flag to enable development mode debug features
-    // NOTE: ensure that this is unset before releasing
+    // TODO: ensure that this is unset before releasing
     let development: Bool = true
 
     init(folderId: UUID) {
         super.init(nibName: nil, bundle: nil)
-        self.folder = State.manager.getItem(uuid: folderId)!.intoFolder()!
+        self.folderId = folderId
     }
 
     required init?(coder: NSCoder) {
@@ -47,7 +47,8 @@ class RecipeListVC: UIViewController {
     }
 
     private func configureNavigationBar() {
-        self.title = self.folder.name.isEmpty ? "Recipes" : self.folder.name
+        let folder = State.manager.getFolder(uuid: self.folderId)!
+        self.title = folder.name.isEmpty ? "Recipes" : folder.name
         self.navigationController?.navigationBar.prefersLargeTitles = true
         self.navigationController?.navigationBar.tintColor = .systemYellow
 
@@ -152,7 +153,7 @@ class RecipeListVC: UIViewController {
 
                     if let error = State.manager.moveItemToFolder(uuid: recipe.uuid, folderId: selectedFolder.uuid) {
                         self.presentErrorAlert(error)
-                    } else if selectedFolder.uuid != self.folder.uuid {
+                    } else if selectedFolder.uuid != self.folderId {
                         // item has been moved to a folder on another screen so remove it
                         self.removeItem(uuid: recipe.uuid)
                     }
@@ -196,7 +197,7 @@ class RecipeListVC: UIViewController {
                                 self.tableView.reloadRows(at: [indexPath], with: .automatic)
                             }
                         } else {
-                            self.presentErrorAlert(.missingRecipe(folder.uuid))
+                            self.presentErrorAlert(.missingItem(.folder, folder.uuid))
                         }
                     }
                 }
@@ -206,7 +207,7 @@ class RecipeListVC: UIViewController {
                 let destVC = FolderTreeVC { (selectedFolder) in
                     if let error = State.manager.moveItemToFolder(uuid: folder.uuid, folderId: selectedFolder.uuid) {
                         self.presentErrorAlert(error)
-                    } else if selectedFolder.uuid != self.folder.uuid {
+                    } else if selectedFolder.uuid != self.folderId {
                         // item has been moved to a folder on another screen so remove it
                         self.removeItem(uuid: folder.uuid)
                     }
@@ -229,11 +230,27 @@ class RecipeListVC: UIViewController {
     }
 
     func loadItems() {
-        let folderItems = State.manager.getFolderItems(uuid: self.folder.uuid)!
+        let folder = State.manager.getFolder(uuid: self.folderId)!
         // show the empty state view if there are no items
-        if folderItems.isEmpty {
+        if folder.recipes.isEmpty && folder.subfolders.isEmpty {
             self.showEmptyStateView(in: self.view)
         } else {
+            // load subfolder/recipe items using the IDs from the folder
+            var folderItems: [RecipeItem] = []
+            for folderId in folder.subfolders {
+                if let folder = State.manager.getFolder(uuid: folderId) {
+                    folderItems.append(.folder(folder))
+                } else {
+                    self.presentErrorAlert(.missingItem(.folder, folderId))
+                }
+            }
+            for recipeId in folder.recipes {
+                if let recipe = State.manager.getRecipe(uuid: recipeId) {
+                    folderItems.append(.recipe(recipe))
+                } else {
+                    self.presentErrorAlert(.missingItem(.recipe, recipeId))
+                }
+            }
             self.items = folderItems.sorted(by: RecipeItem.sort)
             // reload table view data on the main thread
             DispatchQueue.main.async {
@@ -280,7 +297,9 @@ class RecipeListVC: UIViewController {
                 }
             }
         } else {
-            self.presentErrorAlert(.missingRecipe(uuid))
+            // this branch should never be hit
+            // item type is ambiguous but just assume recipe
+            self.presentErrorAlert(.missingItem(.recipe, uuid))
         }
     }
 
@@ -291,7 +310,9 @@ class RecipeListVC: UIViewController {
             if let indexPath = self.findItem(uuid: uuid) {
                 indexPaths.append(indexPath)
             } else {
-                self.presentErrorAlert(.missingRecipe(uuid))
+                // this branch should never be hit
+                // item type is ambiguous but just assume recipe
+                self.presentErrorAlert(.missingItem(.recipe, uuid))
             }
         }
 
@@ -311,7 +332,7 @@ class RecipeListVC: UIViewController {
     func addNewRecipe(_ action: UIAction) {
         let destVC = RecipeFormVC(style: .new)
         destVC.delegate = self
-        destVC.folderId = self.folder.uuid
+        destVC.folderId = self.folderId
 
         let navController = UINavigationController(rootViewController: destVC)
         self.present(navController, animated: true)
@@ -325,7 +346,7 @@ class RecipeListVC: UIViewController {
         ) { [weak self] (text) in
             guard let self else { return }
 
-            let folder = RecipeFolder(folderId: self.folder.uuid, name: text)
+            let folder = RecipeFolder(folderId: self.folderId, name: text)
             if let error = State.manager.addFolder(folder: folder) {
                 self.presentErrorAlert(error)
             } else {
@@ -344,7 +365,7 @@ class RecipeListVC: UIViewController {
             guard let self else { return }
             httpGet(url: text) { (response) in
                 let result = response.flatMap { (body) in
-                    parseNYTRecipe(body: body, folderId: self.folder.uuid)
+                    parseNYTRecipe(body: body, folderId: self.folderId)
                 }
                 DispatchQueue.main.async {
                     switch result {
@@ -382,17 +403,16 @@ class RecipeListVC: UIViewController {
         self.present(alert, animated: true)
     }
 
-    func debugRecipe(_ key: String, folderId: UUID) -> Recipe {
+    private func debugRecipe(_ key: String, folderId: UUID) -> Recipe {
         return Recipe(
-            uuid: UUID(),
             folderId: folderId,
             title: "Recipe \(key)",
-            ingredients: [Ingredient(item: "item \(key)")],
-            instructions: [Instruction(step: "instruction \(key)")]
+            ingredients: ["item \(key)"],
+            instructions: ["instruction \(key)"]
         )
     }
 
-    func debugFolder(_ key: String, folderId: UUID) -> RecipeFolder {
+    private func debugFolder(_ key: String, folderId: UUID) -> RecipeFolder {
         return RecipeFolder(
             folderId: folderId,
             name: "Folder \(key)"
@@ -403,26 +423,22 @@ class RecipeListVC: UIViewController {
         // NOTE: can only be used in development mode
         if !self.development { return }
 
-        let recipeA = self.debugRecipe("A", folderId: self.folder.uuid)
-        let _ = State.manager.addRecipe(recipe: recipeA)
-        let recipeB = self.debugRecipe("B", folderId: self.folder.uuid)
-        let _ = State.manager.addRecipe(recipe: recipeB)
-        let recipeC = self.debugRecipe("C", folderId: self.folder.uuid)
-        let _ = State.manager.addRecipe(recipe: recipeC)
+        let recipeA = self.debugRecipe("A", folderId: self.folderId)
+        let recipeB = self.debugRecipe("B", folderId: self.folderId)
+        let recipeC = self.debugRecipe("C", folderId: self.folderId)
+        let _ = State.manager.addRecipes(recipes: [recipeA, recipeB, recipeC])
 
-        let folderA = self.debugFolder("A", folderId: self.folder.uuid)
-        let _ = State.manager.addFolder(folder: folderA)
-        let recipeD = self.debugRecipe("D", folderId: folderA.uuid)
-        let _ = State.manager.addRecipe(recipe: recipeD)
+        let folderA = self.debugFolder("A", folderId: self.folderId)
+        let folderB = self.debugFolder("B", folderId: self.folderId)
+        let _ = State.manager.addFolders(folders: [folderA, folderB])
 
-        let folderB = self.debugFolder("B", folderId: self.folder.uuid)
-        let _ = State.manager.addFolder(folder: folderB)
-        let recipeE = self.debugRecipe("E", folderId: folderB.uuid)
-        let _ = State.manager.addRecipe(recipe: recipeE)
         let folderC = self.debugFolder("C", folderId: folderB.uuid)
         let _ = State.manager.addFolder(folder: folderC)
+
+        let recipeD = self.debugRecipe("D", folderId: folderA.uuid)
+        let recipeE = self.debugRecipe("E", folderId: folderB.uuid)
         let recipeF = self.debugRecipe("F", folderId: folderC.uuid)
-        let _ = State.manager.addRecipe(recipe: recipeF)
+        let _ = State.manager.addRecipes(recipes: [recipeD, recipeE, recipeF])
 
         self.loadItems()
     }
@@ -452,7 +468,7 @@ class RecipeListVC: UIViewController {
 
                 if let error = State.manager.moveItemsToFolder(uuids: uuids, folderId: selectedFolder.uuid) {
                     self.presentErrorAlert(error)
-                } else if selectedFolder.uuid != self.folder.uuid {
+                } else if selectedFolder.uuid != self.folderId {
                     // items have been moved to a folder on another screen so remove them
                     self.removeItems(uuids: uuids)
                     // disable edit mode once the action has completed
@@ -596,7 +612,7 @@ extension RecipeListVC: RecipeFormVCDelegate {
                         self.tableView.reloadRows(at: [indexPath], with: .automatic)
                     }
                 } else {
-                    self.presentErrorAlert(.missingRecipe(recipe.uuid))
+                    self.presentErrorAlert(.missingItem(.recipe, recipe.uuid))
                 }
             }
         }

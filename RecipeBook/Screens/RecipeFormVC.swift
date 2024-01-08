@@ -162,7 +162,7 @@ class RecipeFormVC: UIViewController {
         // add the ingredients cells
         self.tableCells[ingredientsSection].removeAll()
         for ingredient in recipe.ingredients {
-            let ingredientCell = RecipeFormCell.Content.createInput(text: ingredient.item)
+            let ingredientCell = RecipeFormCell.Content.createInput(text: ingredient)
             self.tableCells[ingredientsSection].append(ingredientCell)
         }
         self.tableCells[ingredientsSection].append(RecipeFormCell.Content.createButton())
@@ -170,7 +170,7 @@ class RecipeFormVC: UIViewController {
         // add the instructions cells
         self.tableCells[instructionsSection].removeAll()
         for instruction in recipe.instructions {
-            let instructionCell = RecipeFormCell.Content.createInput(text: instruction.step)
+            let instructionCell = RecipeFormCell.Content.createInput(text: instruction)
             self.tableCells[instructionsSection].append(instructionCell)
         }
         self.tableCells[instructionsSection].append(RecipeFormCell.Content.createButton())
@@ -234,21 +234,21 @@ class RecipeFormVC: UIViewController {
         }
 
         // gather the ingredients
-        var ingredients: [Ingredient] = []
+        var ingredients: [String] = []
         for cell in self.tableCells[Section.ingredients.rawValue] {
             switch cell.type {
             case .input:
-                ingredients.append(Ingredient(item: cell.text!))
+                ingredients.append(cell.text!)
             case .actionButton:
                 continue
             }
         }
         // gather the instructions
-        var instructions: [Instruction] = []
+        var instructions: [String] = []
         for cell in self.tableCells[Section.instructions.rawValue] {
             switch cell.type {
             case .input:
-                instructions.append(Instruction(step: cell.text!))
+                instructions.append(cell.text!)
             case .actionButton:
                 continue
             }

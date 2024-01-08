@@ -18,7 +18,7 @@ enum RBError: Error {
     case invalidURL(String)
     case missingHTTPData
     case missingInput(UUID)
-    case missingRecipe(UUID)
+    case missingItem(State.Item, UUID)
     case missingTitle
     case notImplemented
     case passwordsDoNotMatch
@@ -43,7 +43,7 @@ enum RBError: Error {
              .failedToSaveRecipes,
              .missingHTTPData,
              .missingInput(_),
-             .missingRecipe(_):
+             .missingItem(_, _):
             return "Something went wrong"
         }
     }
@@ -53,7 +53,7 @@ enum RBError: Error {
         case .cannotModifyRoot:
             return "You cannot modify the root folder. How did you even get in this situation in the first place?"
         case .failedToDecode:
-            return "Invalid UTF-8 response body"
+            return "Failed to decode string"
         case .failedToEncode:
             return "Failed to encode string"
         case .failedToLoadRecipes,
@@ -69,8 +69,13 @@ enum RBError: Error {
             return "Empty response body"
         case .missingInput(let uuid):
             return "Missing input \(uuid)"
-        case .missingRecipe(let uuid):
-            return "Missing recipe \(uuid)"
+        case .missingItem(let itemType, let uuid):
+            switch itemType {
+            case .recipe:
+                return "Missing recipe \(uuid)"
+            case .folder:
+                return "Missing folder \(uuid)"
+            }
         case .missingTitle:
             return "Add a title to the recipe and try again"
         case .notImplemented:

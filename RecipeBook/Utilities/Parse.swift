@@ -11,6 +11,9 @@ import SwiftSoup
 struct UserLoginResponse: Decodable {
     let id: String
     let key: UUID
+    let root: UUID?
+    let recipes: [Recipe]
+    let folders: [RecipeFolder]
 }
 
 private func parseNYTRecipeTitle(_ document: Document) throws -> String {
@@ -32,15 +35,15 @@ private func isIngredientListItem(_ element: Element) throws -> Bool {
     return false
 }
 
-private func parseNYTRecipeIngredients(_ document: Document) throws -> [Ingredient] {
+private func parseNYTRecipeIngredients(_ document: Document) throws -> [String] {
     let listItems = try document.select("li.pantry--ui")
     // down-select to list items with class ingredient_ingredient__*
     let ingredientItems = try listItems.filter { try isIngredientListItem($0) }
 
-    var ingredients: [Ingredient] = []
+    var ingredients: [String] = []
     for item in ingredientItems {
-        let ingredientText = try item.children().map { try $0.text() }.joined(separator: " ")
-        ingredients.append(Ingredient(item: ingredientText))
+        let text = try item.children().map { try $0.text() }.joined(separator: " ")
+        ingredients.append(text)
     }
 
     return ingredients
@@ -56,19 +59,19 @@ private func isInstructionListItem(_ element: Element) throws -> Bool {
     return false
 }
 
-private func parseNYTRecipeInstructions(_ document: Document) throws -> [Instruction] {
+private func parseNYTRecipeInstructions(_ document: Document) throws -> [String] {
     let listItems = try document.getElementsByTag("li")
     // down-select to list items with class preparation_step__*
     let instructionItems = try listItems.filter { try isInstructionListItem($0) }
 
-    var instructions: [Instruction] = []
+    var instructions: [String] = []
     for item in instructionItems {
         let paragraphs = try item.getElementsByClass("pantry--body-long")
         if paragraphs.isEmpty() {
             throw RBError.failedToParseRecipe("Failed to find instruction text")
         }
-        let instructionText = try paragraphs.map { try $0.text() }.joined(separator: " ")
-        instructions.append(Instruction(step: instructionText))
+        let text = try paragraphs.map { try $0.text() }.joined(separator: " ")
+        instructions.append(text)
     }
 
     return instructions
@@ -91,9 +94,7 @@ func parseNYTRecipe(body contents: Data, folderId: UUID) -> Result<Recipe, RBErr
         let title = try parseNYTRecipeTitle(document)
         let ingredients = try parseNYTRecipeIngredients(document)
         let instructions = try parseNYTRecipeInstructions(document)
-        let recipe = Recipe(
-            uuid: UUID(), folderId: folderId,
-            title: title, ingredients: ingredients, instructions: instructions)
+        let recipe = Recipe(folderId: folderId, title: title, ingredients: ingredients, instructions: instructions)
         return .success(recipe)
     } catch {
         return .failure(.failedToParseRecipe(error.localizedDescription))

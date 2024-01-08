@@ -221,7 +221,7 @@ class RegisterVC: UIViewController {
                 switch result {
                 case .success(let userInfo):
                     // store the user info to the app state and transition to the normal flow
-                    if let error = State.manager.addUserInfo(id: userInfo.id, key: userInfo.key) {
+                    if let error = State.manager.addUserInfo(info: userInfo) {
                         self.presentErrorAlert(error)
                     } else {
                         self.sceneDelegate?.sceneDidAddUser()

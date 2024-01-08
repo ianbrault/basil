@@ -25,9 +25,16 @@ class SceneDelegate: UIResponder, RBWindowSceneDelegate {
         // TODO: check if the stored data version is older than the current version
 
         // load the stored app state
-        if let _ = State.manager.load() {
-            // TODO: handle error case
+        if let error = State.manager.load() {
+            // TODO: more sophisticated error handling is needed in the future
+            print("ERROR: failed to load state: \(error.localizedDescription)")
         }
+        // TEMPORARY: write back the state immediately in case we have cleared out an old version
+        let _ = State.manager.store()
+
+        // FIXME: DEBUG
+        // State.manager.clear()
+        // FIXME: END DEBUG
 
         self.window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         self.window?.windowScene = windowScene

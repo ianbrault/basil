@@ -134,13 +134,13 @@ extension RecipeVC: UITableViewDataSource, UITableViewDelegate {
         case .ingredients:
             let cell = tableView.dequeueReusableCell(
                 withIdentifier: RecipeIngredientCell.reuseID) as! RecipeIngredientCell
-            cell.set(ingredient: self.recipe.ingredients[i].item)
+            cell.set(ingredient: self.recipe.ingredients[i])
             return cell
 
         case .instructions:
             let cell = tableView.dequeueReusableCell(
                 withIdentifier: RecipeInstructionCell.reuseID) as! RecipeInstructionCell
-            cell.set(n: i + 1, instruction: self.recipe.instructions[i].step)
+            cell.set(n: i + 1, instruction: self.recipe.instructions[i])
             return cell
         }
     }

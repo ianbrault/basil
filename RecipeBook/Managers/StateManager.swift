@@ -8,17 +8,21 @@
 import Foundation
 
 class State {
+
+    enum Item {
+        case recipe
+        case folder
+    }
+
     // use a separate data type for encoding/decoding
     struct Data: Codable {
         let userId: String
         let root: UUID?
-        let items: [UUID: RecipeItem]
+        let recipes: [Recipe]
+        let folders: [RecipeFolder]
 
         static func empty() -> Data {
-            // create the root folder
-            let rootFolder = RecipeFolder.root()
-            let items = [rootFolder.uuid: RecipeItem.folder(rootFolder)]
-            return Data(userId: "", root: rootFolder.uuid, items: items)
+            return Data(userId: "", root: nil, recipes: [], folders: [])
         }
     }
 
@@ -29,16 +33,37 @@ class State {
     var userKey: UUID?
     // ID of the root folder
     var root: UUID? = nil
-    // maps IDs to items (recipes/folders)
-    var items: [UUID: RecipeItem] = [:]
+    // recipe/folder lists
+    var recipes: [Recipe] = []
+    var folders: [RecipeFolder] = []
+    // maps IDs to recipes/folders
+    // managed volatilely, not put in storage
+    var recipeMap: [UUID: Recipe] = [:]
+    var folderMap: [UUID: RecipeFolder] = [:]
 
     private init() {}
+
+    private func loadRecipes(recipes: [Recipe]) {
+        self.recipes = recipes
+        for recipe in self.recipes {
+            self.recipeMap[recipe.uuid] = recipe
+        }
+    }
+
+    private func loadFolders(folders: [RecipeFolder]) {
+        self.folders = folders
+        for folder in self.folders {
+            self.folderMap[folder.uuid] = folder
+        }
+    }
 
     func load() -> RBError? {
         switch PersistenceManager.loadState() {
         case .success(let data):
+            self.userId = data.userId
             self.root = data.root
-            self.items = data.items
+            self.loadRecipes(recipes: data.recipes)
+            self.loadFolders(folders: data.folders)
             return nil
 
         case .failure(let error):
@@ -47,78 +72,129 @@ class State {
     }
 
     func store() -> RBError? {
-        let data = Data(userId: self.userId, root: self.root, items: self.items)
+        let data = Data(userId: self.userId, root: self.root, recipes: self.recipes, folders: self.folders)
         return PersistenceManager.storeState(state: data)
     }
 
-    func getItem(uuid: UUID) -> RecipeItem? {
-        return self.items[uuid]
+    func getRecipe(uuid: UUID) -> Recipe? {
+        return self.recipeMap[uuid]
     }
 
-    func getFolderItems(uuid: UUID) -> [RecipeItem]? {
-        guard let item = self.getItem(uuid: uuid) else { return [] }
+    func getFolder(uuid: UUID) -> RecipeFolder? {
+        return self.folderMap[uuid]
+    }
 
-        switch item {
-        case .recipe(_):
-            return nil
+    func addRecipe(recipe: Recipe, andStore: Bool = true) -> RBError? {
+        // add the recipe to the stored recipe list
+        self.recipes.append(recipe)
+        // and to the volatile recipe map
+        self.recipeMap[recipe.uuid] = recipe
 
-        case .folder(let folder):
-            var items: [RecipeItem] = []
-            for itemId in folder.items {
-                // if we somehow end up in a situation with a folder containing a non-existent
-                // item, remove it
-                if let item = self.getItem(uuid: itemId) {
-                    items.append(item)
-                } else  {
-                    folder.removeItem(uuid: itemId)
-                }
-            }
-            return items
+        // add to the parent folder
+        if let folder = self.getFolder(uuid: recipe.folderId) {
+            folder.addRecipe(uuid: recipe.uuid)
+        } else {
+            return .missingItem(.folder, recipe.folderId)
         }
+
+        return andStore ? self.store() : nil
     }
 
-    func addRecipe(recipe: Recipe) -> RBError? {
-        let item = RecipeItem.recipe(recipe)
-        self.items[recipe.uuid] = item
+    func addRecipes(recipes: [Recipe]) -> RBError? {
+        var error: RBError? = nil
+        for recipe in recipes {
+            error = error ?? self.addRecipe(recipe: recipe, andStore: false)
+        }
+        return self.store() ?? error
+    }
+
+    func addFolder(folder: RecipeFolder, andStore: Bool = true) -> RBError? {
+        // add the folder to the stored folder list
+        self.folders.append(folder)
+        // and to the volatile folder map
+        self.folderMap[folder.uuid] = folder
 
         // add to the parent folder
-        let folderItem = self.getItem(uuid: recipe.folderId)!.intoFolder()!
-        folderItem.addItem(uuid: recipe.uuid)
+        guard let parentId = folder.folderId else {
+            return .cannotModifyRoot
+        }
+        if let parentFolder = self.getFolder(uuid: parentId) {
+            parentFolder.addSubfolder(uuid: folder.uuid)
+        } else {
+            return .missingItem(.folder, parentId)
+        }
+
+        return andStore ? self.store() : nil
+    }
+
+    func addFolders(folders: [RecipeFolder]) -> RBError? {
+        var error: RBError? = nil
+        for folder in folders {
+            error = error ?? self.addFolder(folder: folder, andStore: false)
+        }
+        return self.store() ?? error
+    }
+
+    func addUserInfo(info: UserLoginResponse) -> RBError? {
+        self.userId = info.id
+        self.userKey = info.key
 
         return self.store()
     }
 
-    func addFolder(folder: RecipeFolder) -> RBError? {
-        let item = RecipeItem.folder(folder)
-        self.items[folder.uuid] = item
-
-        // add to the parent folder
-        // unwrapping because we should never add more roots
-        let folderItem = self.getItem(uuid: folder.folderId!)!.intoFolder()!
-        folderItem.addItem(uuid: folder.uuid)
-
+    func updateRecipe(recipe updatedRecipe: Recipe) -> RBError? {
+        guard let recipe = self.getRecipe(uuid: updatedRecipe.uuid) else {
+            return .missingItem(.recipe, updatedRecipe.uuid)
+        }
+        recipe.update(with: updatedRecipe)
         return self.store()
     }
 
-    func addUserInfo(id: String, key: UUID) -> RBError? {
-        self.userId = id
-        self.userKey = key
-
+    func updateFolder(folder updatedFolder: RecipeFolder) -> RBError? {
+        guard let folder = self.getFolder(uuid: updatedFolder.uuid) else {
+            return .missingItem(.folder, updatedFolder.uuid)
+        }
+        folder.update(with: updatedFolder)
         return self.store()
     }
 
-    func updateRecipe(recipe: Recipe) -> RBError? {
-        let item = RecipeItem.recipe(recipe)
-        self.items[recipe.uuid] = item
+    func deleteRecipe(recipe: Recipe, andStore: Bool = true) -> RBError? {
+        // unhook from the parent folder
+        if let parentFolder = self.getFolder(uuid: recipe.folderId) {
+            parentFolder.removeRecipe(uuid: recipe.uuid)
+        } else {
+            return .missingItem(.folder, recipe.folderId)
+        }
+        // then remove the recipe itself
+        self.recipes.removeAll { $0.uuid == recipe.uuid }
+        self.recipeMap.removeValue(forKey: recipe.uuid)
 
-        return self.store()
+        return andStore ? self.store() : nil
     }
 
-    func updateFolder(folder: RecipeFolder) -> RBError? {
-        let item = RecipeItem.folder(folder)
-        self.items[folder.uuid] = item
+    func deleteFolder(folder: RecipeFolder, andStore: Bool = true) -> RBError? {
+        // first recursively delete sub-items
+        if let error = self.deleteItems(uuids: folder.subfolders) ?? self.deleteItems(uuids: folder.recipes) {
+            return error
+        }
 
-        return self.store()
+        // unhook from the parent folder
+        if let parentFolderId = folder.folderId {
+            if let parentFolder = self.getFolder(uuid: parentFolderId) {
+                parentFolder.removeSubfolder(uuid: folder.uuid)
+            } else {
+                return .missingItem(.folder, parentFolderId)
+            }
+        } else {
+            // this branch should never be hit
+            // folder ID should only be nil for the root, which should never be modified
+            return .cannotModifyRoot
+        }
+        // then remove the folder itself
+        self.folders.removeAll { $0.uuid == folder.uuid }
+        self.folderMap.removeValue(forKey: folder.uuid)
+
+        return andStore ? self.store() : nil
     }
 
     func deleteItem(uuid: UUID) -> RBError? {
@@ -127,28 +203,62 @@ class State {
 
     func deleteItems(uuids: [UUID]) -> RBError? {
         for uuid in uuids {
-            let item = self.getItem(uuid: uuid)!
-            // if this is a folder, first recursively delete its sub-items
-            if item.isFolder {
-                if let error = self.deleteItems(uuids: item.intoFolder()!.items) {
-                    return error
-                }
-            }
-
-            // first unhook from the parent folder
-            if let folderId = item.folderId {
-                let folderItem = self.getItem(uuid: folderId)!.intoFolder()!
-                folderItem.removeItem(uuid: uuid)
+            var error: RBError? = nil
+            if let recipe = self.recipeMap[uuid] {
+                error = self.deleteRecipe(recipe: recipe, andStore: false)
+            } else if let folder = self.folderMap[uuid] {
+                error = self.deleteFolder(folder: folder, andStore: false)
             } else {
-                // folder ID should only be nil for the root, which should never be modified
-                // this branch should never be hit...
-                return .cannotModifyRoot
+                error = .missingItem(.recipe, uuid)
             }
-            // then remove the item itself
-            self.items.removeValue(forKey: uuid)
+            if let error {
+                return error
+            }
         }
 
         return self.store()
+    }
+
+    func moveRecipeToFolder(recipe: Recipe, folderId: UUID, andStore: Bool = true) -> RBError? {
+        // first unhook from the parent folder
+        if let oldParentFolder = self.getFolder(uuid: recipe.folderId) {
+            oldParentFolder.removeRecipe(uuid: recipe.uuid)
+        } else {
+            return .missingItem(.folder, recipe.folderId)
+        }
+        // then add it to the new parent folder
+        recipe.folderId = folderId
+        if let newParentFolder = self.getFolder(uuid: folderId) {
+            newParentFolder.addRecipe(uuid: recipe.uuid)
+        } else {
+            return .missingItem(.folder, folderId)
+        }
+
+        return andStore ? self.store() : nil
+    }
+
+    func moveFolderToFolder(folder: RecipeFolder, folderId: UUID, andStore: Bool = true) -> RBError? {
+        // first unhook from the parent folder
+        if let oldParentFolderId = folder.folderId {
+            if let oldParentFolder = self.getFolder(uuid: oldParentFolderId) {
+                oldParentFolder.removeSubfolder(uuid: folder.uuid)
+            } else {
+                return .missingItem(.folder, oldParentFolderId)
+            }
+        } else {
+            // this branch should never be hit
+            // folder ID should only be nil for the root, which should never be modified
+            return .cannotModifyRoot
+        }
+        // then add it to the new parent folder
+        folder.folderId = folderId
+        if let newParentFolder = self.getFolder(uuid: folderId) {
+            newParentFolder.addSubfolder(uuid: folder.uuid)
+        } else {
+            return .missingItem(.folder, folderId)
+        }
+
+        return andStore ? self.store() : nil
     }
 
     func moveItemToFolder(uuid: UUID, folderId: UUID) -> RBError? {
@@ -157,21 +267,17 @@ class State {
 
     func moveItemsToFolder(uuids: [UUID], folderId: UUID) -> RBError? {
         for uuid in uuids {
-            var item = self.getItem(uuid: uuid)!
-
-            // first unhook from the parent folder
-            if let parentFolderId = item.folderId {
-                let folderItem = self.getItem(uuid: parentFolderId)!.intoFolder()!
-                folderItem.removeItem(uuid: uuid)
+            var error: RBError? = nil
+            if let recipe = self.recipeMap[uuid] {
+                error = self.moveRecipeToFolder(recipe: recipe, folderId: folderId, andStore: false)
+            } else if let folder = self.folderMap[uuid] {
+                error = self.moveFolderToFolder(folder: folder, folderId: folderId, andStore: false)
             } else {
-                // folder ID should only be nil for the root, which should never be modified
-                // this branch should never be hit...
-                return .cannotModifyRoot
+                error = .missingItem(.recipe, uuid)
             }
-            // then add it to the new parent folder
-            item.folderId = folderId
-            let parentFolder = self.getItem(uuid: folderId)!.intoFolder()!
-            parentFolder.addItem(uuid: item.uuid)
+            if let error {
+                return error
+            }
         }
 
         return self.store()
@@ -181,7 +287,14 @@ class State {
         // NOTE: this should only be used for development debugging
         self.userId = ""
         self.userKey = nil
-        let root = self.getItem(uuid: self.root!)!
-        let _ = self.deleteItems(uuids: root.intoFolder()!.items)
+
+        let root = RecipeFolder.root()
+        self.root = root.uuid
+        self.folders = [root]
+        self.folderMap = [root.uuid: root]
+        self.recipes = []
+        self.recipeMap = [:]
+
+        let _ = self.store()
     }
 }

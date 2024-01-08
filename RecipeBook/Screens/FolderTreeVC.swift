@@ -30,25 +30,25 @@ class FolderTreeVC: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    private func getFolderItems(folderId: UUID, indentLevel: Int) -> [Item] {
-        let items = State.manager.getFolderItems(uuid: folderId)!
-        let sortedFolders = items.filter { $0.isFolder }.sorted(by: RecipeItem.sortReverse).map { $0.intoFolder()! }
+    private func getFolderItems(folder: RecipeFolder, indentLevel: Int) -> [Item] {
+        let subfolders = folder.subfolders.map { State.manager.getFolder(uuid: $0)! }
+        let sortedFolders = subfolders.sorted(by: RecipeFolder.sortReverse)
         return sortedFolders.map { Item(folder: $0, indentLevel: indentLevel) }
     }
 
     private func loadFolderTree() {
         // start with the root
-        guard let root = State.manager.root else { return }
-        let rootItem = State.manager.getItem(uuid: root)!.intoFolder()!
-        self.items.append(Item(folder: rootItem, indentLevel: 0))
+        let root = State.manager.root!
+        let rootFolder = State.manager.getFolder(uuid: root)!
+        self.items.append(Item(folder: rootFolder, indentLevel: 0))
 
-        var queue = self.getFolderItems(folderId: root, indentLevel: 1)
+        var queue = self.getFolderItems(folder: rootFolder, indentLevel: 1)
         while !queue.isEmpty {
             // create an item for the folder
             let item = queue.popLast()!
             self.items.append(item)
             // and then add sub-folders to the queue
-            let subItems = self.getFolderItems(folderId: item.folder.uuid, indentLevel: item.indentLevel + 1)
+            let subItems = self.getFolderItems(folder: item.folder, indentLevel: item.indentLevel + 1)
             queue.append(contentsOf: subItems)
         }
     }

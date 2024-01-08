@@ -26,10 +26,6 @@ enum PersistenceManager {
             return .success(.empty())
         }
 
-        if let string = String(data: stateData, encoding: String.Encoding.utf8) {
-          print(string)
-        }
-
         do {
             let decoder = JSONDecoder()
             let state = try decoder.decode(State.Data.self, from: stateData)
@@ -37,6 +33,7 @@ enum PersistenceManager {
         } catch {
             // NOTE: this should be updated at some point in the future, but since we are
             // iterating at the moment, clear out the state when the data format changes
+            print("ERROR: failed to decode state: \(error.localizedDescription)")
             return .success(.empty())
         }
     }

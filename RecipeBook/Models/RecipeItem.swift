@@ -31,42 +31,11 @@ enum RecipeItem: Codable {
         }
         set {
             switch self {
-            case .recipe(var recipe):
+            case .recipe(let recipe):
                 recipe.folderId = newValue!
-            case .folder(var folder):
+            case .folder(let folder):
                 folder.folderId = newValue
             }
-        }
-    }
-
-    var isRecipe: Bool {
-        switch self {
-        case .recipe(_):
-            return true
-        case .folder(_):
-            return false
-        }
-    }
-
-    var isFolder: Bool {
-        return !self.isRecipe
-    }
-
-    func intoRecipe() -> Recipe? {
-        switch self {
-        case .recipe(let recipe):
-            return recipe
-        case .folder(_):
-            return nil
-        }
-    }
-
-    func intoFolder() -> RecipeFolder? {
-        switch self {
-        case .recipe(_):
-            return nil
-        case .folder(let folder):
-            return folder
         }
     }
 
