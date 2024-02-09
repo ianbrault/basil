@@ -45,6 +45,7 @@ class SceneDelegate: UIResponder, RBWindowSceneDelegate {
             self.window?.rootViewController = vc
             self.window?.makeKeyAndVisible()
         } else {
+            // TODO: add a "check-in" with the server
             self.window?.rootViewController = RBTabBarController()
             self.window?.makeKeyAndVisible()
         }

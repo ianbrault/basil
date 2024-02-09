@@ -17,12 +17,13 @@ class State {
     // use a separate data type for encoding/decoding
     struct Data: Codable {
         let userId: String
+        let userKey: UUID?
         let root: UUID?
         let recipes: [Recipe]
         let folders: [RecipeFolder]
 
         static func empty() -> Data {
-            return Data(userId: "", root: nil, recipes: [], folders: [])
+            return Data(userId: "", userKey: nil, root: nil, recipes: [], folders: [])
         }
     }
 
@@ -30,7 +31,7 @@ class State {
 
     // user ID and key
     var userId: String = ""
-    var userKey: UUID?
+    var userKey: UUID? = nil
     // ID of the root folder
     var root: UUID? = nil
     // recipe/folder lists
@@ -61,6 +62,7 @@ class State {
         switch PersistenceManager.loadState() {
         case .success(let data):
             self.userId = data.userId
+            self.userKey = data.userKey
             self.root = data.root
             self.loadRecipes(recipes: data.recipes)
             self.loadFolders(folders: data.folders)
@@ -72,8 +74,30 @@ class State {
     }
 
     func store() -> RBError? {
-        let data = Data(userId: self.userId, root: self.root, recipes: self.recipes, folders: self.folders)
+        let data = Data(
+            userId: self.userId,
+            userKey: self.userKey,
+            root: self.root,
+            recipes: self.recipes,
+            folders: self.folders
+        )
         return PersistenceManager.storeState(state: data)
+    }
+
+    func addUserInfo(info: UserLoginResponse) -> RBError? {
+        self.userId = info.id
+        self.userKey = info.key
+        self.root = info.root
+        for recipe in info.recipes {
+            self.recipes.append(recipe)
+            self.recipeMap[recipe.uuid] = recipe
+        }
+        for folder in info.folders {
+            self.folders.append(folder)
+            self.folderMap[folder.uuid] = folder
+        }
+
+        return self.store()
     }
 
     func getRecipe(uuid: UUID) -> Recipe? {
@@ -84,62 +108,52 @@ class State {
         return self.folderMap[uuid]
     }
 
-    func addRecipe(recipe: Recipe, andStore: Bool = true) -> RBError? {
+    func addRecipe(recipe: Recipe, push: Bool = true, store: Bool = true) -> RBError? {
+        var error: RBError? = nil
+
         // add the recipe to the stored recipe list
         self.recipes.append(recipe)
         // and to the volatile recipe map
         self.recipeMap[recipe.uuid] = recipe
-
-        // add to the parent folder
+        // and then add it to the parent folder
         if let folder = self.getFolder(uuid: recipe.folderId) {
             folder.addRecipe(uuid: recipe.uuid)
         } else {
             return .missingItem(.folder, recipe.folderId)
         }
 
-        return andStore ? self.store() : nil
-    }
-
-    func addRecipes(recipes: [Recipe]) -> RBError? {
-        var error: RBError? = nil
-        for recipe in recipes {
-            error = error ?? self.addRecipe(recipe: recipe, andStore: false)
+        if push {
+            API.createItem(recipe: recipe)
         }
-        return self.store() ?? error
+        if store {
+            error = self.store()
+        }
+        return error
     }
 
-    func addFolder(folder: RecipeFolder, andStore: Bool = true) -> RBError? {
+    func addFolder(folder: RecipeFolder, push: Bool = true, store: Bool = true) -> RBError? {
+        var error: RBError? = nil
+
         // add the folder to the stored folder list
         self.folders.append(folder)
         // and to the volatile folder map
         self.folderMap[folder.uuid] = folder
-
-        // add to the parent folder
-        guard let parentId = folder.folderId else {
-            return .cannotModifyRoot
-        }
-        if let parentFolder = self.getFolder(uuid: parentId) {
-            parentFolder.addSubfolder(uuid: folder.uuid)
-        } else {
-            return .missingItem(.folder, parentId)
+        // and then add it to the parent folder
+        if let parentId = folder.folderId {
+            if let parentFolder = self.getFolder(uuid: parentId) {
+                parentFolder.addSubfolder(uuid: folder.uuid)
+            } else {
+                return .missingItem(.folder, parentId)
+            }
         }
 
-        return andStore ? self.store() : nil
-    }
-
-    func addFolders(folders: [RecipeFolder]) -> RBError? {
-        var error: RBError? = nil
-        for folder in folders {
-            error = error ?? self.addFolder(folder: folder, andStore: false)
+        if push {
+            API.createItem(folder: folder)
         }
-        return self.store() ?? error
-    }
-
-    func addUserInfo(info: UserLoginResponse) -> RBError? {
-        self.userId = info.id
-        self.userKey = info.key
-
-        return self.store()
+        if store {
+            error = self.store()
+        }
+        return error
     }
 
     func updateRecipe(recipe updatedRecipe: Recipe) -> RBError? {
@@ -147,6 +161,7 @@ class State {
             return .missingItem(.recipe, updatedRecipe.uuid)
         }
         recipe.update(with: updatedRecipe)
+        API.updateItems(recipes: [recipe])
         return self.store()
     }
 
@@ -155,6 +170,7 @@ class State {
             return .missingItem(.folder, updatedFolder.uuid)
         }
         folder.update(with: updatedFolder)
+        API.updateItems(folders: [folder])
         return self.store()
     }
 

@@ -8,14 +8,6 @@
 import Foundation
 import SwiftSoup
 
-struct UserLoginResponse: Decodable {
-    let id: String
-    let key: UUID
-    let root: UUID?
-    let recipes: [Recipe]
-    let folders: [RecipeFolder]
-}
-
 private func parseNYTRecipeTitle(_ document: Document) throws -> String {
     let headers = try document.select("h1.pantry--title-display")
     if let header = headers.first() {

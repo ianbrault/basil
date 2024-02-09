@@ -7,81 +7,109 @@
 
 import Foundation
 
-func httpStatusIsError(_ status: Int) -> Bool {
-    return status < 200 || status >= 300
-}
+struct Network {
 
-func httpGet(url: String, handler: @escaping (Result<Data, RBError>) -> ()) {
-    guard let url = URL(string: url) else {
-        handler(.failure(.invalidURL(url)))
-        return
-    }
+    enum Address {
+        case create
+        case login
+        case register
+        case update
 
-    let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
-        if let error {
-            handler(.failure(.httpError(error.localizedDescription)))
-            return
-        }
-        if let httpResponse = response as? HTTPURLResponse {
-            if httpStatusIsError(httpResponse.statusCode) {
-                var message = "Invalid response(\(httpResponse.statusCode))"
-                if let data {
-                    if let errorMessage = String(data: data, encoding: .utf8) {
-                        message = errorMessage
-                    }
-                }
-                handler(.failure(.httpError(message)))
-                return
+        var url: URL {
+            let baseURL = "http://127.0.0.1:3030"
+            // let baseURL = "https://brault.dev"
+            switch self {
+            case .create:
+                return URL(string: "\(baseURL)/recipes/create")!
+            case .login:
+                return URL(string: "\(baseURL)/recipes/login")!
+            case .register:
+                return URL(string: "\(baseURL)/recipes/register")!
+            case .update:
+                return URL(string: "\(baseURL)/recipes/update")!
             }
         }
-        if let data {
-            handler(.success(data))
-        } else {
-            handler(.failure(.missingHTTPData))
+    }
+
+    static func statusIsError(_ status: Int) -> Bool {
+        return status < 200 || status >= 300
+    }
+
+    static func encode<T: Encodable>(_ item: T) -> String? {
+        do {
+            let data = try JSONEncoder().encode(item)
+            if let string = String(data: data, encoding: .utf8) {
+                return string
+            } else {
+                return nil
+            }
+        } catch {
+            return nil
         }
     }
-    task.resume()
-}
 
-func httpPost(url: String, body: [String: Any], handler: @escaping (Result<Data, RBError>) -> ()) {
-    guard let url = URL(string: url) else {
-        handler(.failure(.invalidURL(url)))
-        return
-    }
-
-    var request = URLRequest(url: url)
-    request.httpMethod = "POST"
-    request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.addValue("application/json", forHTTPHeaderField: "Accept")
-    do {
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
-    } catch {
-        handler(.failure(.failedToEncode))
-        return
-    }
-
-    let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
-        if let error {
-            handler(.failure(.httpError(error.localizedDescription)))
+    static func get(_ urlString: String, handler: @escaping (Result<Data, RBError>) -> ()) {
+        guard let url = URL(string: urlString) else {
+            handler(.failure(.invalidURL(urlString)))
             return
         }
-        if let httpResponse = response as? HTTPURLResponse {
-            if httpStatusIsError(httpResponse.statusCode) {
-                var message = "Invalid response(\(httpResponse.statusCode))"
-                if let data {
-                    if let errorMessage = String(data: data, encoding: .utf8) {
-                        message = errorMessage
-                    }
-                }
-                handler(.failure(.httpError(message)))
+        let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
+            if let error {
+                handler(.failure(.httpError(error.localizedDescription)))
                 return
             }
+            if let httpResponse = response as? HTTPURLResponse {
+                if Network.statusIsError(httpResponse.statusCode) {
+                    var message = "Invalid response(\(httpResponse.statusCode))"
+                    if let data {
+                        if let errorMessage = String(data: data, encoding: .utf8) {
+                            message = errorMessage
+                        }
+                    }
+                    handler(.failure(.httpError(message)))
+                    return
+                }
+            }
+            if let data {
+                handler(.success(data))
+            } else {
+                handler(.failure(.missingHTTPData))
+            }
         }
-        if let data {
-            handler(.success(data))
-        } else {
-            handler(.failure(.missingHTTPData))
-        }
+        task.resume()
     }
-    task.resume()
+
+    static func post<T: Encodable>(_ address: Address, body: T, handler: @escaping (Result<Data?, RBError>) -> ()) {
+        var request = URLRequest(url: address.url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
+        do {
+            request.httpBody = try JSONEncoder().encode(body)
+        } catch {
+            handler(.failure(.failedToEncode))
+            return
+        }
+
+        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+            if let error {
+                handler(.failure(.httpError(error.localizedDescription)))
+                return
+            }
+            if let httpResponse = response as? HTTPURLResponse {
+                if Network.statusIsError(httpResponse.statusCode) {
+                    var message = "Invalid response(\(httpResponse.statusCode))"
+                    if let data {
+                        if let errorMessage = String(data: data, encoding: .utf8) {
+                            message = errorMessage
+                        }
+                    }
+                    handler(.failure(.httpError(message)))
+                    return
+                }
+            }
+            handler(.success(data))
+        }
+        task.resume()
+    }
 }

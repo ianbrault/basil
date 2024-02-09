@@ -167,22 +167,9 @@ class LoginVC: UIViewController {
             return
         }
 
-        let url = "http://127.0.0.1:3030/recipes/login"  // TODO: update to server URL
-        let body: [String: String] = [
-            "email": email,
-            "password": hashedPassword,
-        ]
         self.showLoadingView()
-        httpPost(url: url, body: body) { [weak self] (response) in
+        API.login(email: email, password: hashedPassword) { [weak self] (result) in
             guard let self = self else { return }
-            let result = response.flatMap { (body) in
-                do {
-                    let userInfo = try JSONDecoder().decode(UserLoginResponse.self, from: body)
-                    return .success(userInfo)
-                } catch {
-                    return .failure(.failedToDecode)
-                }
-            }
             DispatchQueue.main.async {
                 switch result {
                 case .success(let userInfo):

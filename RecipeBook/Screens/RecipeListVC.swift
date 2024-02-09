@@ -363,7 +363,7 @@ class RecipeListVC: UIViewController {
             confirmButtonText: "Import"
         ) { [weak self] (text) in
             guard let self else { return }
-            httpGet(url: text) { (response) in
+            Network.get(text) { (response) in
                 let result = response.flatMap { (body) in
                     parseNYTRecipe(body: body, folderId: self.folderId)
                 }
@@ -423,22 +423,22 @@ class RecipeListVC: UIViewController {
         // NOTE: can only be used in development mode
         if !self.development { return }
 
+        let folderA = self.debugFolder("A", folderId: self.folderId)
+        let folderB = self.debugFolder("B", folderId: self.folderId)
+        let folderC = self.debugFolder("C", folderId: folderB.uuid)
+        for folder in [folderA, folderB, folderC] {
+            let _ = State.manager.addFolder(folder: folder)
+        }
+
         let recipeA = self.debugRecipe("A", folderId: self.folderId)
         let recipeB = self.debugRecipe("B", folderId: self.folderId)
         let recipeC = self.debugRecipe("C", folderId: self.folderId)
-        let _ = State.manager.addRecipes(recipes: [recipeA, recipeB, recipeC])
-
-        let folderA = self.debugFolder("A", folderId: self.folderId)
-        let folderB = self.debugFolder("B", folderId: self.folderId)
-        let _ = State.manager.addFolders(folders: [folderA, folderB])
-
-        let folderC = self.debugFolder("C", folderId: folderB.uuid)
-        let _ = State.manager.addFolder(folder: folderC)
-
         let recipeD = self.debugRecipe("D", folderId: folderA.uuid)
         let recipeE = self.debugRecipe("E", folderId: folderB.uuid)
         let recipeF = self.debugRecipe("F", folderId: folderC.uuid)
-        let _ = State.manager.addRecipes(recipes: [recipeD, recipeE, recipeF])
+        for recipe in [recipeA, recipeB, recipeC, recipeD, recipeE, recipeF] {
+            let _ = State.manager.addRecipe(recipe: recipe)
+        }
 
         self.loadItems()
     }
