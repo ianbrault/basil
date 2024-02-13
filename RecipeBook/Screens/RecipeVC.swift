@@ -42,17 +42,20 @@ class RecipeVC: UIViewController {
     }
 
     private func createContextMenu() -> UIMenu {
-        let menuItems = [
-            UIAction(title: "Edit recipe", image: SFSymbols.editRecipe, handler: self.editRecipe),
-            UIAction(title: "Delete recipe", image: SFSymbols.trash, attributes: .destructive, handler: self.deleteRecipe),
-        ]
+        let editMenuItem = UIAction(title: "Edit recipe", image: SFSymbols.editRecipe, handler: self.editRecipe)
+        let editMenu = UIMenu(title: "", image: nil, identifier: nil, options: .displayInline, children: [editMenuItem])
 
-        return UIMenu(title: "", image: nil, identifier: nil, options: [], children: menuItems)
+        let deleteMenuItem = UIAction(title: "Delete recipe", image: SFSymbols.trash, attributes: .destructive, handler: self.deleteRecipe)
+        let deleteMenu = UIMenu(title: "", image: nil, identifier: nil, options: .displayInline, children: [deleteMenuItem])
+
+        return UIMenu(title: "", image: nil, identifier: nil, options: [], children: [editMenu, deleteMenu])
     }
 
     private func configureViewController() {
-        self.navigationItem.largeTitleDisplayMode = .never
         self.view.backgroundColor = .systemBackground
+
+        self.navigationItem.largeTitleDisplayMode = .never
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: SFSymbols.contextMenu, menu: self.createContextMenu())
     }
 
     private func configureTableView() {
