@@ -11,6 +11,7 @@ struct Network {
 
     enum Address {
         case create
+        case delete
         case login
         case register
         case update
@@ -21,6 +22,8 @@ struct Network {
             switch self {
             case .create:
                 return URL(string: "\(baseURL)/recipes/create")!
+            case .delete:
+                return URL(string: "\(baseURL)/recipes/delete")!
             case .login:
                 return URL(string: "\(baseURL)/recipes/login")!
             case .register:

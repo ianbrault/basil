@@ -34,6 +34,13 @@ struct RecipesFoldersBody: Codable {
     let folders: [RecipeFolder]
 }
 
+struct RecipesFoldersUUIDBody: Codable {
+    let userId: String
+    let userKey: UUID?
+    let recipes: [UUID]
+    let folders: [UUID]
+}
+
 struct API {
 
     static func parseResponse<T: Decodable>(body contents: Data?) -> Result<T, RBError> {
@@ -96,5 +103,13 @@ struct API {
             recipes: recipes, folders: folders
         )
         self.asyncCall(.update, body: body)
+    }
+
+    static func deleteItems(recipes: [UUID] = [], folders: [UUID] = []) {
+        let body = RecipesFoldersUUIDBody(
+            userId: State.manager.userId, userKey: State.manager.userKey,
+            recipes: recipes, folders: folders
+        )
+        self.asyncCall(.delete, body: body)
     }
 }
