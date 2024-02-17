@@ -18,10 +18,12 @@ class FolderTreeVC: UIViewController {
     let tableView = UITableView()
 
     var items: [Item] = []
+    var currentFolder: UUID!
     var completionHander: ((RecipeFolder) -> Void)!
 
-    init(completionHandler: @escaping (RecipeFolder) -> Void) {
+    init(currentFolder: UUID, completionHandler: @escaping (RecipeFolder) -> Void) {
         super.init(nibName: nil, bundle: nil)
+        self.currentFolder = currentFolder
         self.completionHander = completionHandler
         self.loadFolderTree()
     }
@@ -91,13 +93,15 @@ extension FolderTreeVC: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let item = self.items[indexPath.row]
+        let isEnabled = item.folder.uuid != self.currentFolder
 
         let cell = tableView.dequeueReusableCell(withIdentifier: FolderTreeVC.reuseID)!
         cell.indentationLevel = item.indentLevel * 2
 
         var content = cell.defaultContentConfiguration()
-        content.attributedText = item.folder.attributedText()
+        content.attributedText = item.folder.attributedText(namePlaceholder: "Recipes", isEnabled: isEnabled)
         cell.contentConfiguration = content
+        cell.isUserInteractionEnabled = isEnabled
 
         return cell
     }

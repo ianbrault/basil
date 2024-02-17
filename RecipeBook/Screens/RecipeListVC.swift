@@ -21,10 +21,6 @@ class RecipeListVC: UIViewController {
     var folderId: UUID!
     var items: [RecipeItem] = []
 
-    // set this flag to enable development mode debug features
-    // TODO: ensure that this is unset before releasing
-    let development: Bool = true
-
     init(folderId: UUID) {
         super.init(nibName: nil, bundle: nil)
         self.folderId = folderId
@@ -84,18 +80,9 @@ class RecipeListVC: UIViewController {
         self.deleteButton.tintColor = .systemRed
         self.deleteButton.isEnabled = false
 
-        // create the "nuke" button to clear all state
-        // NOTE: this will only be used in development mode
-        self.debugButton = UIBarButtonItem(image: SFSymbols.bug, menu: self.createDevelopmentContextMenu())
-        self.debugButton.tintColor = .systemGreen
-
         // start with the add/edit buttons in the navigation bar
         // these will be swapped out when the table edit mode is toggled
-        if self.development {
-            self.navigationItem.rightBarButtonItems = [self.editButton, self.addButton, self.debugButton]
-        } else {
-            self.navigationItem.rightBarButtonItems = [self.editButton, self.addButton]
-        }
+        self.navigationItem.rightBarButtonItems = [self.editButton, self.addButton]
     }
 
     private func configureTableView() {
@@ -110,15 +97,6 @@ class RecipeListVC: UIViewController {
         self.tableView.allowsMultipleSelectionDuringEditing = true
 
         self.tableView.register(RecipeCell.self, forCellReuseIdentifier: RecipeCell.reuseID)
-    }
-
-    private func createDevelopmentContextMenu() -> UIMenu {
-        let menuItems = [
-            UIAction(title: "Factory restore", image: SFSymbols.atom, handler: self.factoryRestore),
-            UIAction(title: "Seed recipes", image: SFSymbols.importRecipe, handler: self.seedRecipes),
-        ]
-
-        return UIMenu(title: "", image: nil, identifier: nil, options: [], children: menuItems)
     }
 
     private func createAddButtonContextMenu() -> UIMenu {
@@ -148,7 +126,7 @@ class RecipeListVC: UIViewController {
                 self.present(navController, animated: true)
             }
             let moveAction = UIAction(title: "Move to folder", image: SFSymbols.folder) { (_) in
-                let destVC = FolderTreeVC { [weak self] (selectedFolder) in
+                let destVC = FolderTreeVC(currentFolder: self.folderId) { [weak self] (selectedFolder) in
                     guard let self = self else { return }
 
                     if let error = State.manager.moveItemToFolder(uuid: recipe.uuid, folderId: selectedFolder.uuid) {
@@ -204,7 +182,7 @@ class RecipeListVC: UIViewController {
                 self.present(alert, animated: true)
             }
             let moveAction = UIAction(title: "Move to folder", image: SFSymbols.folder) { (_) in
-                let destVC = FolderTreeVC { (selectedFolder) in
+                let destVC = FolderTreeVC(currentFolder: self.folderId) { (selectedFolder) in
                     if let error = State.manager.moveItemToFolder(uuid: folder.uuid, folderId: selectedFolder.uuid) {
                         self.presentErrorAlert(error)
                     } else if selectedFolder.uuid != self.folderId {
@@ -384,65 +362,6 @@ class RecipeListVC: UIViewController {
         self.present(alert, animated: true)
     }
 
-    func factoryRestore(_ action: UIAction) {
-        // NOTE: can only be used in development mode
-        if !self.development { return }
-
-        let alert = RBWarningAlert(
-            message: "Are you sure you want to fully wipe all recipe data?",
-            actionStyle: .destructive
-        ) { [weak self] () in
-            guard let self = self else { return }
-            State.manager.clear()
-            DispatchQueue.main.async {
-                self.items = []
-                self.tableView.reloadData()
-                self.showEmptyStateView(in: self.view)
-            }
-        }
-        self.present(alert, animated: true)
-    }
-
-    private func debugRecipe(_ key: String, folderId: UUID) -> Recipe {
-        return Recipe(
-            folderId: folderId,
-            title: "Recipe \(key)",
-            ingredients: ["item \(key)"],
-            instructions: ["instruction \(key)"]
-        )
-    }
-
-    private func debugFolder(_ key: String, folderId: UUID) -> RecipeFolder {
-        return RecipeFolder(
-            folderId: folderId,
-            name: "Folder \(key)"
-        )
-    }
-
-    func seedRecipes(_ action: UIAction) {
-        // NOTE: can only be used in development mode
-        if !self.development { return }
-
-        let folderA = self.debugFolder("A", folderId: self.folderId)
-        let folderB = self.debugFolder("B", folderId: self.folderId)
-        let folderC = self.debugFolder("C", folderId: folderB.uuid)
-        for folder in [folderA, folderB, folderC] {
-            let _ = State.manager.addFolder(folder: folder)
-        }
-
-        let recipeA = self.debugRecipe("A", folderId: self.folderId)
-        let recipeB = self.debugRecipe("B", folderId: self.folderId)
-        let recipeC = self.debugRecipe("C", folderId: self.folderId)
-        let recipeD = self.debugRecipe("D", folderId: folderA.uuid)
-        let recipeE = self.debugRecipe("E", folderId: folderB.uuid)
-        let recipeF = self.debugRecipe("F", folderId: folderC.uuid)
-        for recipe in [recipeA, recipeB, recipeC, recipeD, recipeE, recipeF] {
-            let _ = State.manager.addRecipe(recipe: recipe)
-        }
-
-        self.loadItems()
-    }
-
     @objc func enableEditMode(_ action: UIAction? = nil) {
         self.tableView.setEditing(true, animated: true)
         // navigation bar should contain the delete and move and done buttons when edit mode is enabled
@@ -452,18 +371,14 @@ class RecipeListVC: UIViewController {
     @objc func disableEditMode(_ action: UIAction? = nil) {
         self.tableView.setEditing(false, animated: true)
         // navigation bar should contain the add and edit buttons when edit mode is disabled
-        if self.development {
-            self.navigationItem.rightBarButtonItems = [self.editButton, self.addButton, self.debugButton]
-        } else {
-            self.navigationItem.rightBarButtonItems = [self.editButton, self.addButton]
-        }
+        self.navigationItem.rightBarButtonItems = [self.editButton, self.addButton]
     }
 
     @objc func moveSelectedItems(_ action: UIAction) {
         if let selectedRows = tableView.indexPathsForSelectedRows, !selectedRows.isEmpty {
             let uuids = selectedRows.map { self.items[$0.row] }.map { $0.uuid }
 
-            let destVC = FolderTreeVC { [weak self] (selectedFolder) in
+            let destVC = FolderTreeVC(currentFolder: self.folderId) { [weak self] (selectedFolder) in
                 guard let self = self else { return }
 
                 if let error = State.manager.moveItemsToFolder(uuids: uuids, folderId: selectedFolder.uuid) {
