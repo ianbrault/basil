@@ -18,10 +18,6 @@ class SceneDelegate: UIResponder, RBWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
-        // push navigation bar buttons closer to each other
-        let stackViewAppearance = UIStackView.appearance(whenContainedInInstancesOf: [UINavigationBar.self])
-        stackViewAppearance.spacing = -4
-
         // TODO: check if the stored data version is older than the current version
 
         // load the stored app state

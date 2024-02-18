@@ -17,8 +17,8 @@ struct Network {
         case update
 
         var url: URL {
-            let baseURL = "http://127.0.0.1:3030"
-            // let baseURL = "https://brault.dev"
+            // let baseURL = "http://127.0.0.1:3030"
+            let baseURL = "https://brault.dev"
             switch self {
             case .create:
                 return URL(string: "\(baseURL)/recipes/create")!

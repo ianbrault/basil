@@ -16,7 +16,6 @@ class RecipeListVC: UIViewController {
     var doneButton: UIBarButtonItem!
     var moveButton: UIBarButtonItem!
     var deleteButton: UIBarButtonItem!
-    var debugButton: UIBarButtonItem!
 
     var folderId: UUID!
     var items: [RecipeItem] = []
@@ -58,25 +57,13 @@ class RecipeListVC: UIViewController {
     private func configureViewController() {
         self.view.backgroundColor = .systemBackground
 
-        // create an add button to add new recipes
+        // create the bar button items
         self.addButton = UIBarButtonItem(systemItem: .add, menu: self.createAddButtonContextMenu())
-
-        // create an edit button to enable edit mode on the table
-        self.editButton = UIBarButtonItem(
-            title: nil, image: SFSymbols.contextMenu, target: self, action: #selector(self.enableEditMode))
-
-        // create a done button to disable edit mode on the table
-        self.doneButton = UIBarButtonItem(
-            title: nil, image: SFSymbols.checkmarkCircle, target: self, action: #selector(self.disableEditMode))
-
-        // create a move button to move selected items
-        self.moveButton = UIBarButtonItem(
-            title: nil, image: SFSymbols.folder, target: self, action: #selector(self.moveSelectedItems))
+        self.editButton = UIBarButtonItem(title: nil, image: SFSymbols.contextMenu, target: self, action: #selector(self.enableEditMode))
+        self.doneButton = UIBarButtonItem(title: nil, image: SFSymbols.checkmarkCircle, target: self, action: #selector(self.disableEditMode))
+        self.moveButton = UIBarButtonItem(title: nil, image: SFSymbols.folder, target: self, action: #selector(self.moveSelectedItems))
         self.moveButton.isEnabled = false
-
-        // create a delete button to delete selected items
-        self.deleteButton = UIBarButtonItem(
-            title: nil, image: SFSymbols.trash, target: self, action: #selector(self.deleteSelectedItems))
+        self.deleteButton = UIBarButtonItem(title: nil, image: SFSymbols.trash, target: self, action: #selector(self.deleteSelectedItems))
         self.deleteButton.tintColor = .systemRed
         self.deleteButton.isEnabled = false
 
@@ -363,6 +350,9 @@ class RecipeListVC: UIViewController {
     }
 
     @objc func enableEditMode(_ action: UIAction? = nil) {
+        if self.items.isEmpty {
+            return
+        }
         self.tableView.setEditing(true, animated: true)
         // navigation bar should contain the delete and move and done buttons when edit mode is enabled
         self.navigationItem.rightBarButtonItems = [self.doneButton, self.moveButton, self.deleteButton]

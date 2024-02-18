@@ -66,6 +66,11 @@ class RecipeFormVC: UIViewController {
         }
     }
 
+    var cancelButton: UIBarButtonItem!
+    var editButton: UIBarButtonItem!
+    var doneButton: UIBarButtonItem!
+    var saveButton: UIBarButtonItem!
+
     let tableView = UITableView()
     var tableCells: [[RecipeFormCell.Content]] = [
         [.createInput()],
@@ -96,7 +101,16 @@ class RecipeFormVC: UIViewController {
         self.configureTableView()
         self.createDismissKeyboardTapGesture()
         self.createKeyboardNotificationObservers()
-        // TODO: autofocus title input if empty
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        // autofocus the title input if it is empty
+        if let titleCell = self.tableView.cellForRow(at: IndexPath(row: 0, section: Section.title.rawValue)) {
+            let cell = titleCell as! RecipeFormCell
+            if cell.textField?.text?.isEmpty ?? false {
+                cell.textField?.becomeFirstResponder()
+            }
+        }
     }
 
     func configureNavigationController() {
@@ -109,13 +123,14 @@ class RecipeFormVC: UIViewController {
     func configureViewController() {
         self.view.backgroundColor = .systemGroupedBackground
 
-        // dismiss the view when the cancel button is tapped
-        let cancelButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(dismissVC))
-        self.navigationItem.leftBarButtonItem = cancelButton
+        // create the bar button items
+        self.cancelButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(self.dismissVC))
+        self.editButton = UIBarButtonItem(title: nil, image: SFSymbols.reorder, target: self, action: #selector(self.enableEditMode))
+        self.doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(self.disableEditMode))
+        self.saveButton = UIBarButtonItem(title: "Save", style: .done, target: self, action: #selector(self.saveRecipe))
 
-        // save the recipe when the save button is tapped
-        let saveButton = UIBarButtonItem(title: "Save", style: .done, target: self, action: #selector(saveRecipe))
-        self.navigationItem.rightBarButtonItem = saveButton
+        self.navigationItem.leftBarButtonItem = self.cancelButton
+        self.navigationItem.rightBarButtonItems = [self.saveButton, self.editButton]
     }
 
     func configureTableView() {
@@ -225,6 +240,16 @@ class RecipeFormVC: UIViewController {
         self.dismiss(animated: true)
     }
 
+    @objc func enableEditMode(_ action: UIAction? = nil) {
+        self.tableView.setEditing(true, animated: true)
+        self.navigationItem.rightBarButtonItems = [self.doneButton]
+    }
+
+    @objc func disableEditMode(_ action: UIAction? = nil) {
+        self.tableView.setEditing(false, animated: true)
+        self.navigationItem.rightBarButtonItems = [self.saveButton, self.editButton]
+    }
+
     @objc func saveRecipe() {
         // check that the title is filled out
         let title = self.tableCells[Section.title.rawValue][0].text!
@@ -290,7 +315,10 @@ extension RecipeFormVC: UITableViewDataSource, UITableViewDelegate {
         return cell
     }
 
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+    func tableView(
+        _ tableView: UITableView,
+        trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
+    ) -> UISwipeActionsConfiguration? {
         let contextItem = UIContextualAction(style: .destructive, title: "Delete") {  (action, view, actionPerformed) in
             self.tableCells[indexPath.section].remove(at: indexPath.row)
             self.tableView.deleteRows(at: [indexPath], with: .automatic)
@@ -310,6 +338,45 @@ extension RecipeFormVC: UITableViewDataSource, UITableViewDelegate {
             return UISwipeActionsConfiguration(actions: [contextItem])
         }
     }
+
+    func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
+        return .none
+    }
+
+    func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
+        switch Section(rawValue: indexPath.section) {
+        case .title:
+            return false
+        case .ingredients, .instructions:
+            return indexPath.row < self.tableCells[indexPath.section].count - 1
+        case .none:
+            return false
+        }
+    }
+
+    func tableView(
+        _ tableView: UITableView,
+        targetIndexPathForMoveFromRowAt sourceIndexPath: IndexPath,
+        toProposedIndexPath proposedDestinationIndexPath: IndexPath
+    ) -> IndexPath {
+        // prevent moving from across sections
+        if sourceIndexPath.section != proposedDestinationIndexPath.section {
+            return sourceIndexPath
+        }
+        // prevent moving past the button in the section
+        if proposedDestinationIndexPath.row >= self.tableCells[sourceIndexPath.section].count - 1 {
+            return sourceIndexPath
+        }
+        return proposedDestinationIndexPath
+    }
+
+    func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        // move is guaranteed to be within the same section
+        let section = sourceIndexPath.section
+        
+        let item = self.tableCells[section].remove(at: sourceIndexPath.row)
+        self.tableCells[section].insert(item, at: destinationIndexPath.row)
+    }
 }
 
 extension RecipeFormVC: RecipeFormCellDelegate {
@@ -320,19 +387,6 @@ extension RecipeFormVC: RecipeFormCellDelegate {
 
     func instructionsButtonPressed() {
         self.appendInputCell(section: .instructions)
-    }
-
-    func textFieldDidBeginEditing(_ uuid: UUID) {
-        if let indexPath = self.indexPathFromUuid(uuid: uuid) {
-            // add a slight delay to allow the keyboard to displace the screen
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                // FIXME: this can cause an overlap with the view controller large title
-                // update to check the safe area vs. scroll offset or whatever
-                self.tableView.scrollToRow(at: indexPath, at: .top, animated: true)
-            }
-        } else {
-            self.presentErrorAlert(.missingInput(uuid))
-        }
     }
 
     func textFieldDidChange(_ uuid: UUID, text: String?) {

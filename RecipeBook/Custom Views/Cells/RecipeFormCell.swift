@@ -8,7 +8,6 @@
 import UIKit
 
 protocol RecipeFormCellDelegate: AnyObject {
-    func textFieldDidBeginEditing(_: UUID)
     func textFieldDidChange(_: UUID, text: String?)
     func ingredientsButtonPressed()
     func instructionsButtonPressed()
@@ -48,6 +47,7 @@ class RecipeFormCell: UITableViewCell {
     var section: RecipeFormVC.Section?
     var uuid: UUID?
     var textField: RBCellTextField?
+    var textFieldTrailingConstraint: NSLayoutConstraint?
     var actionButton: RBPlainButton?
 
     weak var delegate: RecipeFormCellDelegate?
@@ -57,9 +57,24 @@ class RecipeFormCell: UITableViewCell {
 
         self.textField?.removeFromSuperview()
         self.textField = nil
+        self.textFieldTrailingConstraint = nil
 
         self.actionButton?.removeFromSuperview()
         self.actionButton = nil
+    }
+
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+
+        // only needed for non-title text fields
+        if let textField = self.textField, section != .title {
+            // create space for the drag icon on the right
+            let pad: CGFloat = editing ? -30 : 0
+            self.textFieldTrailingConstraint?.constant = pad
+            self.setNeedsDisplay()
+            // disable text field editing when in edit mode
+            textField.isUserInteractionEnabled = !editing
+        }
     }
 
     func setInput(section: RecipeFormVC.Section, uuid: UUID, text: String) {
@@ -67,7 +82,6 @@ class RecipeFormCell: UITableViewCell {
         self.uuid = uuid
 
         self.textField = RBCellTextField(placeholder: section.textFieldPlaceholder, horizontalPadding: 20)
-        self.textField?.delegate = self
         self.textField?.text = text
         if section == .title {
             self.textField?.autocapitalizationType = .words
@@ -75,11 +89,12 @@ class RecipeFormCell: UITableViewCell {
         self.textField?.addTarget(self, action: #selector(self.textFieldDidChange(_:)), for: .editingChanged)
         self.addSubview(self.textField!)
 
+        self.textFieldTrailingConstraint = self.textField!.trailingAnchor.constraint(equalTo: self.trailingAnchor)
         NSLayoutConstraint.activate([
             self.textField!.topAnchor.constraint(equalTo: self.topAnchor, constant: 1),
             self.textField!.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -1),
             self.textField!.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            self.textField!.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            self.textFieldTrailingConstraint!,
         ])
     }
 
@@ -124,12 +139,5 @@ class RecipeFormCell: UITableViewCell {
                 self.delegate?.instructionsButtonPressed()
             }
         }
-    }
-}
-
-extension RecipeFormCell: UITextFieldDelegate {
-
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        self.delegate?.textFieldDidBeginEditing(self.uuid!)
     }
 }

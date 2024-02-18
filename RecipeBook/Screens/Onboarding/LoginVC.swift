@@ -10,7 +10,7 @@ import UIKit
 class LoginVC: UIViewController {
 
     let backButton = RBPlainButton(title: "Back", image: SFSymbols.arrowBack)
-    let titleLabel = RBTitleLabel(fontSize: 28)
+    let titleLabel = RBTitleLabel(fontSize: 30)
     let emailField = RBIconTextField(placeholder: "Email", image: SFSymbols.email!)
     let passwordField = RBIconTextField(placeholder: "Password", image: SFSymbols.password!)
     let submitButton = RBButton(title: "Login")
@@ -19,14 +19,11 @@ class LoginVC: UIViewController {
     let topPadding: CGFloat = 16
     let bottomPadding: CGFloat = 64
 
-    let textFieldHeight: CGFloat = 44
+    let textFieldHeight: CGFloat = 40
     let textFieldPadding: CGFloat = 36
 
     let buttonHeight: CGFloat = 58
     let buttonPadding: CGFloat = 64
-
-    var currentTextField: UITextField?
-    var keyboardToolbar: RBKeyboardToolbar? = nil
 
     weak var delegate: OnboardingVCDelegate?
     weak var sceneDelegate: RBWindowSceneDelegate?
@@ -34,21 +31,16 @@ class LoginVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configureViewController()
-        self.configureKeyboardToolbar()
         self.configureBackButton()
         self.configureTitleLabel()
         self.configureTextFields()
         self.configureSubmitButton()
         self.createDismissKeyboardTapGesture()
+        self.createSwipeGesture()
     }
 
     private func configureViewController() {
         self.view.backgroundColor = .systemBackground
-    }
-
-    private func configureKeyboardToolbar() {
-        self.keyboardToolbar = RBKeyboardToolbar(width: self.view.frame.size.width, height: 44)
-        self.keyboardToolbar?.toolbarDelegate = self
     }
 
     private func configureBackButton() {
@@ -80,15 +72,11 @@ class LoginVC: UIViewController {
         self.view.addSubview(self.emailField)
         self.view.addSubview(self.passwordField)
 
-        self.emailField.delegate = self
         self.emailField.textField.textContentType = .username
         self.emailField.textField.keyboardType = .emailAddress
-        self.emailField.textField.inputAccessoryView = self.keyboardToolbar
 
-        self.passwordField.delegate = self
         self.passwordField.textField.textContentType = .password
         self.passwordField.textField.isSecureTextEntry = true
-        self.passwordField.textField.inputAccessoryView = self.keyboardToolbar
 
         NSLayoutConstraint.activate([
             self.emailField.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor, constant: self.spacing * 1.5),
@@ -122,18 +110,10 @@ class LoginVC: UIViewController {
         self.view.addGestureRecognizer(tap)
     }
 
-    func previousTextField() -> UITextField? {
-        if self.currentTextField == self.passwordField.textField {
-            return self.emailField.textField
-        }
-        return nil
-    }
-
-    func nextTextField() -> UITextField? {
-        if self.currentTextField == self.emailField.textField {
-            return self.passwordField.textField
-        }
-        return nil
+    private func createSwipeGesture() {
+        let swipe = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(self.backButtonPressed))
+        swipe.edges = .left
+        self.view.addGestureRecognizer(swipe)
     }
 
     @objc func backButtonPressed() {
@@ -185,39 +165,5 @@ class LoginVC: UIViewController {
             }
             self.dismissLoadingView()
         }
-    }
-}
-
-extension LoginVC: RBIconTextFieldDelegate {
-
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        self.currentTextField = textField
-        self.keyboardToolbar?.previousButton.isEnabled = true
-        self.keyboardToolbar?.nextButton.isEnabled = true
-
-        if textField == self.emailField.textField {
-            self.keyboardToolbar?.previousButton.isEnabled = false
-        } else if textField == self.passwordField.textField {
-            self.keyboardToolbar?.nextButton.isEnabled = false
-        }
-    }
-}
-
-extension LoginVC: RBKeyboardToolbarDelegate {
-
-    func previousButtonPressed() {
-        if let textField = self.previousTextField() {
-            textField.becomeFirstResponder()
-        }
-    }
-
-    func nextButtonPressed() {
-        if let textField = self.nextTextField() {
-            textField.becomeFirstResponder()
-        }
-    }
-
-    func doneButtonPressed() {
-        self.view.endEditing(true)
     }
 }
