@@ -33,6 +33,10 @@ class RecipeListVC: UIViewController {
         super.viewWillAppear(animated)
         self.configureNavigationBar()
         self.loadItems()
+        // check-in with the server if it has not been done already
+        if !State.manager.serverCommunicationEstablished {
+            self.establishServerCommunication()
+        }
     }
 
     override func viewDidLoad() {
@@ -104,37 +108,14 @@ class RecipeListVC: UIViewController {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] (_) in
             guard let self = self else { return UIMenu() }
 
-            let editAction = UIAction(title: "Edit recipe", image: SFSymbols.editRecipe) { (_) in
-                let destVC = RecipeFormVC(style: .edit)
-                destVC.delegate = self
-                destVC.set(recipe: recipe)
-
-                let navController = UINavigationController(rootViewController: destVC)
-                self.present(navController, animated: true)
+            let editAction = UIAction(title: "Edit recipe", image: SFSymbols.editRecipe) { (action) in
+                self.editRecipe(action, recipe: recipe)
             }
-            let moveAction = UIAction(title: "Move to folder", image: SFSymbols.folder) { (_) in
-                let destVC = FolderTreeVC(currentFolder: self.folderId) { [weak self] (selectedFolder) in
-                    guard let self = self else { return }
-
-                    if let error = State.manager.moveItemToFolder(uuid: recipe.uuid, folderId: selectedFolder.uuid) {
-                        self.presentErrorAlert(error)
-                    } else if selectedFolder.uuid != self.folderId {
-                        // item has been moved to a folder on another screen so remove it
-                        self.removeItem(uuid: recipe.uuid)
-                    }
-                }
-                let navController = UINavigationController(rootViewController: destVC)
-                self.present(navController, animated: true)
+            let moveAction = UIAction(title: "Move to folder", image: SFSymbols.folder) { (action) in
+                self.moveItemToFolder(action, uuid: recipe.uuid)
             }
-            let deleteAction = UIAction(title: "Delete recipe", image: SFSymbols.trash, attributes: .destructive) { (_) in
-                let alert = RBDeleteRecipeItemAlert(item: .recipe(recipe)) { () in
-                    if let error = State.manager.deleteItem(uuid: recipe.uuid) {
-                        self.presentErrorAlert(error)
-                    } else {
-                        self.removeItem(uuid: recipe.uuid)
-                    }
-                }
-                self.present(alert, animated: true)
+            let deleteAction = UIAction(title: "Delete recipe", image: SFSymbols.trash, attributes: .destructive) { (action) in
+                self.deleteItem(action, item: .recipe(recipe))
             }
             return UIMenu(title: "", children: [editAction, moveAction, deleteAction])
         }
@@ -144,53 +125,44 @@ class RecipeListVC: UIViewController {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] (_) in
             guard let self = self else { return UIMenu() }
 
-            let editAction = UIAction(title: "Edit folder", image: SFSymbols.editRecipe) { (_) in
-                let alert = RBTextFieldAlert(
-                    title: "Edit folder",
-                    placeholder: "Enter folder name",
-                    text: folder.name,
-                    confirmButtonText: "Save"
-                ) { (text) in
-                    folder.name = text
-                    if let error = State.manager.updateFolder(folder: folder) {
-                        self.presentErrorAlert(error)
-                    } else {
-                        // update the items array with the updated folder
-                        if let indexPath = self.findItem(uuid: folder.uuid) {
-                            self.items[indexPath.row] = .folder(folder)
-                            DispatchQueue.main.async {
-                                self.tableView.reloadRows(at: [indexPath], with: .automatic)
-                            }
+            let editAction = UIAction(title: "Edit folder", image: SFSymbols.editRecipe) { (action) in
+                self.editFolder(action, folder: folder)
+            }
+            let moveAction = UIAction(title: "Move to folder", image: SFSymbols.folder) { (action) in
+                self.moveItemToFolder(action, uuid: folder.uuid)
+
+            }
+            let deleteAction = UIAction(title: "Delete folder", image: SFSymbols.trash, attributes: .destructive) { (action) in
+                self.deleteItem(action, item: .folder(folder))
+            }
+            return UIMenu(title: "", children: [editAction, moveAction, deleteAction])
+        }
+    }
+
+    private func establishServerCommunication() {
+        // run the server poke in the background to prevent blocking the main UI
+        DispatchQueue.global(qos: .userInitiated).async {
+            API.pokeServer { (error) in
+                if let _ = error {
+                    DispatchQueue.main.async {
+                        let errorView = RBModalView(
+                            image: SFSymbols.warning?.withTintColor(.systemYellow, renderingMode: .alwaysOriginal),
+                            text: "Failed to connect to the server",
+                            in: self.view
+                        )
+                        self.view.window?.addSubview(errorView)
+                        self.view.window?.bringSubviewToFront(errorView)
+                    }
+                } else {
+                    State.manager.processOfflineOperations { (error) in
+                        if let error {
+                            // TODO: unimplemented
                         } else {
-                            self.presentErrorAlert(.missingItem(.folder, folder.uuid))
+                            // TODO: unimplemented
                         }
                     }
                 }
-                self.present(alert, animated: true)
             }
-            let moveAction = UIAction(title: "Move to folder", image: SFSymbols.folder) { (_) in
-                let destVC = FolderTreeVC(currentFolder: self.folderId) { (selectedFolder) in
-                    if let error = State.manager.moveItemToFolder(uuid: folder.uuid, folderId: selectedFolder.uuid) {
-                        self.presentErrorAlert(error)
-                    } else if selectedFolder.uuid != self.folderId {
-                        // item has been moved to a folder on another screen so remove it
-                        self.removeItem(uuid: folder.uuid)
-                    }
-                }
-                let navController = UINavigationController(rootViewController: destVC)
-                self.present(navController, animated: true)
-            }
-            let deleteAction = UIAction(title: "Delete folder", image: SFSymbols.trash, attributes: .destructive) { (_) in
-                let alert = RBDeleteRecipeItemAlert(item: .folder(folder)) { () in
-                    if let error = State.manager.deleteItem(uuid: folder.uuid) {
-                        self.presentErrorAlert(error)
-                    } else {
-                        self.removeItem(uuid: folder.uuid)
-                    }
-                }
-                self.present(alert, animated: true)
-            }
-            return UIMenu(title: "", children: [editAction, moveAction, deleteAction])
         }
     }
 
@@ -316,6 +288,66 @@ class RecipeListVC: UIViewController {
                 self.presentErrorAlert(error)
             } else {
                 self.insertItem(item: .folder(folder))
+            }
+        }
+        self.present(alert, animated: true)
+    }
+
+    func editRecipe(_ action: UIAction, recipe: Recipe) {
+        let destVC = RecipeFormVC(style: .edit)
+        destVC.delegate = self
+        destVC.set(recipe: recipe)
+
+        let navController = UINavigationController(rootViewController: destVC)
+        self.present(navController, animated: true)
+    }
+
+    func editFolder(_ action: UIAction, folder: RecipeFolder) {
+        let alert = RBTextFieldAlert(
+            title: "Edit folder",
+            placeholder: "Enter folder name",
+            text: folder.name,
+            confirmButtonText: "Save"
+        ) { (text) in
+            folder.name = text
+            if let error = State.manager.updateFolder(folder: folder) {
+                self.presentErrorAlert(error)
+            } else {
+                // update the items array with the updated folder
+                if let indexPath = self.findItem(uuid: folder.uuid) {
+                    self.items[indexPath.row] = .folder(folder)
+                    DispatchQueue.main.async {
+                        self.tableView.reloadRows(at: [indexPath], with: .automatic)
+                    }
+                } else {
+                    self.presentErrorAlert(.missingItem(.folder, folder.uuid))
+                }
+            }
+        }
+        self.present(alert, animated: true)
+    }
+
+    func moveItemToFolder(_ action: UIAction, uuid: UUID) {
+        let destVC = FolderTreeVC(currentFolder: self.folderId) { [weak self] (selectedFolder) in
+            guard let self = self else { return }
+
+            if let error = State.manager.moveItemToFolder(uuid: uuid, folderId: selectedFolder.uuid) {
+                self.presentErrorAlert(error)
+            } else if selectedFolder.uuid != self.folderId {
+                // item has been moved to a folder on another screen so remove it
+                self.removeItem(uuid: uuid)
+            }
+        }
+        let navController = UINavigationController(rootViewController: destVC)
+        self.present(navController, animated: true)
+    }
+
+    func deleteItem(_ action: UIAction, item: RecipeItem) {
+        let alert = RBDeleteRecipeItemAlert(item: item) { () in
+            if let error = State.manager.deleteItem(uuid: item.uuid) {
+                self.presentErrorAlert(error)
+            } else {
+                self.removeItem(uuid: item.uuid)
             }
         }
         self.present(alert, animated: true)

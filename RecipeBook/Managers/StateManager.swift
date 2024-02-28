@@ -21,9 +21,10 @@ class State {
         let root: UUID?
         let recipes: [Recipe]
         let folders: [RecipeFolder]
+        let offlineOperationQueue: OperationQueue
 
         static func empty() -> Data {
-            return Data(userId: "", userKey: nil, root: nil, recipes: [], folders: [])
+            return Data(userId: "", userKey: nil, root: nil, recipes: [], folders: [], offlineOperationQueue: OperationQueue())
         }
     }
 
@@ -32,6 +33,7 @@ class State {
     // user ID and key
     var userId: String = ""
     var userKey: UUID? = nil
+
     // ID of the root folder
     var root: UUID? = nil
     // recipe/folder lists
@@ -41,6 +43,11 @@ class State {
     // managed volatilely, not put in storage
     var recipeMap: [UUID: Recipe] = [:]
     var folderMap: [UUID: RecipeFolder] = [:]
+
+    // has communication with the server been established?
+    var serverCommunicationEstablished: Bool = false
+    // queue up operations that were done while offline
+    var offlineOperationQueue: OperationQueue = OperationQueue()
 
     private init() {}
 
@@ -66,6 +73,7 @@ class State {
             self.root = data.root
             self.loadRecipes(recipes: data.recipes)
             self.loadFolders(folders: data.folders)
+            self.offlineOperationQueue = data.offlineOperationQueue
             return nil
 
         case .failure(let error):
@@ -79,9 +87,14 @@ class State {
             userKey: self.userKey,
             root: self.root,
             recipes: self.recipes,
-            folders: self.folders
+            folders: self.folders,
+            offlineOperationQueue: self.offlineOperationQueue
         )
         return PersistenceManager.storeState(state: data)
+    }
+
+    func processOfflineOperations(handler: @escaping (RBError?) -> ()) {
+        self.offlineOperationQueue.processOperations(handler: handler)
     }
 
     func addUserInfo(info: UserLoginResponse) -> RBError? {
@@ -120,7 +133,11 @@ class State {
             return .missingItem(.folder, recipe.folderId)
         }
 
-        API.createItem(recipe: recipe)
+        if self.serverCommunicationEstablished {
+            API.createItem(recipe: recipe, async: true)
+        } else {
+            self.offlineOperationQueue.addOperation(.create, recipes: [recipe])
+        }
         return self.store()
     }
 
@@ -138,7 +155,11 @@ class State {
             }
         }
 
-        API.createItem(folder: folder)
+        if self.serverCommunicationEstablished {
+            API.createItem(folder: folder, async: true)
+        } else {
+            self.offlineOperationQueue.addOperation(.create, folders: [folder])
+        }
         return self.store()
     }
 
@@ -147,7 +168,12 @@ class State {
             return .missingItem(.recipe, updatedRecipe.uuid)
         }
         recipe.update(with: updatedRecipe)
-        API.updateItems(recipes: [recipe])
+
+        if self.serverCommunicationEstablished {
+            API.updateItems(recipes: [recipe], async: true)
+        } else {
+            self.offlineOperationQueue.addOperation(.update, recipes: [recipe])
+        }
         return self.store()
     }
 
@@ -156,7 +182,12 @@ class State {
             return .missingItem(.folder, updatedFolder.uuid)
         }
         folder.update(with: updatedFolder)
-        API.updateItems(folders: [folder])
+
+        if self.serverCommunicationEstablished {
+            API.updateItems(folders: [folder], async: true)
+        } else {
+            self.offlineOperationQueue.addOperation(.update, folders: [folder])
+        }
         return self.store()
     }
 
@@ -222,7 +253,11 @@ class State {
             }
         }
 
-        API.deleteItems(recipes: recipes, folders: folders)
+        if self.serverCommunicationEstablished {
+            API.deleteItems(recipes: recipes, folders: folders, async: true)
+        } else {
+            self.offlineOperationQueue.addOperation(.delete, recipeUUIDs: recipes, folderUUIDs: folders)
+        }
         return self.store()
     }
 
@@ -333,7 +368,11 @@ class State {
             }
         }
 
-        API.updateItems(recipes: recipes, folders: folders)
+        if self.serverCommunicationEstablished {
+            API.updateItems(recipes: recipes, folders: folders, async: true)
+        } else {
+            self.offlineOperationQueue.addOperation(.update, recipes: recipes, folders: folders)
+        }
         return self.store()
     }
 

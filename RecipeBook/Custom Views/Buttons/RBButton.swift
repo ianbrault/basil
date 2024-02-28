@@ -29,14 +29,7 @@ class RBButton: UIButton {
         self.layer.cornerRadius = 10
         self.layer.masksToBounds = false
 
-        self.layer.shadowColor = UIColor.gray.cgColor
-        self.layer.shadowOpacity = 0.2
-        self.layer.shadowOffset = CGSize(width: 2, height: 2)
-        self.layer.shadowRadius = 5
-        self.layer.shadowPath = UIBezierPath(rect: self.bounds).cgPath
-
-        self.layer.shouldRasterize = true
-        self.layer.rasterizationScale = UIScreen.main.scale
+        self.addShadow()
     }
 
     private func configure(title: String, image: UIImage? = nil, style: Style) {

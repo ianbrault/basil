@@ -28,10 +28,6 @@ class SceneDelegate: UIResponder, RBWindowSceneDelegate {
         // TEMPORARY: write back the state immediately in case we have cleared out an old version
         let _ = State.manager.store()
 
-        // FIXME: DEBUG
-        // State.manager.userId = ""
-        // FIXME: END DEBUG
-
         self.window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         self.window?.windowScene = windowScene
         // check if the user has been registered
@@ -41,7 +37,6 @@ class SceneDelegate: UIResponder, RBWindowSceneDelegate {
             self.window?.rootViewController = vc
             self.window?.makeKeyAndVisible()
         } else {
-            // TODO: add a "check-in" with the server
             self.window?.rootViewController = RBTabBarController()
             self.window?.makeKeyAndVisible()
         }
@@ -49,6 +44,9 @@ class SceneDelegate: UIResponder, RBWindowSceneDelegate {
 
     func sceneDidAddUser() {
         guard let window = self.window else { return }
+
+        // this is triggered following login/registration which requires a successful server connection
+        State.manager.serverCommunicationEstablished = true
 
         window.rootViewController = RBTabBarController()
         UIView.transition(with: window, duration: 0.6, options: .transitionCrossDissolve, animations: {})

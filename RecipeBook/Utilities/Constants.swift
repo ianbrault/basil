@@ -29,4 +29,5 @@ enum SFSymbols {
     static let password = UIImage(systemName: "lock")
     static let reorder = UIImage(systemName: "slider.horizontal.3")
     static let trash = UIImage(systemName: "trash")
+    static let warning = UIImage(systemName: "exclamationmark.triangle.fill")
 }

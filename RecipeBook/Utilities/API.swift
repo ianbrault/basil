@@ -7,6 +7,11 @@
 
 import UIKit
 
+struct UserInfoBody: Codable {
+    let userId: String
+    let userKey: UUID?
+}
+
 struct UserLoginBody: Codable {
     let email: String
     let password: String
@@ -43,6 +48,9 @@ struct RecipesFoldersUUIDBody: Codable {
 
 struct API {
 
+    typealias Handler = (RBError?) -> ()
+    typealias BodyHandler<T> = (Result<T, RBError>) -> ()
+
     static func parseResponse<T: Decodable>(body contents: Data?) -> Result<T, RBError> {
         guard let contents else {
             return .failure(.missingHTTPData)
@@ -56,7 +64,30 @@ struct API {
         }
     }
 
-    static func asyncCall<T: Encodable>(_ address: Network.Address, body: T) {
+    static private func _call<T: Encodable>(_ address: Network.Address, body: T, async: Bool = false, handler: Handler? = nil) {
+        Network.post(address, body: body) { (response) in
+            guard let handler else { return }
+            switch response {
+            case .success(_):
+                handler(nil)
+            case .failure(let error):
+                handler(error)
+            }
+        }
+    }
+
+    static func call<T: Encodable>(_ address: Network.Address, body: T, async: Bool = false, handler: Handler? = nil) {
+        if async {
+            DispatchQueue.global(qos: .userInitiated).async {
+                self._call(address, body: body, async: async, handler: handler)
+            }
+        } else {
+            self._call(address, body: body, async: async, handler: handler)
+        }
+    }
+
+    /*
+    static func asyncCall<T: Encodable>(_ address: Network.Address, body: T, handler: Handler? = nil) {
         DispatchQueue.global(qos: .userInitiated).async {
             Network.post(address, body: body) { (response) in
                 switch response {
@@ -72,8 +103,21 @@ struct API {
             }
         }
     }
+    */
 
-    static func login(email: String, password: String, handler: @escaping (Result<UserLoginResponse, RBError>) -> ()) {
+    static func pokeServer(handler: @escaping Handler) {
+        let body = UserInfoBody(userId: State.manager.userId, userKey: State.manager.userKey)
+        Network.post(.poke, body: body) { (response) in
+            switch response {
+            case .success(_):
+                handler(nil)
+            case .failure(let error):
+                handler(error)
+            }
+        }
+    }
+
+    static func login(email: String, password: String, handler: @escaping BodyHandler<UserLoginResponse>) {
         let body = UserLoginBody(email: email, password: password)
         Network.post(.login, body: body) { (response) in
             let result: Result<UserLoginResponse, RBError> = response.flatMap(self.parseResponse)
@@ -81,7 +125,7 @@ struct API {
         }
     }
 
-    static func register(email: String, password: String, handler: @escaping (Result<UserLoginResponse, RBError>) -> ()) {
+    static func register(email: String, password: String, handler: @escaping BodyHandler<UserLoginResponse>) {
         let body = UserLoginBody(email: email, password: password)
         Network.post(.register, body: body) { (response) in
             let result: Result<UserLoginResponse, RBError> = response.flatMap(self.parseResponse)
@@ -89,27 +133,27 @@ struct API {
         }
     }
 
-    static func createItem(recipe: Recipe? = nil, folder: RecipeFolder? = nil) {
+    static func createItem(recipe: Recipe? = nil, folder: RecipeFolder? = nil, async: Bool = false, handler: Handler? = nil) {
         let body = RecipeFolderBody(
             userId: State.manager.userId, userKey: State.manager.userKey, 
             recipe: recipe, folder: folder
         )
-        self.asyncCall(.create, body: body)
+        self.call(.create, body: body, async: async, handler: handler)
     }
 
-    static func updateItems(recipes: [Recipe] = [], folders: [RecipeFolder] = []) {
+    static func updateItems(recipes: [Recipe] = [], folders: [RecipeFolder] = [], async: Bool = false, handler: Handler? = nil) {
         let body = RecipesFoldersBody(
             userId: State.manager.userId, userKey: State.manager.userKey,
             recipes: recipes, folders: folders
         )
-        self.asyncCall(.update, body: body)
+        self.call(.update, body: body, async: async, handler: handler)
     }
 
-    static func deleteItems(recipes: [UUID] = [], folders: [UUID] = []) {
+    static func deleteItems(recipes: [UUID] = [], folders: [UUID] = [], async: Bool = false, handler: Handler? = nil) {
         let body = RecipesFoldersUUIDBody(
             userId: State.manager.userId, userKey: State.manager.userKey,
             recipes: recipes, folders: folders
         )
-        self.asyncCall(.delete, body: body)
+        self.call(.delete, body: body, async: async, handler: handler)
     }
 }
