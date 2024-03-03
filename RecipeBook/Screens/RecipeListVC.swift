@@ -153,12 +153,12 @@ class RecipeListVC: UIViewController {
                         self.view.window?.addSubview(errorView)
                         self.view.window?.bringSubviewToFront(errorView)
                     }
-                } else {
-                    State.manager.processOfflineOperations { (error) in
+                } else if PersistenceManager.loadNeedsToUpdateServer() {
+                    API.updateUser { (error) in
                         if let error {
-                            // TODO: unimplemented
+                            self.presentErrorAlert(error)
                         } else {
-                            // TODO: unimplemented
+                            PersistenceManager.storeNeedsToUpdateServer(false)
                         }
                     }
                 }

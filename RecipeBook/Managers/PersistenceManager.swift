@@ -13,11 +13,16 @@ enum PersistenceManager {
 
     enum Keys {
         static let dataVersion = "dataVersion"
+        static let needsToUpdateServer = "needsToUpdateServer"
         static let state = "state"
     }
 
     static func loadDataVersion() -> Int {
         return self.defaults.integer(forKey: Keys.dataVersion)
+    }
+
+    static func loadNeedsToUpdateServer() -> Bool {
+        return self.defaults.bool(forKey: Keys.needsToUpdateServer)
     }
 
     static func loadState() -> Result<State.Data, RBError> {
@@ -38,17 +43,21 @@ enum PersistenceManager {
         }
     }
 
-    static func storeState(state: State.Data) -> RBError? {
+    static func storeDataVersion(_ version: Int) {
+        self.defaults.set(version, forKey: Keys.dataVersion)
+    }
+
+    static func storeNeedsToUpdateServer(_ value: Bool) {
+        self.defaults.set(value, forKey: Keys.needsToUpdateServer)
+    }
+
+    static func storeState(state: State.Data) {
         // store the data version alongside the state
         self.defaults.set(self.dataVersion, forKey: Keys.dataVersion)
 
-        do {
-            let encoder = JSONEncoder()
-            let encodedState = try encoder.encode(state)
-            self.defaults.set(encodedState, forKey: Keys.state)
-            return nil
-        } catch {
-            return .failedToSaveRecipes
-        }
+        let encoder = JSONEncoder()
+        // NOTE: unwrap the JSONEncoder result, we should never have invalid JSON data
+        let encodedState = try! encoder.encode(state)
+        self.defaults.set(encodedState, forKey: Keys.state)
     }
 }

@@ -10,29 +10,23 @@ import Foundation
 struct Network {
 
     enum Address {
-        case create
-        case delete
         case login
         case poke
         case register
         case update
 
         var url: URL {
-            let baseURL = "http://127.0.0.1:3030"
-            // let baseURL = "https://brault.dev"
+            // let baseURL = "http://127.0.0.1:3030"
+            let baseURL = "https://brault.dev"
             switch self {
-            case .create:
-                return URL(string: "\(baseURL)/recipes/create")!
-            case .delete:
-                return URL(string: "\(baseURL)/recipes/delete")!
             case .login:
                 return URL(string: "\(baseURL)/recipes/login")!
             case .poke:
-                return URL(string: "\(baseURL)/recipes/poke")!
+                return URL(string: "\(baseURL)/recipes/user/poke")!
             case .register:
                 return URL(string: "\(baseURL)/recipes/register")!
             case .update:
-                return URL(string: "\(baseURL)/recipes/update")!
+                return URL(string: "\(baseURL)/recipes/user/update")!
             }
         }
     }

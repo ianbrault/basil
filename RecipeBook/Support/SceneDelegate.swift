@@ -26,10 +26,12 @@ class SceneDelegate: UIResponder, RBWindowSceneDelegate {
             print("ERROR: failed to load state: \(error.localizedDescription)")
         }
         // TEMPORARY: write back the state immediately in case we have cleared out an old version
-        let _ = State.manager.store()
+        let _ = State.manager.storeToLocal()
 
         self.window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         self.window?.windowScene = windowScene
+        State.manager.window = self.window
+
         // check if the user has been registered
         if State.manager.userId.isEmpty {
             let vc = OnboardingVC()

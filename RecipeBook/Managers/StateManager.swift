@@ -5,7 +5,7 @@
 //  Created by Ian Brault on 4/30/23.
 //
 
-import Foundation
+import UIKit
 
 class State {
 
@@ -21,14 +21,16 @@ class State {
         let root: UUID?
         let recipes: [Recipe]
         let folders: [RecipeFolder]
-        let offlineOperationQueue: OperationQueue
 
         static func empty() -> Data {
-            return Data(userId: "", userKey: nil, root: nil, recipes: [], folders: [], offlineOperationQueue: OperationQueue())
+            return Data(userId: "", userKey: nil, root: nil, recipes: [], folders: [])
         }
     }
 
     static let manager = State()
+
+    // window used to present error alerts
+    var window: UIWindow?
 
     // user ID and key
     var userId: String = ""
@@ -46,8 +48,6 @@ class State {
 
     // has communication with the server been established?
     var serverCommunicationEstablished: Bool = false
-    // queue up operations that were done while offline
-    var offlineOperationQueue: OperationQueue = OperationQueue()
 
     private init() {}
 
@@ -73,7 +73,6 @@ class State {
             self.root = data.root
             self.loadRecipes(recipes: data.recipes)
             self.loadFolders(folders: data.folders)
-            self.offlineOperationQueue = data.offlineOperationQueue
             return nil
 
         case .failure(let error):
@@ -81,23 +80,36 @@ class State {
         }
     }
 
-    func store() -> RBError? {
+    func storeToLocal() {
         let data = Data(
             userId: self.userId,
             userKey: self.userKey,
             root: self.root,
             recipes: self.recipes,
-            folders: self.folders,
-            offlineOperationQueue: self.offlineOperationQueue
+            folders: self.folders
         )
-        return PersistenceManager.storeState(state: data)
+        PersistenceManager.storeState(state: data)
     }
 
-    func processOfflineOperations(handler: @escaping (RBError?) -> ()) {
-        self.offlineOperationQueue.processOperations(handler: handler)
+    func store() {
+        PersistenceManager.storeNeedsToUpdateServer(true)
+        // first store to persistence storage
+        self.storeToLocal()
+        // then push to the server asynchronously
+        if self.serverCommunicationEstablished {
+            API.updateUser(async: true) { (error) in
+                if let error {
+                    // present an alert on the main window and disable further communication with the server
+                    self.window?.rootViewController?.presentErrorAlert(error)
+                    self.serverCommunicationEstablished = false
+                } else {
+                    PersistenceManager.storeNeedsToUpdateServer(false)
+                }
+            }
+        }
     }
 
-    func addUserInfo(info: UserLoginResponse) -> RBError? {
+    func addUserInfo(info: API.UserInfo) {
         self.userId = info.id
         self.userKey = info.key
         self.root = info.root
@@ -110,7 +122,7 @@ class State {
             self.folderMap[folder.uuid] = folder
         }
 
-        return self.store()
+        self.storeToLocal()
     }
 
     func getRecipe(uuid: UUID) -> Recipe? {
@@ -133,12 +145,8 @@ class State {
             return .missingItem(.folder, recipe.folderId)
         }
 
-        if self.serverCommunicationEstablished {
-            API.createItem(recipe: recipe, async: true)
-        } else {
-            self.offlineOperationQueue.addOperation(.create, recipes: [recipe])
-        }
-        return self.store()
+        self.store()
+        return nil
     }
 
     func addFolder(folder: RecipeFolder) -> RBError? {
@@ -155,12 +163,8 @@ class State {
             }
         }
 
-        if self.serverCommunicationEstablished {
-            API.createItem(folder: folder, async: true)
-        } else {
-            self.offlineOperationQueue.addOperation(.create, folders: [folder])
-        }
-        return self.store()
+        self.store()
+        return nil
     }
 
     func updateRecipe(recipe updatedRecipe: Recipe) -> RBError? {
@@ -169,12 +173,8 @@ class State {
         }
         recipe.update(with: updatedRecipe)
 
-        if self.serverCommunicationEstablished {
-            API.updateItems(recipes: [recipe], async: true)
-        } else {
-            self.offlineOperationQueue.addOperation(.update, recipes: [recipe])
-        }
-        return self.store()
+        self.store()
+        return nil
     }
 
     func updateFolder(folder updatedFolder: RecipeFolder) -> RBError? {
@@ -183,12 +183,8 @@ class State {
         }
         folder.update(with: updatedFolder)
 
-        if self.serverCommunicationEstablished {
-            API.updateItems(folders: [folder], async: true)
-        } else {
-            self.offlineOperationQueue.addOperation(.update, folders: [folder])
-        }
-        return self.store()
+        self.store()
+        return nil
     }
 
     func removeRecipe(recipe: Recipe) {
@@ -253,12 +249,8 @@ class State {
             }
         }
 
-        if self.serverCommunicationEstablished {
-            API.deleteItems(recipes: recipes, folders: folders, async: true)
-        } else {
-            self.offlineOperationQueue.addOperation(.delete, recipeUUIDs: recipes, folderUUIDs: folders)
-        }
-        return self.store()
+        self.store()
+        return nil
     }
 
     func moveRecipeToFolder(recipe: Recipe, folderId: UUID) -> RBError? {
@@ -368,12 +360,8 @@ class State {
             }
         }
 
-        if self.serverCommunicationEstablished {
-            API.updateItems(recipes: recipes, folders: folders, async: true)
-        } else {
-            self.offlineOperationQueue.addOperation(.update, recipes: recipes, folders: folders)
-        }
-        return self.store()
+        self.store()
+        return nil
     }
 
     func clear() {
