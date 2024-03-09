@@ -145,16 +145,18 @@ class RecipeListVC: UIViewController {
             API.pokeServer { (error) in
                 if let _ = error {
                     DispatchQueue.main.async {
-                        let errorView = RBModalView(
-                            image: SFSymbols.warning?.withTintColor(.systemYellow, renderingMode: .alwaysOriginal),
-                            text: "Failed to connect to the server",
-                            in: self.view
-                        )
+                        let errorView = RBNoConnectionView(in: self.view)
                         self.view.window?.addSubview(errorView)
                         self.view.window?.bringSubviewToFront(errorView)
                     }
                 } else if PersistenceManager.loadNeedsToUpdateServer() {
+                    // show the view while the local data is pushed to the server
+                    let processingView = RBProcessingView(in: self.view)
+                    self.view.window?.addSubview(processingView)
+                    self.view.window?.bringSubviewToFront(processingView)
+
                     API.updateUser { (error) in
+                        processingView.dismissView()
                         if let error {
                             self.presentErrorAlert(error)
                         } else {
