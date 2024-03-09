@@ -149,7 +149,7 @@ class RecipeListVC: UIViewController {
                         self.view.window?.addSubview(errorView)
                         self.view.window?.bringSubviewToFront(errorView)
                     }
-                } else if PersistenceManager.loadNeedsToUpdateServer() {
+                } else if PersistenceManager.shared.needsToUpdateServer {
                     // show the view while the local data is pushed to the server
                     let processingView = RBProcessingView(in: self.view)
                     self.view.window?.addSubview(processingView)
@@ -160,7 +160,7 @@ class RecipeListVC: UIViewController {
                         if let error {
                             self.presentErrorAlert(error)
                         } else {
-                            PersistenceManager.storeNeedsToUpdateServer(false)
+                            PersistenceManager.shared.needsToUpdateServer = false
                         }
                     }
                 }

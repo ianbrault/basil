@@ -65,19 +65,13 @@ class State {
         }
     }
 
-    func load() -> RBError? {
-        switch PersistenceManager.loadState() {
-        case .success(let data):
-            self.userId = data.userId
-            self.userKey = data.userKey
-            self.root = data.root
-            self.loadRecipes(recipes: data.recipes)
-            self.loadFolders(folders: data.folders)
-            return nil
-
-        case .failure(let error):
-            return error
-        }
+    func load() {
+        let data = PersistenceManager.shared.state
+        self.userId = data.userId
+        self.userKey = data.userKey
+        self.root = data.root
+        self.loadRecipes(recipes: data.recipes)
+        self.loadFolders(folders: data.folders)
     }
 
     func storeToLocal() {
@@ -88,11 +82,11 @@ class State {
             recipes: self.recipes,
             folders: self.folders
         )
-        PersistenceManager.storeState(state: data)
+        PersistenceManager.shared.state = data
     }
 
     func store() {
-        PersistenceManager.storeNeedsToUpdateServer(true)
+        PersistenceManager.shared.needsToUpdateServer = true
         // first store to persistence storage
         self.storeToLocal()
         // then push to the server asynchronously
@@ -103,7 +97,7 @@ class State {
                     self.window?.rootViewController?.presentErrorAlert(error)
                     self.serverCommunicationEstablished = false
                 } else {
-                    PersistenceManager.storeNeedsToUpdateServer(false)
+                    PersistenceManager.shared.needsToUpdateServer = false
                 }
             }
         }

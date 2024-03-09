@@ -7,9 +7,14 @@
 
 import Foundation
 
-enum PersistenceManager {
-    static private let defaults = UserDefaults.standard
-    static private let dataVersion = 1
+class PersistenceManager {
+
+    static let shared = PersistenceManager()
+
+    private let defaults = UserDefaults.standard
+    private let decoder = JSONDecoder()
+    private let encoder = JSONEncoder()
+    private let version = 1
 
     enum Keys {
         static let dataVersion = "dataVersion"
@@ -17,47 +22,41 @@ enum PersistenceManager {
         static let state = "state"
     }
 
-    static func loadDataVersion() -> Int {
-        return self.defaults.integer(forKey: Keys.dataVersion)
-    }
-
-    static func loadNeedsToUpdateServer() -> Bool {
-        return self.defaults.bool(forKey: Keys.needsToUpdateServer)
-    }
-
-    static func loadState() -> Result<State.Data, RBError> {
-        guard let stateData = self.defaults.object(forKey: Keys.state) as? Data else {
-            // if this is nil, nothing has been saved before
-            return .success(.empty())
+    var dataVersion: Int {
+        get {
+            return self.defaults.integer(forKey: Keys.dataVersion)
         }
-
-        do {
-            let decoder = JSONDecoder()
-            let state = try decoder.decode(State.Data.self, from: stateData)
-            return .success(state)
-        } catch {
-            // NOTE: this should be updated at some point in the future, but since we are
-            // iterating at the moment, clear out the state when the data format changes
-            print("ERROR: failed to decode state: \(error.localizedDescription)")
-            return .success(.empty())
+        set {
+            self.defaults.set(newValue, forKey: Keys.dataVersion)
         }
     }
 
-    static func storeDataVersion(_ version: Int) {
-        self.defaults.set(version, forKey: Keys.dataVersion)
+    var needsToUpdateServer: Bool {
+        get {
+            return self.defaults.bool(forKey: Keys.needsToUpdateServer)
+        }
+        set {
+            self.defaults.set(newValue, forKey: Keys.needsToUpdateServer)
+        }
     }
 
-    static func storeNeedsToUpdateServer(_ value: Bool) {
-        self.defaults.set(value, forKey: Keys.needsToUpdateServer)
-    }
-
-    static func storeState(state: State.Data) {
-        // store the data version alongside the state
-        self.defaults.set(self.dataVersion, forKey: Keys.dataVersion)
-
-        let encoder = JSONEncoder()
-        // NOTE: unwrap the JSONEncoder result, we should never have invalid JSON data
-        let encodedState = try! encoder.encode(state)
-        self.defaults.set(encodedState, forKey: Keys.state)
+    var state: State.Data {
+        get {
+            guard let stateData = self.defaults.object(forKey: Keys.state) as? Data else {
+                // if this is nil, nothing has been saved before
+                return .empty()
+            }
+            // NOTE: an assumption is  made that the stored state is valid JSON; this will be true
+            // unless the data version is out of date, so this relies on that case being handled
+            // during initialization at a higher level
+            return try! self.decoder.decode(State.Data.self, from: stateData)
+        }
+        set {
+            // store the data version alongside the state
+            self.defaults.set(self.dataVersion, forKey: Keys.dataVersion)
+            // NOTE: unwrap the JSONEncoder result, we should never have invalid JSON data
+            let encoded = try! self.encoder.encode(newValue)
+            self.defaults.set(encoded, forKey: Keys.state)
+        }
     }
 }
