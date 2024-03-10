@@ -12,6 +12,6 @@ class GroceryListVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .systemBackground
-        self.showEmptyStateView(in: self.view)
+        self.showEmptyStateView(.groceries, in: self.view)
     }
 }

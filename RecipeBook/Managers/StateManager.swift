@@ -48,6 +48,8 @@ class State {
 
     // has communication with the server been established?
     var serverCommunicationEstablished: Bool = false
+    // prevent unnecessary pokes if we were not able to establish server communication
+    var serverPoked: Bool = false
 
     private init() {}
 

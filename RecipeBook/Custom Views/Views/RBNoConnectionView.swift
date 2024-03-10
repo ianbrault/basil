@@ -38,22 +38,12 @@ class RBNoConnectionView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    private func getImageSize(image: UIImage?) -> CGSize {
-        if let image {
-            let scaleFactor = self.imageSize / image.size.width
-            let height = image.size.height * scaleFactor
-            return CGSize(width: self.imageSize, height: height)
-        } else {
-            return .zero
-        }
-    }
-
     private func configureImageView() {
         self.addSubview(self.imageView)
         self.imageView.translatesAutoresizingMaskIntoConstraints = false
 
         let image = SFSymbols.warning?.withTintColor(.systemYellow, renderingMode: .alwaysOriginal)
-        let targetSize = self.getImageSize(image: image)
+        let targetSize = image?.getImageSize(size: self.imageSize) ?? .zero
         self.imageView.image = image?.imageWith(newSize: targetSize).withRenderingMode(.alwaysOriginal)
 
         NSLayoutConstraint.activate([

@@ -24,11 +24,10 @@ extension UIViewController {
         NotificationCenter.default.addObserver(self, selector: selector, name: name, object: nil)
     }
 
-    func showEmptyStateView(in view: UIView) {
+    func showEmptyStateView(_ style: RBEmptyStateView.Style, in view: UIView) {
         self.removeEmptyStateView(in: view)
 
-        let emptyStateView = RBEmptyStateView()
-        emptyStateView.frame = view.bounds
+        let emptyStateView = RBEmptyStateView(style, frame: view.bounds)
         view.addSubview(emptyStateView)
     }
 

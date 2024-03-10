@@ -9,6 +9,20 @@ import UIKit
 
 class RBEmptyStateView: UIView {
 
+    enum Style {
+        case recipes
+        case groceries
+
+        var systemName: String {
+            switch self {
+            case .recipes:
+                return "text.book.closed"
+            case .groceries:
+                return "cart"
+            }
+        }
+    }
+
     let logoImageView = UIImageView()
     let messageLabel = RBTitleLabel(fontSize: 16, weight: .regular, textAlignment: .center)
 
@@ -17,25 +31,33 @@ class RBEmptyStateView: UIView {
     let imageSize: CGFloat = 72
     let lineSpacing: CGFloat = 4
 
-    override init(frame: CGRect) {
+    init(_ style: Style, frame: CGRect) {
         super.init(frame: frame)
-        self.configure()
+        self.configure(style: style)
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    private func configure() {
-        self.configureLogoImageView()
-        self.configureMessageLabel()
+    private func configure(style: Style) {
+        self.configureLogoImageView(style: style)
+        self.configureMessageLabel(style: style)
     }
 
-    func getMessageAttributedText() -> NSAttributedString {
+    func getMessageAttributedText(style: Style) -> NSAttributedString {
         let imageAttachment = NSTextAttachment()
         imageAttachment.image = SFSymbols.add?.withTintColor(.secondaryLabel)
 
-        let message = NSMutableAttributedString(string: "Add a recipe using the ")
+        var item: String
+        switch style {
+        case .recipes:
+            item = "a recipe"
+        case .groceries:
+            item = "groceries"
+        }
+
+        let message = NSMutableAttributedString(string: "Add \(item) using the ")
         message.append(NSAttributedString(attachment: imageAttachment))
         message.append(NSAttributedString(string: " button in the top-right"))
 
@@ -49,11 +71,11 @@ class RBEmptyStateView: UIView {
         return string
     }
 
-    private func configureLogoImageView() {
+    private func configureLogoImageView(style: Style) {
         self.addSubview(self.logoImageView)
 
         let symbol = UIImage(
-            systemName: "text.book.closed",
+            systemName: style.systemName,
             withConfiguration: UIImage.SymbolConfiguration(pointSize: self.imageSize, weight: .light))
         let image = symbol?.withTintColor(.tertiaryLabel, renderingMode: .alwaysOriginal)
 
@@ -68,10 +90,10 @@ class RBEmptyStateView: UIView {
         ])
     }
 
-    private func configureMessageLabel() {
+    private func configureMessageLabel(style: Style) {
         self.addSubview(self.messageLabel)
 
-        self.messageLabel.attributedText = self.getMessageAttributedText()
+        self.messageLabel.attributedText = self.getMessageAttributedText(style: style)
         self.messageLabel.numberOfLines = 3
         self.messageLabel.textColor = .secondaryLabel
 

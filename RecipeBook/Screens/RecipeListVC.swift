@@ -34,7 +34,7 @@ class RecipeListVC: UIViewController {
         self.configureNavigationBar()
         self.loadItems()
         // check-in with the server if it has not been done already
-        if !State.manager.serverCommunicationEstablished {
+        if !State.manager.serverPoked {
             self.establishServerCommunication()
         }
     }
@@ -142,6 +142,7 @@ class RecipeListVC: UIViewController {
     private func establishServerCommunication() {
         // run the server poke in the background to prevent blocking the main UI
         DispatchQueue.global(qos: .userInitiated).async {
+            State.manager.serverPoked = true
             API.pokeServer { (error) in
                 if let _ = error {
                     DispatchQueue.main.async {
@@ -149,18 +150,21 @@ class RecipeListVC: UIViewController {
                         self.view.window?.addSubview(errorView)
                         self.view.window?.bringSubviewToFront(errorView)
                     }
-                } else if PersistenceManager.shared.needsToUpdateServer {
-                    // show the view while the local data is pushed to the server
-                    let processingView = RBProcessingView(in: self.view)
-                    self.view.window?.addSubview(processingView)
-                    self.view.window?.bringSubviewToFront(processingView)
+                } else {
+                    State.manager.serverCommunicationEstablished = true
+                    if PersistenceManager.shared.needsToUpdateServer {
+                        // show the view while the local data is pushed to the server
+                        let processingView = RBProcessingView(in: self.view)
+                        self.view.window?.addSubview(processingView)
+                        self.view.window?.bringSubviewToFront(processingView)
 
-                    API.updateUser { (error) in
-                        processingView.dismissView()
-                        if let error {
-                            self.presentErrorAlert(error)
-                        } else {
-                            PersistenceManager.shared.needsToUpdateServer = false
+                        API.updateUser { (error) in
+                            processingView.dismissView()
+                            if let error {
+                                self.presentErrorAlert(error)
+                            } else {
+                                PersistenceManager.shared.needsToUpdateServer = false
+                            }
                         }
                     }
                 }
@@ -172,7 +176,7 @@ class RecipeListVC: UIViewController {
         let folder = State.manager.getFolder(uuid: self.folderId)!
         // show the empty state view if there are no items
         if folder.recipes.isEmpty && folder.subfolders.isEmpty {
-            self.showEmptyStateView(in: self.view)
+            self.showEmptyStateView(.recipes, in: self.view)
         } else {
             // load subfolder/recipe items using the IDs from the folder
             var folderItems: [RecipeItem] = []
@@ -232,7 +236,7 @@ class RecipeListVC: UIViewController {
                 self.tableView.deleteRows(at: [indexPath], with: .automatic)
                 // if this was the last recipe, show the empty state view
                 if self.items.isEmpty {
-                    self.showEmptyStateView(in: self.view)
+                    self.showEmptyStateView(.recipes, in: self.view)
                 }
             }
         } else {
@@ -263,7 +267,7 @@ class RecipeListVC: UIViewController {
             self.tableView.deleteRows(at: indexPaths, with: .automatic)
             // if these were the last recipes, show the empty state view
             if self.items.isEmpty {
-                self.showEmptyStateView(in: self.view)
+                self.showEmptyStateView(.recipes, in: self.view)
             }
         }
     }
