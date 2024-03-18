@@ -35,6 +35,8 @@
 		E38FF66E2AA5472A00D8ED7A /* Parse.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38FF66D2AA5472A00D8ED7A /* Parse.swift */; };
 		E38FF6702AA584A500D8ED7A /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38FF66F2AA584A500D8ED7A /* Network.swift */; };
 		E391D8A82AAEB6E400265060 /* RecipeTitleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E391D8A72AAEB6E400265060 /* RecipeTitleCell.swift */; };
+		E3931E542B9D46C70015A127 /* Grocery.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3931E532B9D46C70015A127 /* Grocery.swift */; };
+		E3931E562B9D61930015A127 /* GroceryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3931E552B9D61930015A127 /* GroceryCell.swift */; };
 		E39D32A72B16DA4F00D7511B /* RBIconTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39D32A62B16DA4F00D7511B /* RBIconTextField.swift */; };
 		E39D32A92B1AC02100D7511B /* UIImage+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39D32A82B1AC02100D7511B /* UIImage+Ext.swift */; };
 		E39D32AB2B1D70FF00D7511B /* Security.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39D32AA2B1D70FF00D7511B /* Security.swift */; };
@@ -91,6 +93,8 @@
 		E38FF66D2AA5472A00D8ED7A /* Parse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parse.swift; sourceTree = "<group>"; };
 		E38FF66F2AA584A500D8ED7A /* Network.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
 		E391D8A72AAEB6E400265060 /* RecipeTitleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeTitleCell.swift; sourceTree = "<group>"; };
+		E3931E532B9D46C70015A127 /* Grocery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Grocery.swift; sourceTree = "<group>"; };
+		E3931E552B9D61930015A127 /* GroceryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryCell.swift; sourceTree = "<group>"; };
 		E39D32A62B16DA4F00D7511B /* RBIconTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBIconTextField.swift; sourceTree = "<group>"; };
 		E39D32A82B1AC02100D7511B /* UIImage+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Ext.swift"; sourceTree = "<group>"; };
 		E39D32AA2B1D70FF00D7511B /* Security.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Security.swift; sourceTree = "<group>"; };
@@ -169,6 +173,7 @@
 				E3427C0F29E15D1B002C81E2 /* RecipeIngredientCell.swift */,
 				E3011DD229E38D7D00490919 /* RecipeInstructionCell.swift */,
 				E391D8A72AAEB6E400265060 /* RecipeTitleCell.swift */,
+				E3931E552B9D61930015A127 /* GroceryCell.swift */,
 			);
 			path = Cells;
 			sourceTree = "<group>";
@@ -280,6 +285,7 @@
 				E3B1C73829CD205C00736C96 /* Recipe.swift */,
 				E336B63729FDF7D20025CC38 /* RecipeFolder.swift */,
 				E3C466052A00B2D100791576 /* RecipeItem.swift */,
+				E3931E532B9D46C70015A127 /* Grocery.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -401,6 +407,7 @@
 				E3C1D3802B083004002E26D1 /* RBButton.swift in Sources */,
 				E349B13A29DFDB2D0097A338 /* PersistenceManager.swift in Sources */,
 				E3C1D3772B01F282002E26D1 /* OnboardingVC.swift in Sources */,
+				E3931E542B9D46C70015A127 /* Grocery.swift in Sources */,
 				E3427C1029E15D1B002C81E2 /* RecipeIngredientCell.swift in Sources */,
 				E349B14229E002100097A338 /* RBDeleteRecipeItemAlert.swift in Sources */,
 				E3C1D37E2B07004C002E26D1 /* RegisterVC.swift in Sources */,
@@ -417,6 +424,7 @@
 				E3E3E9632A0892F7006A9E00 /* RBErrorAlertController.swift in Sources */,
 				E3B1C73E29CE1E9600736C96 /* RecipeCell.swift in Sources */,
 				E3573E6929CC16DC000F7877 /* GroceryListVC.swift in Sources */,
+				E3931E562B9D61930015A127 /* GroceryCell.swift in Sources */,
 				E3573E6629CC16C1000F7877 /* RecipeListVC.swift in Sources */,
 				E391D8A82AAEB6E400265060 /* RecipeTitleCell.swift in Sources */,
 				E3FD19FA2A1323E300ACA346 /* FolderTreeVC.swift in Sources */,

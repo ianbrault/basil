@@ -18,6 +18,7 @@ class PersistenceManager {
 
     enum Keys {
         static let dataVersion = "dataVersion"
+        static let groceries = "groceries"
         static let needsToUpdateServer = "needsToUpdateServer"
         static let state = "state"
     }
@@ -28,6 +29,21 @@ class PersistenceManager {
         }
         set {
             self.defaults.set(newValue, forKey: Keys.dataVersion)
+        }
+    }
+
+    var groceries: [Grocery] {
+        get {
+            guard let groceryData = self.defaults.object(forKey: Keys.groceries) as? Data else {
+                return []
+            }
+            // NOTE: this should always be valid JSON
+            return try! self.decoder.decode([Grocery].self, from: groceryData)
+        }
+        set {
+            // NOTE: unwrap the JSONEncoder result, we should never have invalid JSON data
+            let encoded = try! self.encoder.encode(newValue)
+            self.defaults.set(encoded, forKey: Keys.groceries)
         }
     }
 
@@ -46,7 +62,7 @@ class PersistenceManager {
                 // if this is nil, nothing has been saved before
                 return .empty()
             }
-            // NOTE: an assumption is  made that the stored state is valid JSON; this will be true
+            // NOTE: an assumption is made that the stored state is valid JSON; this will be true
             // unless the data version is out of date, so this relies on that case being handled
             // during initialization at a higher level
             return try! self.decoder.decode(State.Data.self, from: stateData)

@@ -139,32 +139,50 @@ class RecipeListVC: UIViewController {
         }
     }
 
-    private func establishServerCommunication() {
-        // run the server poke in the background to prevent blocking the main UI
-        DispatchQueue.global(qos: .userInitiated).async {
-            State.manager.serverPoked = true
-            API.pokeServer { (error) in
-                if let _ = error {
-                    DispatchQueue.main.async {
-                        let errorView = RBNoConnectionView(in: self.view)
-                        self.view.window?.addSubview(errorView)
-                        self.view.window?.bringSubviewToFront(errorView)
-                    }
-                } else {
-                    State.manager.serverCommunicationEstablished = true
-                    if PersistenceManager.shared.needsToUpdateServer {
-                        // show the view while the local data is pushed to the server
-                        let processingView = RBProcessingView(in: self.view)
-                        self.view.window?.addSubview(processingView)
-                        self.view.window?.bringSubviewToFront(processingView)
+    private func showNoConnectionView() {
+        DispatchQueue.main.async {
+            let errorView = RBNoConnectionView(in: self.view)
+            self.view.window?.addSubview(errorView)
+            self.view.window?.bringSubviewToFront(errorView)
+        }
+    }
 
-                        API.updateUser { (error) in
-                            processingView.dismissView()
-                            if let error {
+    private func showProcessingView() {
+        DispatchQueue.main.async {
+            // show the view while the local data is pushed to the server
+            let processingView = RBProcessingView(in: self.view)
+            self.view.window?.addSubview(processingView)
+            self.view.window?.bringSubviewToFront(processingView)
+        }
+    }
+
+    private func hideProcessingView() {
+        DispatchQueue.main.async {
+            for subview in self.view.window?.subviews ?? [] {
+                if let processingView = subview as? RBProcessingView {
+                    processingView.dismissView()
+                }
+            }
+        }
+    }
+
+    private func establishServerCommunication() {
+        State.manager.serverPoked = true
+        API.pokeServer { (error) in
+            if let _ = error {
+                self.showNoConnectionView()
+            } else {
+                State.manager.serverCommunicationEstablished = true
+                if PersistenceManager.shared.needsToUpdateServer {
+                    self.showProcessingView()
+                    API.updateUser { (error) in
+                        self.hideProcessingView()
+                        if let error {
+                            DispatchQueue.main.async {
                                 self.presentErrorAlert(error)
-                            } else {
-                                PersistenceManager.shared.needsToUpdateServer = false
                             }
+                        } else {
+                            PersistenceManager.shared.needsToUpdateServer = false
                         }
                     }
                 }

@@ -67,12 +67,14 @@ struct API {
 
     static func pokeServer(handler: @escaping Handler) {
         let body = UserInfoBasic(id: State.manager.userId, key: State.manager.userKey)
-        Network.post(.poke, body: body) { (response) in
-            switch response {
-            case .success(_):
-                handler(nil)
-            case .failure(let error):
-                handler(error)
+        DispatchQueue.global(qos: .userInitiated).async {
+            Network.post(.poke, body: body) { (response) in
+                switch response {
+                case .success(_):
+                    handler(nil)
+                case .failure(let error):
+                    handler(error)
+                }
             }
         }
     }

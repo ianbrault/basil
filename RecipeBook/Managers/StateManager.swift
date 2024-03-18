@@ -46,6 +46,9 @@ class State {
     var recipeMap: [UUID: Recipe] = [:]
     var folderMap: [UUID: RecipeFolder] = [:]
 
+    // grocery list
+    var groceries: [Grocery] = []
+
     // has communication with the server been established?
     var serverCommunicationEstablished: Bool = false
     // prevent unnecessary pokes if we were not able to establish server communication
@@ -74,6 +77,7 @@ class State {
         self.root = data.root
         self.loadRecipes(recipes: data.recipes)
         self.loadFolders(folders: data.folders)
+        self.groceries = PersistenceManager.shared.groceries
     }
 
     func storeToLocal() {
@@ -360,10 +364,16 @@ class State {
         return nil
     }
 
+    func updateGroceries(groceries: [Grocery]) {
+        self.groceries = groceries
+        PersistenceManager.shared.groceries = groceries
+    }
+
     func clear() {
         // NOTE: this should only be used for development debugging
         guard let rootId = self.root else { return }
         guard let root = self.getFolder(uuid: rootId) else { return }
+        self.groceries = []
         let _ = self.deleteItems(uuids: root.subfolders + root.recipes)
     }
 }
