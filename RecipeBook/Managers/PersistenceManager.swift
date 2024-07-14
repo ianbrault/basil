@@ -7,6 +7,11 @@
 
 import Foundation
 
+//
+// Singleton class responsible for managing the storage/retrieval of persistent state using the UserDefaults API
+// Member variables are getters/setters which store to or retrieve from persistent storage
+// Versioned to allow for backwards compatibility
+//
 class PersistenceManager {
 
     static let shared = PersistenceManager()
@@ -16,9 +21,9 @@ class PersistenceManager {
     private let encoder = JSONEncoder()
     private let version = 1
 
-    enum Keys {
+    private enum Keys {
         static let dataVersion = "dataVersion"
-        static let groceries = "groceries"
+        static let groceryList = "groceryList"
         static let needsToUpdateServer = "needsToUpdateServer"
         static let state = "state"
     }
@@ -32,18 +37,24 @@ class PersistenceManager {
         }
     }
 
-    var groceries: [Grocery] {
+    var groceryList: GroceryList {
         get {
-            guard let groceryData = self.defaults.object(forKey: Keys.groceries) as? Data else {
-                return []
+            guard let groceryData = self.defaults.object(forKey: Keys.groceryList) as? Data else {
+                return GroceryList()
             }
             // NOTE: this should always be valid JSON
-            return try! self.decoder.decode([Grocery].self, from: groceryData)
+            // return try! self.decoder.decode(GroceryList.self, from: groceryData)
+            // FIXME: DEBUG
+            do {
+                return try self.decoder.decode(GroceryList.self, from: groceryData)
+            } catch {
+                return GroceryList()
+            }
         }
         set {
             // NOTE: unwrap the JSONEncoder result, we should never have invalid JSON data
             let encoded = try! self.encoder.encode(newValue)
-            self.defaults.set(encoded, forKey: Keys.groceries)
+            self.defaults.set(encoded, forKey: Keys.groceryList)
         }
     }
 

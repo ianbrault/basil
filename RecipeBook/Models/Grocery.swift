@@ -9,19 +9,35 @@ import Foundation
 
 class Grocery: Codable {
 
-    var quantity: CGFloat
-    var unit: String  // TODO: enum
+    var quantity: Quantity
+    var unit: Unit?
     var item: String
     var complete: Bool
 
-    init(item: String) {
-        self.quantity = 0
-        self.unit = ""
+    init(quantity: Quantity, unit: Unit?, item: String) {
+        self.quantity = quantity
+        self.unit = unit
         self.item = item
         self.complete = false
     }
 
+    convenience init(item: String) {
+        self.init(quantity: .none, unit: nil, item: item)
+    }
+
     func toggleComplete() {
         self.complete = !self.complete
+    }
+
+    func toString() -> String {
+        var s = ""
+        if self.quantity != .none {
+            s += self.quantity.toString() + " "
+        }
+        if let unit = self.unit {
+            s += unit.toString() + " "
+        }
+        s += self.item
+        return s
     }
 }

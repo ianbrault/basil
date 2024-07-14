@@ -43,19 +43,22 @@ class RecipeVC: UIViewController {
 
     private func createContextMenu() -> UIMenu {
         let editMenuItem = UIAction(title: "Edit recipe", image: SFSymbols.editRecipe, handler: self.editRecipe)
-        let editMenu = UIMenu(title: "", image: nil, identifier: nil, options: .displayInline, children: [editMenuItem])
-
+        let groceriesMenuItem = UIAction(title: "Add to grocery list", image: SFSymbols.groceries, handler: self.addToGroceryList)
         let deleteMenuItem = UIAction(title: "Delete recipe", image: SFSymbols.trash, attributes: .destructive, handler: self.deleteRecipe)
-        let deleteMenu = UIMenu(title: "", image: nil, identifier: nil, options: .displayInline, children: [deleteMenuItem])
 
-        return UIMenu(title: "", image: nil, identifier: nil, options: [], children: [editMenu, deleteMenu])
+        let menuA = UIMenu(title: "", image: nil, identifier: nil, options: .displayInline, children: [editMenuItem, groceriesMenuItem])
+        let menuB = UIMenu(title: "", image: nil, identifier: nil, options: .displayInline, children: [deleteMenuItem])
+        return UIMenu(title: "", image: nil, identifier: nil, options: [], children: [menuA, menuB])
     }
 
     private func configureViewController() {
         self.view.backgroundColor = .systemBackground
 
         self.navigationItem.largeTitleDisplayMode = .never
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: SFSymbols.contextMenu, menu: self.createContextMenu())
+
+        let contextMenuItem = UIBarButtonItem(image: SFSymbols.contextMenu, menu: self.createContextMenu())
+        let groceriesMenuItem = UIBarButtonItem(title: nil, image: SFSymbols.groceries, target: self, action: #selector(self.addToGroceryList))
+        self.navigationItem.rightBarButtonItems = [contextMenuItem, groceriesMenuItem]
     }
 
     private func configureTableView() {
@@ -95,6 +98,11 @@ class RecipeVC: UIViewController {
             guard let self = self else { return }
             self.delegate?.didDeleteRecipe(recipe: self.recipe)
         }
+        self.present(alert, animated: true)
+    }
+
+    @objc func addToGroceryList(_ action: UIAction) {
+        let alert = RBAddGroceriesAlert(recipe: self.recipe)
         self.present(alert, animated: true)
     }
 }

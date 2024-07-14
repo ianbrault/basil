@@ -11,12 +11,22 @@ class GroceryListVC: UIViewController {
 
     let tableView = UITableView()
 
-    var groceries: [Grocery] = []
+    var previousCount = 0
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.configureNavigationBar()
-        self.loadGroceries()
+
+        if State.manager.groceryList.isEmpty {
+            self.showEmptyStateView(.groceries, in: self.view)
+        } else {
+            self.removeEmptyStateView(in: self.view)
+        }
+
+        if State.manager.groceryList.count != self.previousCount {
+            self.tableView.reloadData()
+        }
+        self.previousCount = State.manager.groceryList.count
     }
 
     override func viewDidLoad() {
@@ -46,41 +56,27 @@ class GroceryListVC: UIViewController {
 
         self.tableView.register(GroceryCell.self, forCellReuseIdentifier: GroceryCell.reuseID)
     }
-
-    private func loadGroceries() {
-        self.groceries = State.manager.groceries
-        // FIXME: DEBUG
-        self.groceries = [
-            Grocery(item: "Apples"),
-            Grocery(item: "Bananas"),
-            Grocery(item: "Cinnamon Toast Crunch"),
-        ]
-        if self.groceries.isEmpty {
-            self.showEmptyStateView(.groceries, in: self.view)
-        }
-    }
 }
 
 extension GroceryListVC: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.groceries.count
+        return State.manager.groceryList.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: GroceryCell.reuseID) as! GroceryCell
-        let grocery = self.groceries[indexPath.row]
+        let grocery = State.manager.groceryList.grocery(at: indexPath)
         cell.set(grocery: grocery)
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let grocery = self.groceries[indexPath.row]
-        grocery.toggleComplete()
-        State.manager.updateGroceries(groceries: self.groceries)
+        State.manager.groceryList.toggleComplete(at: indexPath)
+        State.manager.storeGroceryList()
 
         tableView.beginUpdates()
-        tableView.reloadRows(at: [indexPath], with: .automatic)
+        tableView.reloadRows(at: [indexPath], with: .none)
         tableView.endUpdates()
     }
 }

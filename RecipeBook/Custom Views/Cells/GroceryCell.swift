@@ -22,7 +22,7 @@ class GroceryCell: UITableViewCell {
 
     func set(grocery: Grocery) {
         var content = self.defaultContentConfiguration()
-        content.text = grocery.item
+        content.text = grocery.toString()
 
         if grocery.complete {
             content.image = SFSymbols.checkmarkCircleFill

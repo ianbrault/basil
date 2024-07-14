@@ -7,6 +7,9 @@
 
 import Foundation
 
+//
+// Wrapper struct containing networking functions as static members
+//
 struct Network {
 
     enum Address {
@@ -16,6 +19,7 @@ struct Network {
         case update
 
         var url: URL {
+            // toggle for local development
             // let baseURL = "http://127.0.0.1:3030"
             let baseURL = "https://brault.dev"
             switch self {

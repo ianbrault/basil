@@ -386,7 +386,7 @@ class RecipeListVC: UIViewController {
             guard let self else { return }
             Network.get(text) { (response) in
                 let result = response.flatMap { (body) in
-                    parseNYTRecipe(body: body, folderId: self.folderId)
+                    NYTRecipeParser.parse(body: body, folderId: self.folderId)
                 }
                 DispatchQueue.main.async {
                     switch result {

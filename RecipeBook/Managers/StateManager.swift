@@ -7,6 +7,10 @@
 
 import UIKit
 
+//
+// Singleton class responsible for managing global application state
+// Reflects state changes to persistence storage and to the remote server (if connected)
+//
 class State {
 
     enum Item {
@@ -47,7 +51,7 @@ class State {
     var folderMap: [UUID: RecipeFolder] = [:]
 
     // grocery list
-    var groceries: [Grocery] = []
+    var groceryList: GroceryList = GroceryList()
 
     // has communication with the server been established?
     var serverCommunicationEstablished: Bool = false
@@ -77,7 +81,8 @@ class State {
         self.root = data.root
         self.loadRecipes(recipes: data.recipes)
         self.loadFolders(folders: data.folders)
-        self.groceries = PersistenceManager.shared.groceries
+
+        self.groceryList = PersistenceManager.shared.groceryList
     }
 
     func storeToLocal() {
@@ -89,6 +94,10 @@ class State {
             folders: self.folders
         )
         PersistenceManager.shared.state = data
+    }
+
+    func storeGroceryList() {
+        PersistenceManager.shared.groceryList = self.groceryList
     }
 
     func store() {
@@ -364,16 +373,11 @@ class State {
         return nil
     }
 
-    func updateGroceries(groceries: [Grocery]) {
-        self.groceries = groceries
-        PersistenceManager.shared.groceries = groceries
-    }
-
     func clear() {
         // NOTE: this should only be used for development debugging
         guard let rootId = self.root else { return }
         guard let root = self.getFolder(uuid: rootId) else { return }
-        self.groceries = []
+        self.groceryList = GroceryList()
         let _ = self.deleteItems(uuids: root.subfolders + root.recipes)
     }
 }
