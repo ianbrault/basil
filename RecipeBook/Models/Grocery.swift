@@ -40,4 +40,16 @@ class Grocery: Codable {
         s += self.item
         return s
     }
+
+    func add(quantity: Quantity) {
+        // FIXME: DEBUG
+        print("before: \(self.quantity.toString())")
+
+        let new = self.quantity.add(quantity)
+
+        // FIXME: DEBUG
+        print("after: \(new.toString())")
+
+        self.quantity = new
+    }
 }

@@ -7,6 +7,10 @@
 
 import Foundation
 
+//
+// Data structure representing the grocery list
+// Handles merging logic to combine groceries when adding from multiple recipes
+//
 class GroceryList: Codable {
 
     var groceries: [Grocery]
@@ -35,7 +39,8 @@ class GroceryList: Codable {
 
     private func addGrocery(_ grocery: Grocery) {
         if self.groceryItems.contains(grocery.item) {
-            // TODO: add merging logic
+            let index = self.groceries.firstIndex { $0.item == grocery.item }!
+            self.groceries[index].add(quantity: grocery.quantity)
         } else {
             self.groceries.append(grocery)
             self.groceryItems.insert(grocery.item)
@@ -51,5 +56,10 @@ class GroceryList: Codable {
         for ingredient in recipe.ingredients {
             self.addIngredient(ingredient)
         }
+    }
+
+    func clear() {
+        self.groceries.removeAll()
+        self.groceryItems.removeAll()
     }
 }

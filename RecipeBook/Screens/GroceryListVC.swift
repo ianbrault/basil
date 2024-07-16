@@ -7,11 +7,13 @@
 
 import UIKit
 
+//
+// Displays a list of groceries
+// Allows users to add/delete groceries and check/reorder items
+//
 class GroceryListVC: UIViewController {
 
     let tableView = UITableView()
-
-    var previousCount = 0
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -22,11 +24,7 @@ class GroceryListVC: UIViewController {
         } else {
             self.removeEmptyStateView(in: self.view)
         }
-
-        if State.manager.groceryList.count != self.previousCount {
-            self.tableView.reloadData()
-        }
-        self.previousCount = State.manager.groceryList.count
+        self.tableView.reloadData()
     }
 
     override func viewDidLoad() {
@@ -43,6 +41,10 @@ class GroceryListVC: UIViewController {
 
     private func configureViewController() {
         self.view.backgroundColor = .systemBackground
+
+        let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(self.addGrocery))
+        let deleteButton = UIBarButtonItem(title: nil, image: SFSymbols.trash, target: self, action: #selector(self.deleteGroceries))
+        self.navigationItem.rightBarButtonItems = [deleteButton, addButton]
     }
 
     private func configureTableView() {
@@ -55,6 +57,25 @@ class GroceryListVC: UIViewController {
         self.tableView.removeExcessCells()
 
         self.tableView.register(GroceryCell.self, forCellReuseIdentifier: GroceryCell.reuseID)
+    }
+
+    @objc func addGrocery(_ action: UIAction) {
+        // TODO: unimplemented
+    }
+
+    @objc func deleteGroceries(_ action: UIAction) {
+        let title = "Are you sure you want to delete all groceries?"
+        let alert = RBDeleteAlert(title: title) { [weak self] () in
+            guard let self = self else { return }
+
+            State.manager.clearGroceryList()
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+                // show the empty state view
+                self.showEmptyStateView(.groceries, in: self.view)
+            }
+        }
+        self.present(alert, animated: true)
     }
 }
 

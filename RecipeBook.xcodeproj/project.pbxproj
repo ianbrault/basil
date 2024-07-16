@@ -31,7 +31,6 @@
 		E3573E6629CC16C1000F7877 /* RecipeListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6529CC16C1000F7877 /* RecipeListVC.swift */; };
 		E3573E6929CC16DC000F7877 /* GroceryListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6829CC16DC000F7877 /* GroceryListVC.swift */; };
 		E3573E6C29CC185A000F7877 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6B29CC185A000F7877 /* Constants.swift */; };
-		E38FF6672AA3F37900D8ED7A /* RBDeleteMultipleRecipeItemsAlertViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38FF6662AA3F37900D8ED7A /* RBDeleteMultipleRecipeItemsAlertViewController.swift */; };
 		E38FF6692AA5369F00D8ED7A /* RBWarningAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38FF6682AA5369F00D8ED7A /* RBWarningAlert.swift */; };
 		E38FF66C2AA5466B00D8ED7A /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = E38FF66B2AA5466B00D8ED7A /* SwiftSoup */; };
 		E38FF66E2AA5472A00D8ED7A /* Parse.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38FF66D2AA5472A00D8ED7A /* Parse.swift */; };
@@ -62,6 +61,7 @@
 		E3C4B51A2B721FF700E8ACE5 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C4B5192B721FF700E8ACE5 /* API.swift */; };
 		E3C4B51C2B84346700E8ACE5 /* RBNoConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C4B51B2B84346700E8ACE5 /* RBNoConnectionView.swift */; };
 		E3D374D12B95604900A0EF70 /* RBProcessingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D374D02B95604900A0EF70 /* RBProcessingView.swift */; };
+		E3DE28FC2C4465E8007FBDC5 /* RBDeleteAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DE28FB2C4465E8007FBDC5 /* RBDeleteAlert.swift */; };
 		E3E3E9632A0892F7006A9E00 /* RBErrorAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E3E9622A0892F7006A9E00 /* RBErrorAlertController.swift */; };
 		E3EAC2A32BAE88DC00B4B7B6 /* RecipeBookTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3EAC2A22BAE88DC00B4B7B6 /* RecipeBookTests.swift */; };
 		E3EAC2AA2BAE8AD200B4B7B6 /* GroceryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3EAC2A92BAE8AD200B4B7B6 /* GroceryTests.swift */; };
@@ -124,7 +124,6 @@
 		E3573E6529CC16C1000F7877 /* RecipeListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeListVC.swift; sourceTree = "<group>"; };
 		E3573E6829CC16DC000F7877 /* GroceryListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryListVC.swift; sourceTree = "<group>"; };
 		E3573E6B29CC185A000F7877 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
-		E38FF6662AA3F37900D8ED7A /* RBDeleteMultipleRecipeItemsAlertViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBDeleteMultipleRecipeItemsAlertViewController.swift; sourceTree = "<group>"; };
 		E38FF6682AA5369F00D8ED7A /* RBWarningAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBWarningAlert.swift; sourceTree = "<group>"; };
 		E38FF66D2AA5472A00D8ED7A /* Parse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parse.swift; sourceTree = "<group>"; };
 		E38FF66F2AA584A500D8ED7A /* Network.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
@@ -153,6 +152,7 @@
 		E3C4B5192B721FF700E8ACE5 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 		E3C4B51B2B84346700E8ACE5 /* RBNoConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBNoConnectionView.swift; sourceTree = "<group>"; };
 		E3D374D02B95604900A0EF70 /* RBProcessingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBProcessingView.swift; sourceTree = "<group>"; };
+		E3DE28FB2C4465E8007FBDC5 /* RBDeleteAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBDeleteAlert.swift; sourceTree = "<group>"; };
 		E3E3E9622A0892F7006A9E00 /* RBErrorAlertController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBErrorAlertController.swift; sourceTree = "<group>"; };
 		E3EAC2A02BAE88DC00B4B7B6 /* RecipeBookTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RecipeBookTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3EAC2A22BAE88DC00B4B7B6 /* RecipeBookTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeBookTests.swift; sourceTree = "<group>"; };
@@ -206,12 +206,12 @@
 		E34B4CE629CEE89E0063A9A2 /* Alerts */ = {
 			isa = PBXGroup;
 			children = (
+				E3931E5B2BA81DE30015A127 /* RBAddGroceriesAlert.swift */,
+				E3DE28FB2C4465E8007FBDC5 /* RBDeleteAlert.swift */,
+				E349B14129E002100097A338 /* RBDeleteRecipeItemAlert.swift */,
 				E3E3E9622A0892F7006A9E00 /* RBErrorAlertController.swift */,
 				E34B4CE929CEEA3E0063A9A2 /* RBTextFieldAlert.swift */,
-				E349B14129E002100097A338 /* RBDeleteRecipeItemAlert.swift */,
 				E38FF6682AA5369F00D8ED7A /* RBWarningAlert.swift */,
-				E38FF6662AA3F37900D8ED7A /* RBDeleteMultipleRecipeItemsAlertViewController.swift */,
-				E3931E5B2BA81DE30015A127 /* RBAddGroceriesAlert.swift */,
 			);
 			path = Alerts;
 			sourceTree = "<group>";
@@ -335,12 +335,12 @@
 		E3B1C73729CD205000736C96 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				E3B1C73829CD205C00736C96 /* Recipe.swift */,
-				E336B63729FDF7D20025CC38 /* RecipeFolder.swift */,
-				E3C466052A00B2D100791576 /* RecipeItem.swift */,
 				E3931E532B9D46C70015A127 /* Grocery.swift */,
 				E3931E592BA7EEEE0015A127 /* GroceryList.swift */,
 				E3EAC2BD2BB00E4900B4B7B6 /* Quantity.swift */,
+				E3B1C73829CD205C00736C96 /* Recipe.swift */,
+				E336B63729FDF7D20025CC38 /* RecipeFolder.swift */,
+				E3C466052A00B2D100791576 /* RecipeItem.swift */,
 				E3277D9B2BC10997004F7566 /* Unit.swift */,
 			);
 			path = Models;
@@ -371,8 +371,8 @@
 			isa = PBXGroup;
 			children = (
 				E3C1D37B2B07001B002E26D1 /* LoginVC.swift */,
-				E3C1D37D2B07004C002E26D1 /* RegisterVC.swift */,
 				E3C1D3762B01F282002E26D1 /* OnboardingVC.swift */,
+				E3C1D37D2B07004C002E26D1 /* RegisterVC.swift */,
 				E3C1D3792B06FF30002E26D1 /* WelcomeVC.swift */,
 			);
 			path = Onboarding;
@@ -504,6 +504,7 @@
 				E349B13A29DFDB2D0097A338 /* PersistenceManager.swift in Sources */,
 				E3C1D3772B01F282002E26D1 /* OnboardingVC.swift in Sources */,
 				E3EAC2AC2BAE8D3400B4B7B6 /* String+Ext.swift in Sources */,
+				E3DE28FC2C4465E8007FBDC5 /* RBDeleteAlert.swift in Sources */,
 				E3931E542B9D46C70015A127 /* Grocery.swift in Sources */,
 				E3427C1029E15D1B002C81E2 /* RecipeIngredientCell.swift in Sources */,
 				E349B14229E002100097A338 /* RBDeleteRecipeItemAlert.swift in Sources */,
@@ -517,7 +518,6 @@
 				E349B13F29DFE2390097A338 /* RBEmptyStateView.swift in Sources */,
 				E38FF6702AA584A500D8ED7A /* Network.swift in Sources */,
 				E336B63829FDF7D20025CC38 /* RecipeFolder.swift in Sources */,
-				E38FF6672AA3F37900D8ED7A /* RBDeleteMultipleRecipeItemsAlertViewController.swift in Sources */,
 				E3E3E9632A0892F7006A9E00 /* RBErrorAlertController.swift in Sources */,
 				E3B1C73E29CE1E9600736C96 /* RecipeCell.swift in Sources */,
 				E3573E6929CC16DC000F7877 /* GroceryListVC.swift in Sources */,

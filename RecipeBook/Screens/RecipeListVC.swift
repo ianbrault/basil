@@ -7,6 +7,10 @@
 
 import UIKit
 
+//
+// Displays a list of recipes and folders
+// Allows users to add/delete/move recipes
+//
 class RecipeListVC: UIViewController {
 
     let tableView = UITableView()
@@ -444,8 +448,9 @@ class RecipeListVC: UIViewController {
     @objc func deleteSelectedItems(_ action: UIAction) {
         if let selectedRows = tableView.indexPathsForSelectedRows, !selectedRows.isEmpty {
             let uuids = selectedRows.map { self.items[$0.row] }.map { $0.uuid }
+            let title = "Are you sure you want to delete these \(uuids.count) items?"
 
-            let alert = RBDeleteMultipleRecipeItemsAlertViewController(count: uuids.count) { [weak self] () in
+            let alert = RBDeleteAlert(title: title) { [weak self] () in
                 guard let self = self else { return }
 
                 if let error = State.manager.deleteItems(uuids: uuids) {

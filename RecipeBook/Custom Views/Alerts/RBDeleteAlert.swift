@@ -1,16 +1,18 @@
 //
-//  RBDeleteMultipleRecipeItemsAlertViewController.swift
+//  RBDeleteAlert.swift
 //  RecipeBook
 //
-//  Created by Ian Brault on 9/2/23.
+//  Created by Ian Brault on 7/14/24.
 //
 
 import UIKit
 
-class RBDeleteMultipleRecipeItemsAlertViewController: UIAlertController {
+//
+// Generic alert for deletion
+//
+class RBDeleteAlert: UIAlertController {
 
-    convenience init(count: Int, deleteAction: @escaping () -> Void) {
-        let title = "Are you sure you want to delete these \(count) items?"
+    convenience init(title: String, deleteAction: @escaping () -> Void) {
         self.init(title: title, message: nil, preferredStyle: .actionSheet)
         self.addActions(actionHandler: deleteAction)
     }

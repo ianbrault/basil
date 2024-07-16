@@ -123,7 +123,25 @@ enum Quantity: Codable & Equatable {
         case .fraction(let f):
             let lcm = Fraction.lcm(f.divisor, fraction.divisor)
             let newFraction = Fraction(((lcm / f.divisor) * f.dividend) + ((lcm / fraction.divisor) * fraction.dividend), lcm)
-            return .fraction(newFraction)
+            // convert to an integer, if possible
+            if newFraction.dividend % newFraction.divisor == 0 {
+                return .integer(newFraction.dividend / newFraction.divisor)
+            } else {
+                return .fraction(newFraction)
+            }
+        }
+    }
+
+    func add(_ other: Quantity) -> Quantity {
+        switch self {
+        case .none:
+            return other
+        case .integer(let i):
+            return self.add(integer: i)
+        case .float(let f):
+            return self.add(float: f)
+        case .fraction(let f):
+            return self.add(fraction: f)
         }
     }
 

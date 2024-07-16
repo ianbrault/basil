@@ -60,6 +60,10 @@ class State {
 
     private init() {}
 
+    //
+    // Local/Remote storage
+    //
+
     private func loadRecipes(recipes: [Recipe]) {
         self.recipes = recipes
         for recipe in self.recipes {
@@ -118,6 +122,10 @@ class State {
         }
     }
 
+    //
+    // User
+    //
+
     func addUserInfo(info: API.UserInfo) {
         self.userId = info.id
         self.userKey = info.key
@@ -133,6 +141,10 @@ class State {
 
         self.storeToLocal()
     }
+
+    //
+    // Recipes/Folders
+    //
 
     func getRecipe(uuid: UUID) -> Recipe? {
         return self.recipeMap[uuid]
@@ -373,11 +385,29 @@ class State {
         return nil
     }
 
+    //
+    // Grocery List
+    //
+
+    func addIngredientsToGroceryList(from recipe: Recipe) {
+        self.groceryList.addIngredients(from: recipe)
+        self.storeGroceryList()
+    }
+
+    func clearGroceryList() {
+        self.groceryList.clear()
+        self.storeGroceryList()
+    }
+
+    //
+    // Debug functions
+    //
+
     func clear() {
         // NOTE: this should only be used for development debugging
         guard let rootId = self.root else { return }
         guard let root = self.getFolder(uuid: rootId) else { return }
-        self.groceryList = GroceryList()
+        self.groceryList.clear()
         let _ = self.deleteItems(uuids: root.subfolders + root.recipes)
     }
 }

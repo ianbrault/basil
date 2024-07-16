@@ -7,7 +7,10 @@
 
 import UIKit
 
-class RBDeleteRecipeItemAlert: UIAlertController {
+//
+// Alert when the user is deleting a recipe/folder
+//
+class RBDeleteRecipeItemAlert: RBDeleteAlert {
 
     convenience init(item: RecipeItem, deleteAction: @escaping () -> Void) {
         var title: String!
@@ -17,17 +20,7 @@ class RBDeleteRecipeItemAlert: UIAlertController {
         case .folder(_):
             title = "Are you sure you want to delete this folder and all of its recipes?"
         }
-        self.init(title: title, message: nil, preferredStyle: .actionSheet)
+        self.init(title: title, deleteAction: deleteAction)
         self.addActions(actionHandler: deleteAction)
-    }
-
-    func addActions(actionHandler: @escaping () -> Void) {
-        let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { (_) in
-            actionHandler()
-        }
-        self.addAction(deleteAction)
-
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
-        self.addAction(cancelAction)
     }
 }
