@@ -94,4 +94,20 @@ final class GroceryTests: XCTestCase {
         XCTAssertEqual(output.unit, nil)
         XCTAssertEqual(output.item, "beef rips")
     }
+
+    func testGroceryAddFractionsToWhole() throws {
+        let a = Grocery(quantity: .fraction(Quantity.Fraction(3, 4)), unit: .pounds, item: "meat")
+        let b = Grocery(quantity: .fraction(Quantity.Fraction(1, 4)), unit: .pounds, item: "meat")
+        a.add(quantity: b.quantity)
+        XCTAssertEqual(a.quantity, .integer(1))
+        XCTAssertEqual(a.unit, .pounds)
+        XCTAssertEqual(a.item, "meat")
+
+        let c = Grocery(quantity: .fraction(Quantity.Fraction(7, 3)), unit: .cups, item: "whole milk")
+        let d = Grocery(quantity: .fraction(Quantity.Fraction(2, 3)), unit: .cups, item: "whole milk")
+        c.add(quantity: d.quantity)
+        XCTAssertEqual(c.quantity, .integer(3))
+        XCTAssertEqual(c.unit, .cups)
+        XCTAssertEqual(c.item, "whole milk")
+    }
 }

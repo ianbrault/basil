@@ -43,11 +43,11 @@ class PersistenceManager {
                 return GroceryList()
             }
             // NOTE: this should always be valid JSON
-            // return try! self.decoder.decode(GroceryList.self, from: groceryData)
-            // FIXME: DEBUG
+            // TODO: consider unwrapping instead of failing silently
             do {
                 return try self.decoder.decode(GroceryList.self, from: groceryData)
             } catch {
+                print("ERROR: invalid grocery list, continuing with an empty list")
                 return GroceryList()
             }
         }

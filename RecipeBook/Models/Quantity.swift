@@ -133,7 +133,7 @@ enum Quantity: Codable & Equatable {
     }
 
     func add(_ other: Quantity) -> Quantity {
-        switch self {
+        switch other {
         case .none:
             return other
         case .integer(let i):

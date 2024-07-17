@@ -79,6 +79,7 @@ class GroceryListVC: UIViewController {
     }
 }
 
+// TODO: consider using UITableViewDiffableDataSource instead
 extension GroceryListVC: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -93,11 +94,41 @@ extension GroceryListVC: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        State.manager.groceryList.toggleComplete(at: indexPath)
-        State.manager.storeGroceryList()
-
-        tableView.beginUpdates()
+        // first toggle the completion and reload the row to see the update
+        State.manager.groceryList.grocery(at: indexPath).toggleComplete()
         tableView.reloadRows(at: [indexPath], with: .none)
-        tableView.endUpdates()
+
+        let grocery = State.manager.groceryList.grocery(at: indexPath)
+        if grocery.complete {
+            let mergeWithExisting = State.manager.groceryList.complete.contains(grocery)
+            // move from the incomplete list to the complete list
+            State.manager.groceryList.remove(at: indexPath)
+            State.manager.groceryList.complete.insert(grocery, at: 0)
+            if mergeWithExisting {
+                // let newIndex = State.manager.groceryList.indexOf(grocery: grocery)!
+                tableView.deleteRows(at: [indexPath], with: .automatic)
+                // FIXME: data needs to be reloaded
+                // tableView.reloadRows(at: [newIndex], with: .automatic)
+            } else {
+                let newIndex = IndexPath(row: State.manager.groceryList.incomplete.count, section: 0)
+                tableView.moveRow(at: indexPath, to: newIndex)
+            }
+        } else {
+            let mergeWithExisting = State.manager.groceryList.incomplete.contains(grocery)
+            // move from the complete list to the incomplete list
+            State.manager.groceryList.remove(at: indexPath)
+            State.manager.groceryList.incomplete.insert(grocery, at: 0)
+            if mergeWithExisting {
+                // let newIndex = State.manager.groceryList.indexOf(grocery: grocery)!
+                tableView.deleteRows(at: [indexPath], with: .automatic)
+                // FIXME: data needs to be reloaded
+                // tableView.reloadRows(at: [newIndex], with: .automatic)
+            } else {
+                let newIndex = IndexPath(row: State.manager.groceryList.incomplete.count - 1, section: 0)
+                tableView.moveRow(at: indexPath, to: newIndex)
+            }
+        }
+
+        State.manager.storeGroceryList()
     }
 }
