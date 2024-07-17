@@ -7,9 +7,9 @@
 
 import Foundation
 
-enum Quantity: Codable & Equatable {
+enum Quantity: Codable & Equatable & Hashable {
 
-    struct Fraction: Codable & Equatable {
+    struct Fraction: Codable & Equatable & Hashable {
         let dividend: Int
         let divisor: Int
 

@@ -26,6 +26,10 @@ class GroceryList: Codable {
             return self.list.isEmpty
         }
 
+        var items: [Grocery] {
+            return self.list
+        }
+
         subscript(index: Int) -> Grocery {
             return self.list[index]
         }
@@ -91,6 +95,10 @@ class GroceryList: Codable {
 
     var isEmpty: Bool {
         return self.incomplete.isEmpty && self.complete.isEmpty
+    }
+
+    var items: [Grocery] {
+        return self.incomplete.items + self.complete.items
     }
 
     init() {

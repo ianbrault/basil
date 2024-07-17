@@ -10,6 +10,7 @@ import UIKit
 //
 // Displays a list of recipes and folders
 // Allows users to add/delete/move recipes
+// TODO: port to UITableViewDiffableDataSource as a backing store
 //
 class RecipeListVC: UIViewController {
 

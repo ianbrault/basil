@@ -45,4 +45,22 @@ class Grocery: Codable {
         let new = self.quantity.add(quantity)
         self.quantity = new
     }
+
+    static func == (lhs: Grocery, rhs: Grocery) -> Bool {
+        return (
+            (lhs.item == rhs.item) &&
+            (lhs.unit == rhs.unit) &&
+            (lhs.quantity == rhs.quantity) &&
+            (lhs.complete == rhs.complete))
+    }
+}
+
+extension Grocery: Hashable {
+    var identifier: String {
+        return self.toString()
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        return hasher.combine(self.identifier)
+    }
 }

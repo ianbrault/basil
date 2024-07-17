@@ -219,12 +219,12 @@
 		E34B4CEF29CF78800063A9A2 /* Cells */ = {
 			isa = PBXGroup;
 			children = (
+				E3931E552B9D61930015A127 /* GroceryCell.swift */,
 				E3B1C73D29CE1E9600736C96 /* RecipeCell.swift */,
 				E34B4D0629D15A480063A9A2 /* RecipeFormCell.swift */,
 				E3427C0F29E15D1B002C81E2 /* RecipeIngredientCell.swift */,
 				E3011DD229E38D7D00490919 /* RecipeInstructionCell.swift */,
 				E391D8A72AAEB6E400265060 /* RecipeTitleCell.swift */,
-				E3931E552B9D61930015A127 /* GroceryCell.swift */,
 			);
 			path = Cells;
 			sourceTree = "<group>";

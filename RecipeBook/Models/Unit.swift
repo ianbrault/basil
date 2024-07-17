@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Unit: Codable & Equatable {
+enum Unit: Codable & Equatable & Hashable {
 
     // weights
     case ounces
