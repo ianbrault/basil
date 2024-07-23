@@ -59,10 +59,10 @@ class RBNoConnectionView: UIView {
         self.addSubview(self.bodyLabel)
 
         self.titleLabel.text = "Failed to connect to the server"
-        self.titleLabel.textColor = .secondaryLabel
+        self.titleLabel.textColor = .darkYellow
 
         self.bodyLabel.text = "Changes will not be saved to the server until you are back online"
-        self.bodyLabel.textColor = .secondaryLabel
+        self.bodyLabel.textColor = .darkYellow
         self.bodyLabel.numberOfLines = 3
         self.bodyLabel.lineBreakMode = .byWordWrapping
 
@@ -85,7 +85,9 @@ class RBNoConnectionView: UIView {
         let endY = view.frame.size.height - self.height - self.verticalMargin
         self.frame = CGRect(x: self.horizontalMargin, y: startY, width: width, height: self.height)
 
-        self.backgroundColor = .secondarySystemBackground
+        self.backgroundColor = .paleYellow
+        self.layer.borderWidth = 1.5
+        self.layer.borderColor = UIColor.systemYellow.cgColor
         self.layer.cornerRadius = 12
         self.addShadow()
 

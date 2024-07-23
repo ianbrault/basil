@@ -47,7 +47,7 @@ class RBProcessingView: UIView {
         self.addSubview(self.label)
 
         self.label.text = "Uploading your recipes to the server"
-        self.label.textColor = .secondaryLabel
+        self.label.textColor = .darkYellow
 
         NSLayoutConstraint.activate([
             self.label.centerYAnchor.constraint(equalTo: self.centerYAnchor),
@@ -63,7 +63,9 @@ class RBProcessingView: UIView {
         let endY = view.frame.size.height - self.height - self.verticalMargin
         self.frame = CGRect(x: self.horizontalMargin, y: startY, width: width, height: self.height)
 
-        self.backgroundColor = .secondarySystemBackground
+        self.backgroundColor = .paleYellow
+        self.layer.borderWidth = 1.5
+        self.layer.borderColor = UIColor.systemYellow.cgColor
         self.layer.cornerRadius = 12
         self.addShadow()
 

@@ -10,6 +10,7 @@
 		E3011DD329E38D7D00490919 /* RecipeInstructionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3011DD229E38D7D00490919 /* RecipeInstructionCell.swift */; };
 		E3277D9C2BC10997004F7566 /* Unit.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3277D9B2BC10997004F7566 /* Unit.swift */; };
 		E3277D9D2BC112AA004F7566 /* Unit.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3277D9B2BC10997004F7566 /* Unit.swift */; };
+		E327FDDB2C505DD30082EF11 /* UIColor+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E327FDDA2C505DD30082EF11 /* UIColor+Ext.swift */; };
 		E336B63829FDF7D20025CC38 /* RecipeFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336B63729FDF7D20025CC38 /* RecipeFolder.swift */; };
 		E3427C0E29E158FC002C81E2 /* RecipeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3427C0D29E158FC002C81E2 /* RecipeVC.swift */; };
 		E3427C1029E15D1B002C81E2 /* RecipeIngredientCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3427C0F29E15D1B002C81E2 /* RecipeIngredientCell.swift */; };
@@ -101,6 +102,7 @@
 /* Begin PBXFileReference section */
 		E3011DD229E38D7D00490919 /* RecipeInstructionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeInstructionCell.swift; sourceTree = "<group>"; };
 		E3277D9B2BC10997004F7566 /* Unit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Unit.swift; sourceTree = "<group>"; };
+		E327FDDA2C505DD30082EF11 /* UIColor+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Ext.swift"; sourceTree = "<group>"; };
 		E336B63729FDF7D20025CC38 /* RecipeFolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeFolder.swift; sourceTree = "<group>"; };
 		E3427C0D29E158FC002C81E2 /* RecipeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeVC.swift; sourceTree = "<group>"; };
 		E3427C0F29E15D1B002C81E2 /* RecipeIngredientCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeIngredientCell.swift; sourceTree = "<group>"; };
@@ -350,10 +352,11 @@
 			isa = PBXGroup;
 			children = (
 				E3EAC2AB2BAE8D3400B4B7B6 /* String+Ext.swift */,
+				E327FDDA2C505DD30082EF11 /* UIColor+Ext.swift */,
+				E39D32A82B1AC02100D7511B /* UIImage+Ext.swift */,
 				E3B1C73B29CE1CF600736C96 /* UITableView+Ext.swift */,
 				E3B1C74629CE6CC900736C96 /* UIView+Ext.swift */,
 				E34B4CED29CF77CC0063A9A2 /* UIViewController+Ext.swift */,
-				E39D32A82B1AC02100D7511B /* UIImage+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -516,6 +519,7 @@
 				E3B1C73929CD205C00736C96 /* Recipe.swift in Sources */,
 				E34B4CEA29CEEA3E0063A9A2 /* RBTextFieldAlert.swift in Sources */,
 				E349B13F29DFE2390097A338 /* RBEmptyStateView.swift in Sources */,
+				E327FDDB2C505DD30082EF11 /* UIColor+Ext.swift in Sources */,
 				E38FF6702AA584A500D8ED7A /* Network.swift in Sources */,
 				E336B63829FDF7D20025CC38 /* RecipeFolder.swift in Sources */,
 				E3E3E9632A0892F7006A9E00 /* RBErrorAlertController.swift in Sources */,
