@@ -65,11 +65,25 @@ class RecipeFolder: Codable {
         self.subfolders = other.subfolders
     }
 
+    static func == (lhs: RecipeFolder, rhs: RecipeFolder) -> Bool {
+        return lhs.uuid == rhs.uuid
+    }
+
     static func sort(_ this: RecipeFolder, _ that: RecipeFolder) -> Bool {
         return this.name < that.name
     }
 
     static func sortReverse(_ this: RecipeFolder, _ that: RecipeFolder) -> Bool {
         return !RecipeFolder.sort(this, that)
+    }
+}
+
+extension RecipeFolder: Hashable {
+    var identifier: String {
+        return self.uuid.uuidString
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        return hasher.combine(self.identifier)
     }
 }

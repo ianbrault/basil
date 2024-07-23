@@ -30,17 +30,17 @@ class GroceryListVC: UIViewController {
         snapshot.appendItems(State.manager.groceryList.items, toSection: 0)
         snapshot.reloadItems(identifiers)
         self.dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        self.configureNavigationBar()
 
         if State.manager.groceryList.isEmpty {
             self.showEmptyStateView(.groceries, in: self.view)
         } else {
             self.removeEmptyStateView(in: self.view)
         }
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.configureNavigationBar()
         self.applySnapshot(animatingDifferences: false)
     }
 
@@ -86,10 +86,6 @@ class GroceryListVC: UIViewController {
 
             State.manager.clearGroceryList()
             self.applySnapshot()
-            DispatchQueue.main.async {
-                // show the empty state view
-                self.showEmptyStateView(.groceries, in: self.view)
-            }
         }
         self.present(alert, animated: true)
     }

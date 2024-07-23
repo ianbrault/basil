@@ -33,11 +33,25 @@ class Recipe: Codable {
         self.instructions = other.instructions
     }
 
+    static func == (lhs: Recipe, rhs: Recipe) -> Bool {
+        return lhs.uuid == rhs.uuid
+    }
+
     static func sort(_ this: Recipe, _ that: Recipe) -> Bool {
         return this.title < that.title
     }
 
     static func sortReverse(_ this: Recipe, _ that: Recipe) -> Bool {
         return !Recipe.sort(this, that)
+    }
+}
+
+extension Recipe: Hashable {
+    var identifier: String {
+        return self.uuid.uuidString
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        return hasher.combine(self.identifier)
     }
 }

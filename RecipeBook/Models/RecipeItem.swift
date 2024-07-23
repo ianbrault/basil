@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum RecipeItem: Codable {
+enum RecipeItem: Codable & Equatable & Hashable {
     case recipe(Recipe)
     case folder(RecipeFolder)
 

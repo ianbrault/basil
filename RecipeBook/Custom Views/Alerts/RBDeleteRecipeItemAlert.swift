@@ -21,6 +21,5 @@ class RBDeleteRecipeItemAlert: RBDeleteAlert {
             title = "Are you sure you want to delete this folder and all of its recipes?"
         }
         self.init(title: title, deleteAction: deleteAction)
-        self.addActions(actionHandler: deleteAction)
     }
 }

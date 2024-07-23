@@ -10,11 +10,8 @@ import UIKit
 //
 // Displays a list of recipes and folders
 // Allows users to add/delete/move recipes
-// TODO: port to UITableViewDiffableDataSource as a backing store
 //
 class RecipeListVC: UIViewController {
-
-    let tableView = UITableView()
 
     var addButton: UIBarButtonItem!
     var editButton: UIBarButtonItem!
@@ -25,6 +22,17 @@ class RecipeListVC: UIViewController {
     var folderId: UUID!
     var items: [RecipeItem] = []
 
+    typealias DataSource = UITableViewDiffableDataSource<Int, RecipeItem>
+    typealias Snapshot = NSDiffableDataSourceSnapshot<Int, RecipeItem>
+
+    let tableView = UITableView()
+
+    private lazy var dataSource = DataSource(tableView: self.tableView) { (tableView, indexPath, item) -> RecipeCell? in
+        let cell = tableView.dequeueReusableCell(withIdentifier: RecipeCell.reuseID, for: indexPath) as? RecipeCell
+        cell?.set(item: item)
+        return cell
+    }
+
     init(folderId: UUID) {
         super.init(nibName: nil, bundle: nil)
         self.folderId = folderId
@@ -34,10 +42,46 @@ class RecipeListVC: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
+    func loadItems() {
+        let folder = State.manager.getFolder(uuid: self.folderId)!
+        // load subfolder/recipe items using the IDs from the folder
+        var folderItems: [RecipeItem] = []
+        for folderId in folder.subfolders {
+            if let folder = State.manager.getFolder(uuid: folderId) {
+                folderItems.append(.folder(folder))
+            } else {
+                self.presentErrorAlert(.missingItem(.folder, folderId))
+            }
+        }
+        for recipeId in folder.recipes {
+            if let recipe = State.manager.getRecipe(uuid: recipeId) {
+                folderItems.append(.recipe(recipe))
+            } else {
+                self.presentErrorAlert(.missingItem(.recipe, recipeId))
+            }
+        }
+        self.items = folderItems.sorted(by: RecipeItem.sort)
+    }
+
+    func applySnapshot(reload identifiers: [RecipeItem] = [], animatingDifferences: Bool = true) {
+        var snapshot = Snapshot()
+        snapshot.appendSections([0])
+        snapshot.appendItems(self.items, toSection: 0)
+        snapshot.reloadItems(identifiers)
+        self.dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
+
+        if State.manager.groceryList.isEmpty {
+            self.showEmptyStateView(.groceries, in: self.view)
+        } else {
+            self.removeEmptyStateView(in: self.view)
+        }
+    }
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.configureNavigationBar()
         self.loadItems()
+        self.applySnapshot(animatingDifferences: false)
         // check-in with the server if it has not been done already
         if !State.manager.serverPoked {
             self.establishServerCommunication()
@@ -86,7 +130,7 @@ class RecipeListVC: UIViewController {
 
         self.tableView.frame = self.view.bounds
         self.tableView.delegate = self
-        self.tableView.dataSource = self
+        // self.tableView.dataSource = self
         self.tableView.removeExcessCells()
 
         self.tableView.allowsMultipleSelection = true
@@ -195,39 +239,6 @@ class RecipeListVC: UIViewController {
         }
     }
 
-    func loadItems() {
-        let folder = State.manager.getFolder(uuid: self.folderId)!
-        // show the empty state view if there are no items
-        if folder.recipes.isEmpty && folder.subfolders.isEmpty {
-            self.showEmptyStateView(.recipes, in: self.view)
-        } else {
-            // load subfolder/recipe items using the IDs from the folder
-            var folderItems: [RecipeItem] = []
-            for folderId in folder.subfolders {
-                if let folder = State.manager.getFolder(uuid: folderId) {
-                    folderItems.append(.folder(folder))
-                } else {
-                    self.presentErrorAlert(.missingItem(.folder, folderId))
-                }
-            }
-            for recipeId in folder.recipes {
-                if let recipe = State.manager.getRecipe(uuid: recipeId) {
-                    folderItems.append(.recipe(recipe))
-                } else {
-                    self.presentErrorAlert(.missingItem(.recipe, recipeId))
-                }
-            }
-            self.items = folderItems.sorted(by: RecipeItem.sort)
-            // reload table view data on the main thread
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
-                // ensure that the table view is brought to the front in case the empty state
-                // view is still there
-                self.view.bringSubviewToFront(self.tableView)
-            }
-        }
-    }
-
     func findItem(uuid: UUID) -> IndexPath? {
         var indexPath: IndexPath? = nil
         for (index, item) in self.items.enumerated() {
@@ -245,23 +256,14 @@ class RecipeListVC: UIViewController {
         let indexPath = IndexPath(row: pos, section: 0)
 
         self.items.insert(item, at: pos)
-        DispatchQueue.main.async {
-            self.removeEmptyStateView(in: self.view)
-            self.tableView.insertRows(at: [indexPath], with: .automatic)
-        }
+        self.applySnapshot()
     }
 
     func removeItem(uuid: UUID) {
         // find the item using the given UUID
         if let indexPath = self.findItem(uuid: uuid) {
             self.items.remove(at: indexPath.row)
-            DispatchQueue.main.async {
-                self.tableView.deleteRows(at: [indexPath], with: .automatic)
-                // if this was the last recipe, show the empty state view
-                if self.items.isEmpty {
-                    self.showEmptyStateView(.recipes, in: self.view)
-                }
-            }
+            self.applySnapshot()
         } else {
             // this branch should never be hit
             // item type is ambiguous but just assume recipe
@@ -286,13 +288,7 @@ class RecipeListVC: UIViewController {
         let rows = Set(indexPaths.map { $0.row })
         let newItems = self.items.enumerated().filter { !rows.contains($0.offset) }.map { $0.element }
         self.items = newItems
-        DispatchQueue.main.async {
-            self.tableView.deleteRows(at: indexPaths, with: .automatic)
-            // if these were the last recipes, show the empty state view
-            if self.items.isEmpty {
-                self.showEmptyStateView(.recipes, in: self.view)
-            }
-        }
+        self.applySnapshot()
     }
 
     func addNewRecipe(_ action: UIAction) {
@@ -345,9 +341,7 @@ class RecipeListVC: UIViewController {
                 // update the items array with the updated folder
                 if let indexPath = self.findItem(uuid: folder.uuid) {
                     self.items[indexPath.row] = .folder(folder)
-                    DispatchQueue.main.async {
-                        self.tableView.reloadRows(at: [indexPath], with: .automatic)
-                    }
+                    self.applySnapshot(reload: [self.items[indexPath.row]])
                 } else {
                     self.presentErrorAlert(.missingItem(.folder, folder.uuid))
                 }
@@ -467,18 +461,7 @@ class RecipeListVC: UIViewController {
     }
 }
 
-extension RecipeListVC: UITableViewDataSource, UITableViewDelegate {
-
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.items.count
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: RecipeCell.reuseID) as! RecipeCell
-        let item = self.items[indexPath.row]
-        cell.set(item: item)
-        return cell
-    }
+extension RecipeListVC: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // prevent items from being opened while in edit mode
@@ -575,9 +558,7 @@ extension RecipeListVC: RecipeFormVCDelegate {
                 // update the items array with the new recipe contents
                 if let indexPath = self.findItem(uuid: recipe.uuid) {
                     self.items[indexPath.row] = .recipe(recipe)
-                    DispatchQueue.main.async {
-                        self.tableView.reloadRows(at: [indexPath], with: .automatic)
-                    }
+                    self.applySnapshot(reload: [self.items[indexPath.row]])
                 } else {
                     self.presentErrorAlert(.missingItem(.recipe, recipe.uuid))
                 }
