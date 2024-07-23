@@ -70,8 +70,8 @@ class RecipeListVC: UIViewController {
         snapshot.reloadItems(identifiers)
         self.dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
 
-        if State.manager.groceryList.isEmpty {
-            self.showEmptyStateView(.groceries, in: self.view)
+        if self.items.isEmpty {
+            self.showEmptyStateView(.recipes, in: self.view)
         } else {
             self.removeEmptyStateView(in: self.view)
         }
@@ -253,8 +253,6 @@ class RecipeListVC: UIViewController {
     func insertItem(item: RecipeItem) {
         // find the sorted position for the item
         let pos = self.items.firstIndex { RecipeItem.sort(item, $0) } ?? self.items.endIndex
-        let indexPath = IndexPath(row: pos, section: 0)
-
         self.items.insert(item, at: pos)
         self.applySnapshot()
     }
