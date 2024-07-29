@@ -7,6 +7,9 @@
 
 import UIKit
 
+//
+// Alert to prompt to add ingredients from a recipe to the grocery list
+//
 class RBAddGroceriesAlert: UIAlertController {
 
     convenience init(recipe: Recipe) {
@@ -15,7 +18,7 @@ class RBAddGroceriesAlert: UIAlertController {
         self.addActions(recipe: recipe)
     }
 
-    func addActions(recipe: Recipe) {
+    private func addActions(recipe: Recipe) {
         let deleteAction = UIAlertAction(title: "Add", style: .default) { (_) in
             State.manager.addIngredientsToGroceryList(from: recipe)
         }

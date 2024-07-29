@@ -50,8 +50,7 @@ class Grocery: Codable {
         return (
             (lhs.item == rhs.item) &&
             (lhs.unit == rhs.unit) &&
-            (lhs.quantity == rhs.quantity) &&
-            (lhs.complete == rhs.complete))
+            (lhs.quantity == rhs.quantity))
     }
 }
 

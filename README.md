@@ -8,7 +8,8 @@ an iOS app to store recipes
 - [x] feature: multi-selection of recipes/folders for move/delete/etc. on all items at once
 - [x] feature: import recipes from NYT Cooking
 - [x] feature: accounts and cloud-sync
-- [ ] feature: grocery list
+- [x] feature: grocery list
 - [ ] feature: cooking screen
+- [ ] enhancement: searchable recipe list
 - [ ] feature: multiple devices for a single account
 

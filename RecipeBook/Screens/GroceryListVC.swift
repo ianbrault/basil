@@ -17,6 +17,8 @@ class GroceryListVC: UIViewController {
     typealias Snapshot = NSDiffableDataSourceSnapshot<Int, Grocery>
 
     private let tableView = UITableView()
+    private let feedback = UISelectionFeedbackGenerator()
+    private var textFieldAlert: RBTextFieldAlert? = nil
 
     private lazy var dataSource = DataSource(tableView: self.tableView) { (tableView, indexPath, grocery) -> GroceryCell? in
         let cell = tableView.dequeueReusableCell(withIdentifier: GroceryCell.reuseID, for: indexPath) as? GroceryCell
@@ -76,7 +78,36 @@ class GroceryListVC: UIViewController {
     }
 
     @objc func addGrocery(_ action: UIAction) {
-        // TODO: unimplemented
+        self.textFieldAlert = RBTextFieldAlert(
+            title: "New Grocery",
+            message: "Enter the ingredient for the grocery list",
+            placeholder: "ex. ½ red onion",
+            confirmText: "Save"
+        ) { [weak self] (text) in
+            guard let self else { return }
+
+            let grocery = GroceryParser.shared.parse(string: text)
+            State.manager.addToGroceryList(grocery: grocery)
+            // TODO: need to reload if merging
+            self.applySnapshot()
+        }
+        self.textFieldAlert?.autocapitalizationType = UITextAutocapitalizationType.none
+        self.presentTextFieldAlert()
+    }
+
+    func presentTextFieldAlert() {
+        if let alert = self.textFieldAlert {
+            self.present(alert, animated: true) {
+                // add tap-to-dismiss gesture to background
+                let gesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissTextFieldAlert))
+                alert.view.superview?.subviews.first?.isUserInteractionEnabled = true
+                alert.view.superview?.subviews.first?.addGestureRecognizer(gesture)
+            }
+        }
+    }
+
+    @objc func dismissTextFieldAlert() {
+        self.textFieldAlert?.dismiss(animated: true)
     }
 
     @objc func deleteGroceries(_ action: UIAction) {
@@ -95,19 +126,11 @@ class GroceryListVC: UIViewController {
 extension GroceryListVC: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let grocery = State.manager.groceryList.grocery(at: indexPath)
-        grocery.toggleComplete()
-        if grocery.complete {
-            // move from the incomplete list to the complete list
-            State.manager.groceryList.remove(at: indexPath)
-            State.manager.groceryList.complete.insert(grocery, at: 0)
-        } else {
-            // move from the complete list to the incomplete list
-            State.manager.groceryList.remove(at: indexPath)
-            State.manager.groceryList.incomplete.add(grocery)
-        }
-
+        let newIndexPath = State.manager.groceryList.toggleComplete(at: indexPath)
         State.manager.storeGroceryList()
+
+        let grocery = State.manager.groceryList.grocery(at: newIndexPath)
         self.applySnapshot(reload: [grocery])
+        self.feedback.selectionChanged()
     }
 }

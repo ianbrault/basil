@@ -7,34 +7,64 @@
 
 import UIKit
 
+//
+// Standard alert view with a text field
+//
 class RBTextFieldAlert: UIAlertController {
 
-    convenience init(title: String, placeholder: String, confirmButtonText: String, completed: @escaping (String) -> Void) {
-        self.init(title: title, message: nil, preferredStyle: UIAlertController.Style.alert)
-        self.configure(placeholder: placeholder, text: nil, confirmButtonText: confirmButtonText, completed: completed)
+    var autocapitalizationType: UITextAutocapitalizationType? {
+        get {
+            if let textField = self.textFields?.first {
+                return textField.autocapitalizationType
+            } else {
+                return nil
+            }
+        }
+        set {
+            if let newValue, let textField = self.textFields?.first {
+                textField.autocapitalizationType = newValue
+            }
+        }
     }
 
-    convenience init(title: String, placeholder: String, text: String, confirmButtonText: String, completed: @escaping (String) -> Void) {
-        self.init(title: title, message: nil, preferredStyle: UIAlertController.Style.alert)
-        self.configure(placeholder: placeholder, text: text,  confirmButtonText: confirmButtonText, completed: completed)
+    var text: String? {
+        get {
+            if let textField = self.textFields?.first {
+                return textField.text
+            } else {
+                return nil
+            }
+        }
+        set {
+            if let newValue, let textField = self.textFields?.first {
+                textField.text = newValue
+            }
+        }
     }
 
-    private func configure(placeholder: String, text: String?, confirmButtonText: String, completed: @escaping (String) -> Void) {
+    convenience init(
+        title: String,
+        message: String?,
+        placeholder: String,
+        confirmText: String,
+        completed: @escaping (String) -> Void
+    ) {
+        self.init(title: title, message: message, preferredStyle: UIAlertController.Style.alert)
+        self.configure(placeholder: placeholder, confirmText: confirmText, completed: completed)
+    }
+
+    private func configure(placeholder: String, confirmText: String, completed: @escaping (String) -> Void) {
         let textFieldConfig = { (textField: UITextField) in
             textField.autocapitalizationType = .words
             textField.autocorrectionType = .yes
             textField.placeholder = placeholder
-            if let text {
-                textField.text = text
-            }
         }
         self.addTextField(configurationHandler: textFieldConfig)
-
-        self.addActions(confirmButtonText: confirmButtonText,  completed: completed)
+        self.addActions(confirmText: confirmText, completed: completed)
     }
 
-    private func addActions(confirmButtonText: String, completed: @escaping (String) -> Void) {
-        let confirmAction = UIAlertAction(title: confirmButtonText, style: .default) { (_) in
+    private func addActions(confirmText: String, completed: @escaping (String) -> Void) {
+        let confirmAction = UIAlertAction(title: confirmText, style: .default) { (_) in
             if let textField = self.textFields?.first, let text = textField.text {
                 completed(text)
             }

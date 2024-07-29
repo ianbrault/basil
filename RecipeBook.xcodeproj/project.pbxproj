@@ -312,11 +312,11 @@
 			isa = PBXGroup;
 			children = (
 				E3C1D3782B06FEA4002E26D1 /* Onboarding */,
+				E3FD19F92A1323E300ACA346 /* FolderTreeVC.swift */,
 				E3573E6829CC16DC000F7877 /* GroceryListVC.swift */,
 				E34B4D0429D154AF0063A9A2 /* RecipeFormVC.swift */,
 				E3573E6529CC16C1000F7877 /* RecipeListVC.swift */,
 				E3427C0D29E158FC002C81E2 /* RecipeVC.swift */,
-				E3FD19F92A1323E300ACA346 /* FolderTreeVC.swift */,
 			);
 			path = Screens;
 			sourceTree = "<group>";

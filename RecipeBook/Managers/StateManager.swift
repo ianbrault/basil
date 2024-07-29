@@ -389,6 +389,11 @@ class State {
     // Grocery List
     //
 
+    func addToGroceryList(grocery: Grocery) {
+        self.groceryList.addGrocery(grocery)
+        self.storeGroceryList()
+    }
+
     func addIngredientsToGroceryList(from recipe: Recipe) {
         self.groceryList.addIngredients(from: recipe)
         self.storeGroceryList()

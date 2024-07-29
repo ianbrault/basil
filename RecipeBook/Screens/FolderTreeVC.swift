@@ -7,6 +7,9 @@
 
 import UIKit
 
+//
+// Displays a tree visualizing the recipe folder hierarchy, used to select a folder
+//
 class FolderTreeVC: UIViewController {
     static let reuseID = "FolderTreeCell"
 
@@ -65,7 +68,7 @@ class FolderTreeVC: UIViewController {
         self.title = "Move to folder"
 
         // dismiss the view when the cancel button is tapped
-        let cancelButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(dismissVC))
+        let cancelButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(self.dismissVC))
         self.navigationItem.rightBarButtonItem = cancelButton
     }
 
