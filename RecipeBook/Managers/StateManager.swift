@@ -399,7 +399,18 @@ class State {
         self.storeGroceryList()
     }
 
-    func clearGroceryList() {
+    func replaceGrocery(at indexPath: IndexPath, with grocery: Grocery) -> IndexPath {
+        let indexPath = self.groceryList.replace(at: indexPath, with: grocery)
+        self.storeGroceryList()
+        return indexPath
+    }
+
+    func removeGrocery(at indexPath: IndexPath) {
+        self.groceryList.remove(at: indexPath)
+        self.storeGroceryList()
+    }
+
+    func removeAllGroceries() {
         self.groceryList.clear()
         self.storeGroceryList()
     }

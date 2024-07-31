@@ -88,8 +88,7 @@ class GroceryListVC: UIViewController {
 
             let grocery = GroceryParser.shared.parse(string: text)
             State.manager.addToGroceryList(grocery: grocery)
-            // TODO: need to reload if merging
-            self.applySnapshot()
+            self.applySnapshot(reload: [grocery])
         }
         self.textFieldAlert?.autocapitalizationType = UITextAutocapitalizationType.none
         self.presentTextFieldAlert()
@@ -110,12 +109,44 @@ class GroceryListVC: UIViewController {
         self.textFieldAlert?.dismiss(animated: true)
     }
 
+    @objc func editGrocery(_ action: UIAction, at indexPath: IndexPath) {
+        let grocery = State.manager.groceryList.grocery(at: indexPath)
+
+        self.textFieldAlert = RBTextFieldAlert(
+            title: "Edit Grocery",
+            message: "Enter the ingredient for the grocery list",
+            placeholder: "ex. ½ red onion",
+            confirmText: "Save"
+        ) { [weak self] (text) in
+            guard let self else { return }
+
+            let grocery = GroceryParser.shared.parse(string: text)
+            let newIndexPath = State.manager.replaceGrocery(at: indexPath, with: grocery)
+            let newGrocery = State.manager.groceryList.grocery(at: newIndexPath)
+            self.applySnapshot(reload: [newGrocery])
+        }
+        self.textFieldAlert?.text = grocery.toString()
+        self.textFieldAlert?.autocapitalizationType = UITextAutocapitalizationType.none
+        self.presentTextFieldAlert()
+    }
+
+    @objc func deleteGrocery(_ action: UIAction, at indexPath: IndexPath) {
+        let title = "Are you sure you want to delete this grocery?"
+        let alert = RBDeleteAlert(title: title) { [weak self] () in
+            guard let self = self else { return }
+
+            State.manager.removeGrocery(at: indexPath)
+            self.applySnapshot()
+        }
+        self.present(alert, animated: true)
+    }
+
     @objc func deleteGroceries(_ action: UIAction) {
         let title = "Are you sure you want to delete all groceries?"
         let alert = RBDeleteAlert(title: title) { [weak self] () in
             guard let self = self else { return }
 
-            State.manager.clearGroceryList()
+            State.manager.removeAllGroceries()
             self.applySnapshot()
         }
         self.present(alert, animated: true)
@@ -132,5 +163,22 @@ extension GroceryListVC: UITableViewDelegate {
         let grocery = State.manager.groceryList.grocery(at: newIndexPath)
         self.applySnapshot(reload: [grocery])
         self.feedback.selectionChanged()
+    }
+
+    func tableView(
+        _ tableView: UITableView,
+        contextMenuConfigurationForRowAt indexPath: IndexPath,
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] (_) in
+            guard let self = self else { return UIMenu() }
+            let editAction = UIAction(title: "Edit grocery", image: SFSymbols.editRecipe) { (action) in
+                self.editGrocery(action, at: indexPath)
+            }
+            let deleteAction = UIAction(title: "Delete grocery", image: SFSymbols.trash, attributes: .destructive) { (action) in
+                self.deleteGrocery(action, at: indexPath)
+            }
+            return UIMenu(title: "", children: [editAction, deleteAction])
+        }
     }
 }

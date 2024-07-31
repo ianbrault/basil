@@ -16,7 +16,7 @@ class GroceryList: Codable {
     private var incomplete: [Grocery] = []
     private var complete: [Grocery] = []
 
-    private enum ListType {
+    private enum List {
         case incomplete
         case complete
     }
@@ -33,15 +33,7 @@ class GroceryList: Codable {
         return self.incomplete + self.complete
     }
 
-    func grocery(at indexPath: IndexPath) -> Grocery {
-        if indexPath.row >= self.incomplete.count {
-            return self.complete[indexPath.row - self.incomplete.count]
-        } else {
-            return self.incomplete[indexPath.row]
-        }
-    }
-
-    private func indexOf(_ grocery: Grocery, in list: ListType) -> Int? {
+    private func indexOf(_ grocery: Grocery, in list: List) -> Int? {
         // NOTE: current implementation only allows merging for identical units
         // TODO: update this to allow conversions between equivalent unit types (i.e. volume, weight, etc.)
         switch list {
@@ -52,7 +44,7 @@ class GroceryList: Codable {
         }
     }
 
-    private func add(_ grocery: Grocery, to list: ListType, at index: Int? = nil) -> Int {
+    private func add(_ grocery: Grocery, to list: List, at index: Int? = nil) -> IndexPath {
         var row: Int
         if let i = self.indexOf(grocery, in: list) {
             // grocery exists in target list, merging with existing grocery
@@ -85,10 +77,18 @@ class GroceryList: Codable {
                 self.complete.append(grocery)
             }
         }
-        return row
+        return IndexPath(row: row, section: 0)
     }
 
-    func addGrocery(_ grocery: Grocery) {
+    func grocery(at indexPath: IndexPath) -> Grocery {
+        if indexPath.row < self.incomplete.count {
+            return self.incomplete[indexPath.row]
+        } else {
+            return self.complete[indexPath.row - self.incomplete.count]
+        }
+    }
+
+    func addGrocery(_ grocery: Grocery){
         let _ = self.add(grocery, to: .incomplete)
     }
 
@@ -111,21 +111,38 @@ class GroceryList: Codable {
         }
     }
 
+    func replace(at indexPath: IndexPath, with grocery: Grocery) -> IndexPath {
+        // check if the new grocery can be merged with any others in its list
+        let list: List = indexPath.row < self.incomplete.count ? .incomplete : .complete
+        if let index = self.indexOf(grocery, in: list), index != indexPath.row {
+            self.remove(at: indexPath)
+            return self.add(grocery, to: list)
+        } else {
+            switch list {
+            case .incomplete:
+                self.incomplete[indexPath.row] = grocery
+            case .complete:
+                self.complete[indexPath.row - self.incomplete.count] = grocery
+            }
+            return indexPath
+        }
+    }
+
     func toggleComplete(at indexPath: IndexPath) -> IndexPath {
         let grocery = self.grocery(at: indexPath)
         grocery.toggleComplete()
 
-        var row: Int
+        var newIndexPath: IndexPath
         if grocery.complete {
             // move from the incomplete list to head of the complete list
             self.remove(at: indexPath)
-            row = self.add(grocery, to: .complete, at: 0)
+            newIndexPath = self.add(grocery, to: .complete, at: 0)
         } else {
             // move from the complete list to the tail of the incomplete list
             self.remove(at: indexPath)
-            row = self.add(grocery, to: .incomplete)
+            newIndexPath = self.add(grocery, to: .incomplete)
         }
-        return IndexPath(row: row, section: 0)
+        return newIndexPath
     }
 
     func clear() {
