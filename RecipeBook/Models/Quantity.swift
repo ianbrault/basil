@@ -85,6 +85,19 @@ enum Quantity: Codable & Equatable & Hashable {
         (7 << 16) | 8: "⅞",
     ]
 
+    func asFloat() -> CGFloat {
+        switch self {
+        case .none:
+            return 0.0
+        case .integer(let i):
+            return CGFloat(integerLiteral: i)
+        case .float(let f):
+            return f
+        case .fraction(let f):
+            return f.asFloat()
+        }
+    }
+
     func add(integer: Int) -> Quantity {
         switch self {
         case .none:
@@ -94,7 +107,8 @@ enum Quantity: Codable & Equatable & Hashable {
         case .float(let f):
             return .float(f + CGFloat(integerLiteral: integer))
         case .fraction(let f):
-            return .fraction(Fraction(f.dividend + (integer * f.divisor), f.divisor))
+            let newFraction = Fraction(f.dividend + (integer * f.divisor), f.divisor)
+            return Quantity.simplify(fraction: newFraction)
         }
     }
 
@@ -123,12 +137,7 @@ enum Quantity: Codable & Equatable & Hashable {
         case .fraction(let f):
             let lcm = Fraction.lcm(f.divisor, fraction.divisor)
             let newFraction = Fraction(((lcm / f.divisor) * f.dividend) + ((lcm / fraction.divisor) * fraction.dividend), lcm)
-            // convert to an integer, if possible
-            if newFraction.dividend % newFraction.divisor == 0 {
-                return .integer(newFraction.dividend / newFraction.divisor)
-            } else {
-                return .fraction(newFraction)
-            }
+            return Quantity.simplify(fraction: newFraction)
         }
     }
 
@@ -142,6 +151,64 @@ enum Quantity: Codable & Equatable & Hashable {
             return self.add(float: f)
         case .fraction(let f):
             return self.add(fraction: f)
+        }
+    }
+
+    func multiplyBy(integer: Int) -> Quantity {
+        switch self {
+        case .none:
+            return .none
+        case .integer(let i):
+            return .integer(i * integer)
+        case .float(let f):
+            return .float(f * CGFloat(integerLiteral: integer))
+        case .fraction(let f):
+            let newFraction = Fraction(f.dividend * integer, f.divisor)
+            return Quantity.simplify(fraction: newFraction)
+        }
+    }
+
+    func multiplyBy(float: CGFloat) -> Quantity {
+        switch self {
+        case .none:
+            return .none
+        case .integer(let i):
+            return .float(CGFloat(integerLiteral: i) * float)
+        case .float(let f):
+            return .float(f * float)
+        case .fraction(let f):
+            return .float(f.asFloat() * float)
+        }
+    }
+
+    func divideBy(integer: Int) -> Quantity {
+        switch self {
+        case .none:
+            return .none
+        case .integer(let i):
+            if i % integer == 0 {
+                return .integer(i / integer)
+            } else {
+                return .float(CGFloat(integerLiteral: i) / CGFloat(integerLiteral: integer))
+            }
+        case .float(let f):
+            return .float(f / CGFloat(integerLiteral: integer))
+        case .fraction(let f):
+            let newFraction = Fraction(f.dividend, f.divisor * integer)
+            return Quantity.simplify(fraction: newFraction)
+        }
+    }
+
+    func divideBy(float: CGFloat) -> Quantity {
+        switch self {
+        case .none:
+            return .none
+        case .integer(let i):
+            return .float(CGFloat(integerLiteral: i) / float)
+        case .float(let f):
+            return .float(f / float)
+        case .fraction(let f):
+            return .float(f.asFloat() / float)
         }
     }
 
@@ -195,6 +262,20 @@ enum Quantity: Codable & Equatable & Hashable {
             return .fraction(Fraction((integer * divisor) + dividend, divisor))
         } else {
             return .none
+        }
+    }
+
+    static func simplify(fraction: Fraction) -> Quantity {
+        // first check if the fraction can be simplified to an integer
+        if fraction.dividend % fraction.divisor == 0 {
+            return .integer(fraction.dividend / fraction.divisor)
+        }
+        // otherwise check if the dividend/divisor have a common factor
+        let gcd = Fraction.gcd(fraction.dividend, fraction.divisor)
+        if gcd != 1 {
+            return .fraction(Fraction(fraction.dividend / gcd, fraction.divisor / gcd))
+        } else {
+            return .fraction(fraction)
         }
     }
 }

@@ -64,6 +64,7 @@
 		E3D374D12B95604900A0EF70 /* RBProcessingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D374D02B95604900A0EF70 /* RBProcessingView.swift */; };
 		E3DE28FC2C4465E8007FBDC5 /* RBDeleteAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DE28FB2C4465E8007FBDC5 /* RBDeleteAlert.swift */; };
 		E3E3E9632A0892F7006A9E00 /* RBErrorAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E3E9622A0892F7006A9E00 /* RBErrorAlertController.swift */; };
+		E3E542302C5CACAB0018C5AE /* UnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E5422F2C5CACAB0018C5AE /* UnitTests.swift */; };
 		E3EAC2A32BAE88DC00B4B7B6 /* RecipeBookTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3EAC2A22BAE88DC00B4B7B6 /* RecipeBookTests.swift */; };
 		E3EAC2AA2BAE8AD200B4B7B6 /* GroceryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3EAC2A92BAE8AD200B4B7B6 /* GroceryTests.swift */; };
 		E3EAC2AC2BAE8D3400B4B7B6 /* String+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3EAC2AB2BAE8D3400B4B7B6 /* String+Ext.swift */; };
@@ -156,6 +157,7 @@
 		E3D374D02B95604900A0EF70 /* RBProcessingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBProcessingView.swift; sourceTree = "<group>"; };
 		E3DE28FB2C4465E8007FBDC5 /* RBDeleteAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBDeleteAlert.swift; sourceTree = "<group>"; };
 		E3E3E9622A0892F7006A9E00 /* RBErrorAlertController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBErrorAlertController.swift; sourceTree = "<group>"; };
+		E3E5422F2C5CACAB0018C5AE /* UnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitTests.swift; sourceTree = "<group>"; };
 		E3EAC2A02BAE88DC00B4B7B6 /* RecipeBookTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RecipeBookTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3EAC2A22BAE88DC00B4B7B6 /* RecipeBookTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeBookTests.swift; sourceTree = "<group>"; };
 		E3EAC2A92BAE8AD200B4B7B6 /* GroceryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryTests.swift; sourceTree = "<group>"; };
@@ -384,8 +386,9 @@
 		E3EAC2A12BAE88DC00B4B7B6 /* RecipeBookTests */ = {
 			isa = PBXGroup;
 			children = (
-				E3EAC2A22BAE88DC00B4B7B6 /* RecipeBookTests.swift */,
 				E3EAC2A92BAE8AD200B4B7B6 /* GroceryTests.swift */,
+				E3EAC2A22BAE88DC00B4B7B6 /* RecipeBookTests.swift */,
+				E3E5422F2C5CACAB0018C5AE /* UnitTests.swift */,
 			);
 			path = RecipeBookTests;
 			sourceTree = "<group>";
@@ -569,6 +572,7 @@
 				E3277D9D2BC112AA004F7566 /* Unit.swift in Sources */,
 				E3EAC2A32BAE88DC00B4B7B6 /* RecipeBookTests.swift in Sources */,
 				E3EAC2AE2BAF924500B4B7B6 /* Parse.swift in Sources */,
+				E3E542302C5CACAB0018C5AE /* UnitTests.swift in Sources */,
 				E3EAC2BB2BAF93AA00B4B7B6 /* RBEmptyStateView.swift in Sources */,
 				E3EAC2BC2BAF93B800B4B7B6 /* RBTitleLabel.swift in Sources */,
 				E3EAC2B22BAF933200B4B7B6 /* PersistenceManager.swift in Sources */,

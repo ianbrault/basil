@@ -15,6 +15,7 @@ enum RBError: Error {
     case failedToParseRecipe(String?)
     case failedToSaveRecipes
     case httpError(String)
+    case invalidConversion(Unit, Unit)
     case invalidURL(String)
     case missingHTTPData
     case missingInput(UUID)
@@ -27,6 +28,8 @@ enum RBError: Error {
         switch self {
         case .httpError(_):
             return "An error occurred"
+        case .invalidConversion(_, _):
+            return "Invalid unit conversion"
         case .invalidURL(_):
             return "Invalid URL"
         case .missingTitle:
@@ -63,6 +66,8 @@ enum RBError: Error {
             return message ?? "Error while parsing recipe"
         case .httpError(let error):
             return error
+        case .invalidConversion(let from, let to):
+            return "Cannot convert from \(from.toString()) to \(to.toString())"
         case .invalidURL(let string):
             return string
         case .missingHTTPData:
