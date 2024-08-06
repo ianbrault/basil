@@ -42,8 +42,7 @@ class Grocery: Codable {
     }
 
     func add(quantity: Quantity) {
-        let new = self.quantity.add(quantity)
-        self.quantity = new
+        self.quantity = self.quantity + quantity
     }
 
     static func == (lhs: Grocery, rhs: Grocery) -> Bool {

@@ -92,29 +92,29 @@ enum Unit: Codable & Equatable & Hashable {
             case .ounces:
                 return quantity
             case .pounds:
-                return quantity.divideBy(integer: Unit.ouncesPerPound)
+                return quantity / Unit.ouncesPerPound
             case .grams:
-                return quantity.multiplyBy(float: Unit.gramsPerOunce)
+                return quantity * Unit.gramsPerOunce
             default:
                 throw RBError.invalidConversion(from, to)
             }
         case .pounds:
             switch to {
             case .ounces:
-                return quantity.multiplyBy(integer: Unit.ouncesPerPound)
+                return quantity * Unit.ouncesPerPound
             case .pounds:
                 return quantity
             case .grams:
-                return quantity.multiplyBy(float: CGFloat(integerLiteral: Unit.ouncesPerPound) * Unit.gramsPerOunce)
+                return quantity * Unit.ouncesPerPound * Unit.gramsPerOunce
             default:
                 throw RBError.invalidConversion(from, to)
             }
         case .grams:
             switch to {
             case .ounces:
-                return quantity.divideBy(float: Unit.gramsPerOunce)
+                return quantity / Unit.gramsPerOunce
             case .pounds:
-                return quantity.divideBy(float: CGFloat(integerLiteral: Unit.ouncesPerPound) * Unit.gramsPerOunce)
+                return quantity / (Unit.ouncesPerPound.toFloat() * Unit.gramsPerOunce)
             case .grams:
                 return quantity
             default:
@@ -125,29 +125,29 @@ enum Unit: Codable & Equatable & Hashable {
             case .teaspoons:
                 return quantity
             case .tablespoons:
-                return quantity.divideBy(integer: Unit.teaspoonsPerTablespoon)
+                return quantity / Unit.teaspoonsPerTablespoon
             case .cups:
-                return quantity.divideBy(integer: Unit.teaspoonsPerTablespoon * Unit.tablespoonsPerCup)
+                return quantity / (Unit.teaspoonsPerTablespoon * Unit.tablespoonsPerCup)
             default:
                 throw RBError.invalidConversion(from, to)
             }
         case .tablespoons:
             switch to {
             case .teaspoons:
-                return quantity.multiplyBy(integer: Unit.teaspoonsPerTablespoon)
+                return quantity * Unit.teaspoonsPerTablespoon
             case .tablespoons:
                 return quantity
             case .cups:
-                return quantity.divideBy(integer: Unit.tablespoonsPerCup)
+                return quantity / Unit.tablespoonsPerCup
             default:
                 throw RBError.invalidConversion(from, to)
             }
         case .cups:
             switch to {
             case .teaspoons:
-                return quantity.multiplyBy(integer: Unit.tablespoonsPerCup * Unit.teaspoonsPerTablespoon)
+                return quantity * Unit.tablespoonsPerCup * Unit.teaspoonsPerTablespoon
             case .tablespoons:
-                return quantity.multiplyBy(integer: Unit.tablespoonsPerCup)
+                return quantity * Unit.tablespoonsPerCup
             case .cups:
                 return quantity
             default:
@@ -162,19 +162,19 @@ enum Unit: Codable & Equatable & Hashable {
 
         switch unit {
         case .ounces:
-            let pounds = quantity.divideBy(integer: Unit.ouncesPerPound)
+            let pounds = quantity / Unit.ouncesPerPound
             if pounds.asFloat() >= 1.0 {
                 finalQuantity = pounds
                 finalUnit = .pounds
             }
         case .teaspoons:
-            let tablespoons = quantity.divideBy(integer: Unit.teaspoonsPerTablespoon)
+            let tablespoons = quantity / Unit.teaspoonsPerTablespoon
             if tablespoons.asFloat() >= 1.0 {
                 // attempt to convert upwards again to cups
                 (finalQuantity, finalUnit) = Unit.simplify(tablespoons, .tablespoons)
             }
         case .tablespoons:
-            let cups = quantity.divideBy(integer: Unit.tablespoonsPerCup)
+            let cups = quantity / Unit.tablespoonsPerCup
             if cups.asFloat() >= 1.0 {
                 finalQuantity = cups
                 finalUnit = .cups
@@ -194,7 +194,7 @@ enum Unit: Codable & Equatable & Hashable {
         guard let unitA, let unitB, unitA.canCombineWith(unitB) else { return nil }
 
         if unitA == unitB {
-            let quantity = quantityA.add(quantityB)
+            let quantity = quantityA + quantityB
             return Unit.simplify(quantity, unitA)
         }
 
@@ -205,14 +205,14 @@ enum Unit: Codable & Equatable & Hashable {
             let unit = (unitA == .grams && unitB == .grams) ? Unit.grams : Unit.ounces
             let a = try! Unit.convert(quantityA, from: unitA, to: unit)
             let b = try! Unit.convert(quantityB, from: unitB, to: unit)
-            let quantity = a.add(b)
+            let quantity = a + b
             return Unit.simplify(quantity, unit)
         // volume
         case .teaspoons, .tablespoons, .cups:
             let unit = Unit.teaspoons
             let a = try! Unit.convert(quantityA, from: unitA, to: unit)
             let b = try! Unit.convert(quantityB, from: unitB, to: unit)
-            let quantity = a.add(b)
+            let quantity = a + b
             return Unit.simplify(quantity, unit)
         }
     }

@@ -37,15 +37,15 @@ class GroceryParser {
                 if self.quantityIsInt() {
                     break
                 }
-                self.quantity = self.quantity.add(integer: integer)
+                self.quantity = self.quantity + .integer(integer)
                 self.index += 1
             case .float(let float):
-                self.quantity = self.quantity.add(float: float)
+                self.quantity = self.quantity + .float(float)
                 self.index += 1
                 // stop parsing once a float is parsed
                 break
             case .fraction(let fraction):
-                self.quantity = self.quantity.add(fraction: fraction)
+                self.quantity = self.quantity + .fraction(fraction)
                 self.index += 1
                 // stop parsing once a fraction is parsed
                 break

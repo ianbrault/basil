@@ -38,6 +38,11 @@ enum Quantity: Codable & Equatable & Hashable {
         static func lcm(_ x: Int, _ y: Int) -> Int {
             return x / gcd(x, y) * y
         }
+
+        static func +(lhs: Fraction, rhs: Fraction) -> Fraction {
+            let lcm = Fraction.lcm(lhs.divisor, rhs.divisor)
+            return Fraction(((lcm / lhs.divisor) * lhs.dividend) + ((lcm / rhs.divisor) * rhs.dividend), lcm)
+        }
     }
 
     case none
@@ -95,120 +100,6 @@ enum Quantity: Codable & Equatable & Hashable {
             return f
         case .fraction(let f):
             return f.asFloat()
-        }
-    }
-
-    func add(integer: Int) -> Quantity {
-        switch self {
-        case .none:
-            return .integer(integer)
-        case .integer(let i):
-            return .integer(i + integer)
-        case .float(let f):
-            return .float(f + CGFloat(integerLiteral: integer))
-        case .fraction(let f):
-            let newFraction = Fraction(f.dividend + (integer * f.divisor), f.divisor)
-            return Quantity.simplify(fraction: newFraction)
-        }
-    }
-
-    func add(float: CGFloat) -> Quantity {
-        switch self {
-        case .none:
-            return .float(float)
-        case .integer(let i):
-            return .float(CGFloat(integerLiteral: i) + float)
-        case .float(let f):
-            return .float(f + float)
-        case .fraction(let f):
-            return .float(f.asFloat() + float)
-        }
-    }
-
-    func add(fraction: Fraction) -> Quantity {
-        switch self {
-        case .none:
-            return .fraction(fraction)
-        case .integer(let i):
-            let newFraction = Fraction(fraction.dividend + (i * fraction.divisor), fraction.divisor)
-            return .fraction(newFraction)
-        case .float(let f):
-            return .float(f + fraction.asFloat())
-        case .fraction(let f):
-            let lcm = Fraction.lcm(f.divisor, fraction.divisor)
-            let newFraction = Fraction(((lcm / f.divisor) * f.dividend) + ((lcm / fraction.divisor) * fraction.dividend), lcm)
-            return Quantity.simplify(fraction: newFraction)
-        }
-    }
-
-    func add(_ other: Quantity) -> Quantity {
-        switch other {
-        case .none:
-            return other
-        case .integer(let i):
-            return self.add(integer: i)
-        case .float(let f):
-            return self.add(float: f)
-        case .fraction(let f):
-            return self.add(fraction: f)
-        }
-    }
-
-    func multiplyBy(integer: Int) -> Quantity {
-        switch self {
-        case .none:
-            return .none
-        case .integer(let i):
-            return .integer(i * integer)
-        case .float(let f):
-            return .float(f * CGFloat(integerLiteral: integer))
-        case .fraction(let f):
-            let newFraction = Fraction(f.dividend * integer, f.divisor)
-            return Quantity.simplify(fraction: newFraction)
-        }
-    }
-
-    func multiplyBy(float: CGFloat) -> Quantity {
-        switch self {
-        case .none:
-            return .none
-        case .integer(let i):
-            return .float(CGFloat(integerLiteral: i) * float)
-        case .float(let f):
-            return .float(f * float)
-        case .fraction(let f):
-            return .float(f.asFloat() * float)
-        }
-    }
-
-    func divideBy(integer: Int) -> Quantity {
-        switch self {
-        case .none:
-            return .none
-        case .integer(let i):
-            if i % integer == 0 {
-                return .integer(i / integer)
-            } else {
-                return .float(CGFloat(integerLiteral: i) / CGFloat(integerLiteral: integer))
-            }
-        case .float(let f):
-            return .float(f / CGFloat(integerLiteral: integer))
-        case .fraction(let f):
-            let newFraction = Fraction(f.dividend, f.divisor * integer)
-            return Quantity.simplify(fraction: newFraction)
-        }
-    }
-
-    func divideBy(float: CGFloat) -> Quantity {
-        switch self {
-        case .none:
-            return .none
-        case .integer(let i):
-            return .float(CGFloat(integerLiteral: i) / float)
-        case .float(let f):
-            return .float(f / float)
-        case .fraction(let f):
-            return .float(f.asFloat() / float)
         }
     }
 
@@ -276,6 +167,88 @@ enum Quantity: Codable & Equatable & Hashable {
             return .fraction(Fraction(fraction.dividend / gcd, fraction.divisor / gcd))
         } else {
             return .fraction(fraction)
+        }
+    }
+
+    static func +(lhs: Quantity, rhs: Quantity) -> Quantity {
+        switch (lhs, rhs) {
+        case (.none, .none):
+            return .none
+        case (.none, _):
+            return rhs
+        case (_, .none):
+            return lhs
+        case (.integer(let i), .integer(let ii)):
+            return .integer(i + ii)
+        case (.float(let f), .float(let ff)):
+            return .float(f + ff)
+        case (.fraction(let f), .fraction(let ff)):
+            return Quantity.simplify(fraction: f + ff)
+        case (.integer(let i), .float(let f)), (.float(let f), .integer(let i)):
+            return .float(i.toFloat() + f)
+        case (.integer(let i), .fraction(let f)), (.fraction(let f), .integer(let i)):
+            let newFraction = Fraction(f.dividend + (i * f.divisor), f.divisor)
+            return Quantity.simplify(fraction: newFraction)
+        case (.float(let f), .fraction(let ff)), (.fraction(let ff), .float(let f)):
+            return .float(f + ff.asFloat())
+        }
+    }
+
+    static func *(lhs: Quantity, rhs: Int) -> Quantity {
+        switch lhs {
+        case .none:
+            return .none
+        case .integer(let i):
+            return .integer(i * rhs)
+        case .float(let f):
+            return .float(f * rhs.toFloat())
+        case .fraction(let f):
+            let newFraction = Fraction(f.dividend * rhs, f.divisor)
+            return Quantity.simplify(fraction: newFraction)
+        }
+    }
+
+    static func *(lhs: Quantity, rhs: CGFloat) -> Quantity {
+        switch lhs {
+        case .none:
+            return .none
+        case .integer(let i):
+            return .float(i.toFloat() * rhs)
+        case .float(let f):
+            return .float(f * rhs)
+        case .fraction(let f):
+            return .float(f.asFloat() * rhs)
+        }
+    }
+
+    static func /(lhs: Quantity, rhs: Int) -> Quantity {
+        switch lhs {
+        case .none:
+            return .none
+        case .integer(let i):
+            if i % rhs == 0 {
+                return .integer(i / rhs)
+            } else {
+                return .float(i.toFloat() / rhs.toFloat())
+            }
+        case .float(let f):
+            return .float(f / rhs.toFloat())
+        case .fraction(let f):
+            let newFraction = Fraction(f.dividend, f.divisor * rhs)
+            return Quantity.simplify(fraction: newFraction)
+        }
+    }
+
+    static func /(lhs: Quantity, rhs: CGFloat) -> Quantity {
+        switch lhs {
+        case .none:
+            return .none
+        case .integer(let i):
+            return .float(i.toFloat() / rhs)
+        case .float(let f):
+            return .float(f / rhs)
+        case .fraction(let f):
+            return .float(f.asFloat() / rhs)
         }
     }
 }
