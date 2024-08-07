@@ -47,7 +47,7 @@ class PersistenceManager {
             do {
                 return try self.decoder.decode(GroceryList.self, from: groceryData)
             } catch {
-                print("ERROR: invalid grocery list, continuing with an empty list")
+                print("ERROR: invalid grocery list: \(error): continuing with an empty list")
                 return GroceryList()
             }
         }

@@ -389,17 +389,17 @@ class State {
     // Grocery List
     //
 
-    func addToGroceryList(grocery: Grocery) {
-        self.groceryList.addGrocery(grocery)
+    func addToGroceryList(_ ingredient: Ingredient) {
+        self.groceryList.addIngredient(ingredient)
         self.storeGroceryList()
     }
 
-    func addIngredientsToGroceryList(from recipe: Recipe) {
+    func addToGroceryList(from recipe: Recipe) {
         self.groceryList.addIngredients(from: recipe)
         self.storeGroceryList()
     }
 
-    func replaceGrocery(at indexPath: IndexPath, with grocery: Grocery) -> IndexPath {
+    func replaceGrocery(at indexPath: IndexPath, with grocery: Ingredient) -> IndexPath {
         let indexPath = self.groceryList.replace(at: indexPath, with: grocery)
         self.storeGroceryList()
         return indexPath

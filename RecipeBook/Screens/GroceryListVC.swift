@@ -13,8 +13,8 @@ import UIKit
 //
 class GroceryListVC: UIViewController {
 
-    typealias DataSource = UITableViewDiffableDataSource<Int, Grocery>
-    typealias Snapshot = NSDiffableDataSourceSnapshot<Int, Grocery>
+    typealias DataSource = UITableViewDiffableDataSource<Int, Ingredient>
+    typealias Snapshot = NSDiffableDataSourceSnapshot<Int, Ingredient>
 
     private let tableView = UITableView()
     private let feedback = UISelectionFeedbackGenerator()
@@ -26,7 +26,7 @@ class GroceryListVC: UIViewController {
         return cell
     }
 
-    func applySnapshot(reload identifiers: [Grocery] = [], animatingDifferences: Bool = true) {
+    func applySnapshot(reload identifiers: [Ingredient] = [], animatingDifferences: Bool = true) {
         var snapshot = Snapshot()
         snapshot.appendSections([0])
         snapshot.appendItems(State.manager.groceryList.items, toSection: 0)
@@ -79,16 +79,16 @@ class GroceryListVC: UIViewController {
 
     @objc func addGrocery(_ action: UIAction) {
         self.textFieldAlert = RBTextFieldAlert(
-            title: "New Grocery",
+            title: "New Ingredient",
             message: "Enter the ingredient for the grocery list",
             placeholder: "ex. ½ red onion",
             confirmText: "Save"
         ) { [weak self] (text) in
             guard let self else { return }
 
-            let grocery = GroceryParser.shared.parse(string: text)
-            State.manager.addToGroceryList(grocery: grocery)
-            self.applySnapshot(reload: [grocery])
+            let ingredient = IngredientParser.shared.parse(string: text)
+            State.manager.addToGroceryList(ingredient)
+            self.applySnapshot(reload: [ingredient])
         }
         self.textFieldAlert?.autocapitalizationType = UITextAutocapitalizationType.none
         self.presentTextFieldAlert()
@@ -113,14 +113,14 @@ class GroceryListVC: UIViewController {
         let grocery = State.manager.groceryList.grocery(at: indexPath)
 
         self.textFieldAlert = RBTextFieldAlert(
-            title: "Edit Grocery",
+            title: "Edit Ingredient",
             message: "Enter the ingredient for the grocery list",
             placeholder: "ex. ½ red onion",
             confirmText: "Save"
         ) { [weak self] (text) in
             guard let self else { return }
 
-            let grocery = GroceryParser.shared.parse(string: text)
+            let grocery = IngredientParser.shared.parse(string: text)
             let newIndexPath = State.manager.replaceGrocery(at: indexPath, with: grocery)
             let newGrocery = State.manager.groceryList.grocery(at: newIndexPath)
             self.applySnapshot(reload: [newGrocery])

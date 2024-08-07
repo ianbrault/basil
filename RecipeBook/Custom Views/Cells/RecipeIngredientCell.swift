@@ -21,8 +21,8 @@ class RecipeIngredientCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func set(ingredient: String) {
-        let string = "•\t\(ingredient)"
+    func set(ingredient: Ingredient) {
+        let string = "•\t\(ingredient.toString())"
 
         let paragraphStyle = NSMutableParagraphStyle()
         let bulletSize = NSAttributedString(

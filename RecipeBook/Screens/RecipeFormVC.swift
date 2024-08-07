@@ -11,6 +11,9 @@ protocol RecipeFormVCDelegate: AnyObject {
     func didSaveRecipe(style: RecipeFormVC.Style, recipe: Recipe)
 }
 
+//
+// Displays a form to create/edit a recipe
+//
 class RecipeFormVC: UIViewController {
 
     enum Style {
@@ -177,7 +180,7 @@ class RecipeFormVC: UIViewController {
         // add the ingredients cells
         self.tableCells[ingredientsSection].removeAll()
         for ingredient in recipe.ingredients {
-            let ingredientCell = RecipeFormCell.Content.createInput(text: ingredient)
+            let ingredientCell = RecipeFormCell.Content.createInput(text: ingredient.toString())
             self.tableCells[ingredientsSection].append(ingredientCell)
         }
         self.tableCells[ingredientsSection].append(RecipeFormCell.Content.createButton())
@@ -259,11 +262,12 @@ class RecipeFormVC: UIViewController {
         }
 
         // gather the ingredients
-        var ingredients: [String] = []
+        var ingredients: [Ingredient] = []
         for cell in self.tableCells[Section.ingredients.rawValue] {
             switch cell.type {
             case .input:
-                ingredients.append(cell.text!)
+                let ingredient = IngredientParser.shared.parse(string: cell.text!)
+                ingredients.append(ingredient)
             case .actionButton:
                 continue
             }

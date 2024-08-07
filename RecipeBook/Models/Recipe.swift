@@ -11,10 +11,10 @@ class Recipe: Codable {
     var uuid: UUID
     var folderId: UUID
     var title: String
-    var ingredients: [String]
+    var ingredients: [Ingredient]
     var instructions: [String]
 
-    init(uuid: UUID, folderId: UUID, title: String, ingredients: [String] = [], instructions: [String] = []) {
+    init(uuid: UUID, folderId: UUID, title: String, ingredients: [Ingredient] = [], instructions: [String] = []) {
         self.uuid = uuid
         self.folderId = folderId
         self.title = title
@@ -22,7 +22,7 @@ class Recipe: Codable {
         self.instructions = instructions
     }
 
-    convenience init(folderId: UUID, title: String, ingredients: [String] = [], instructions: [String] = []) {
+    convenience init(folderId: UUID, title: String, ingredients: [Ingredient] = [], instructions: [String] = []) {
         self.init(uuid: UUID(), folderId: folderId, title: title, ingredients: ingredients, instructions: instructions)
     }
 

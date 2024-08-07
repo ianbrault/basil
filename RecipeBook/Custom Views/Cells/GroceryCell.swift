@@ -20,7 +20,7 @@ class GroceryCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func set(grocery: Grocery) {
+    func set(grocery: Ingredient) {
         var content = self.defaultContentConfiguration()
         content.text = grocery.toString()
 

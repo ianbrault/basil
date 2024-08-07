@@ -1,5 +1,5 @@
 //
-//  Grocery.swift
+//  Ingredient.swift
 //  RecipeBook
 //
 //  Created by Ian Brault on 3/9/24.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Grocery: Codable {
+class Ingredient: Codable {
 
     var quantity: Quantity
     var unit: Unit?
@@ -45,7 +45,7 @@ class Grocery: Codable {
         self.quantity = self.quantity + quantity
     }
 
-    static func == (lhs: Grocery, rhs: Grocery) -> Bool {
+    static func == (lhs: Ingredient, rhs: Ingredient) -> Bool {
         return (
             (lhs.item == rhs.item) &&
             (lhs.unit == rhs.unit) &&
@@ -53,7 +53,7 @@ class Grocery: Codable {
     }
 }
 
-extension Grocery: Hashable {
+extension Ingredient: Hashable {
     var identifier: String {
         return self.toString()
     }

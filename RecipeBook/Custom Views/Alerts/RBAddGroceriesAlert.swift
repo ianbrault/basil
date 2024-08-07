@@ -20,7 +20,7 @@ class RBAddGroceriesAlert: UIAlertController {
 
     private func addActions(recipe: Recipe) {
         let deleteAction = UIAlertAction(title: "Add", style: .default) { (_) in
-            State.manager.addIngredientsToGroceryList(from: recipe)
+            State.manager.addToGroceryList(from: recipe)
         }
         self.addAction(deleteAction)
 

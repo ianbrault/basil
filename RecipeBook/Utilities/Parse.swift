@@ -8,9 +8,9 @@
 import Foundation
 import SwiftSoup
 
-class GroceryParser {
+class IngredientParser {
 
-    static let shared = GroceryParser()
+    static let shared = IngredientParser()
 
     var parts: [String] = []
     var index: Int = 0
@@ -61,7 +61,7 @@ class GroceryParser {
         }
     }
 
-    func parse(string: String) -> Grocery {
+    func parse(string: String) -> Ingredient {
         // split by whitespace in order to parse individual components
         self.parts = string.trim()
             .components(separatedBy: .whitespaces)
@@ -76,7 +76,7 @@ class GroceryParser {
         // remaining string is the item
         let item = self.parts[self.index...].joined(separator: " ")
 
-        return Grocery(quantity: self.quantity, unit: self.unit, item: item)
+        return Ingredient(quantity: self.quantity, unit: self.unit, item: item)
     }
 }
 
@@ -101,15 +101,16 @@ enum NYTRecipeParser {
         return false
     }
 
-    static private func parseIngredients(_ document: Document) throws -> [String] {
+    static private func parseIngredients(_ document: Document) throws -> [Ingredient] {
         let listItems = try document.select("li.pantry--ui")
         // down-select to list items with class ingredient_ingredient__*
         let ingredientItems = try listItems.filter { try self.isIngredientListItem($0) }
 
-        var ingredients: [String] = []
+        var ingredients: [Ingredient] = []
         for item in ingredientItems {
             let text = try item.children().map { try $0.text() }.joined(separator: " ")
-            ingredients.append(text)
+            let ingredient = IngredientParser.shared.parse(string: text)
+            ingredients.append(ingredient)
         }
 
         return ingredients
