@@ -38,6 +38,9 @@ class RecipeListVC: UIViewController {
     init(folderId: UUID) {
         super.init(nibName: nil, bundle: nil)
         self.folderId = folderId
+
+        let folder = State.manager.getFolder(uuid: folderId)!
+        self.title = folder.name.isEmpty ? "Recipes" : folder.name
     }
 
     required init?(coder: NSCoder) {
@@ -81,7 +84,6 @@ class RecipeListVC: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.configureNavigationBar()
         self.loadItems()
         self.applySnapshot(animatingDifferences: false)
         // check-in with the server if it has not been done already
@@ -94,19 +96,6 @@ class RecipeListVC: UIViewController {
         super.viewDidLoad()
         self.configureViewController()
         self.configureTableView()
-    }
-
-    private func configureNavigationBar() {
-        let folder = State.manager.getFolder(uuid: self.folderId)!
-        self.title = folder.name.isEmpty ? "Recipes" : folder.name
-
-        let appearance = UINavigationBarAppearance()
-        appearance.largeTitleTextAttributes = [
-            NSAttributedString.Key.font: UIFont.systemFont(ofSize: 32, weight: .bold),
-        ]
-        self.navigationController?.navigationBar.standardAppearance = appearance
-        self.navigationController?.navigationBar.prefersLargeTitles = true
-        self.navigationController?.navigationBar.tintColor = .systemYellow
     }
 
     private func configureViewController() {

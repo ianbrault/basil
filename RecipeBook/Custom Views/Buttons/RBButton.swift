@@ -10,11 +10,11 @@ import UIKit
 class RBButton: UIButton {
 
     enum Style {
-        case filled
-        case bordered
+        case primary
+        case secondary
     }
 
-    init(title: String, image: UIImage? = nil, style: Style = .filled) {
+    init(title: String, image: UIImage? = nil, style: Style = .primary) {
         super.init(frame: .zero)
         self.configure(title: title, image: image, style: style)
     }
@@ -22,35 +22,20 @@ class RBButton: UIButton {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-
-        self.layer.cornerRadius = 10
-        self.layer.masksToBounds = false
-
-        self.addShadow()
-    }
 
     private func configure(title: String, image: UIImage? = nil, style: Style) {
         self.translatesAutoresizingMaskIntoConstraints = false
 
+        self.configuration = .filled()
         switch style {
-        case .filled:
-            self.configuration = .filled()
-            self.configuration?.cornerStyle = .medium
+        case .primary:
             self.configuration?.baseBackgroundColor = .systemYellow
             self.configuration?.baseForegroundColor = .systemBackground
-
-        case .bordered:
-            self.configuration = .bordered()
-            self.configuration?.cornerStyle = .medium
-            self.configuration?.baseBackgroundColor = .systemBackground
+        case .secondary:
+            self.configuration?.baseBackgroundColor = .secondarySystemBackground
             self.configuration?.baseForegroundColor = .systemYellow
-            self.layer.borderColor = UIColor.systemYellow.cgColor
-            self.layer.borderWidth = 2
         }
-
+        self.configuration?.cornerStyle = .large
         self.configuration?.attributedTitle = AttributedString(
             title,
             attributes: AttributeContainer([

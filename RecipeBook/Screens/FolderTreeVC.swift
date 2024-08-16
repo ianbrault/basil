@@ -102,6 +102,7 @@ extension FolderTreeVC: UITableViewDataSource, UITableViewDelegate {
         cell.indentationLevel = item.indentLevel * 2
 
         var content = cell.defaultContentConfiguration()
+        // TODO: needs update to use image/text
         content.attributedText = item.folder.attributedText(namePlaceholder: "Recipes", isEnabled: isEnabled)
         cell.contentConfiguration = content
         cell.isUserInteractionEnabled = isEnabled

@@ -73,10 +73,14 @@ class PersistenceManager {
                 // if this is nil, nothing has been saved before
                 return .empty()
             }
-            // NOTE: an assumption is made that the stored state is valid JSON; this will be true
-            // unless the data version is out of date, so this relies on that case being handled
-            // during initialization at a higher level
-            return try! self.decoder.decode(State.Data.self, from: stateData)
+            // NOTE: this should always be valid JSON
+            // TODO: consider unwrapping instead of failing silently
+            do {
+                return try self.decoder.decode(State.Data.self, from: stateData)
+            } catch {
+                print("ERROR: invalid state: \(error): continuing with an empty state")
+                return .empty()
+            }
         }
         set {
             // store the data version alongside the state

@@ -7,11 +7,7 @@
 
 import UIKit
 
-protocol RBWindowSceneDelegate: UIWindowSceneDelegate {
-    func sceneDidAddUser()
-}
-
-class SceneDelegate: UIResponder, RBWindowSceneDelegate {
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
@@ -27,14 +23,11 @@ class SceneDelegate: UIResponder, RBWindowSceneDelegate {
 
         // check if the user has been registered
         if State.manager.userId.isEmpty {
-            let vc = OnboardingVC()
-            vc.sceneDelegate = self
-            self.window?.rootViewController = vc
-            self.window?.makeKeyAndVisible()
+            self.window?.rootViewController = RBOnboardingController()
         } else {
             self.window?.rootViewController = RBTabBarController()
-            self.window?.makeKeyAndVisible()
         }
+        self.window?.makeKeyAndVisible()
     }
 
     func sceneDidAddUser() {

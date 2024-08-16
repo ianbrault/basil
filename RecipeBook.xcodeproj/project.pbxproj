@@ -8,11 +8,15 @@
 
 /* Begin PBXBuildFile section */
 		E3011DD329E38D7D00490919 /* RecipeInstructionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3011DD229E38D7D00490919 /* RecipeInstructionCell.swift */; };
+		E3138BD52C6C6A4000F8E05E /* OnboardingFormVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3138BD42C6C6A4000F8E05E /* OnboardingFormVC.swift */; };
 		E316DF1B2C630A9C009550B1 /* QuantityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E316DF1A2C630A9C009550B1 /* QuantityTests.swift */; };
 		E3277D9C2BC10997004F7566 /* Unit.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3277D9B2BC10997004F7566 /* Unit.swift */; };
 		E3277D9D2BC112AA004F7566 /* Unit.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3277D9B2BC10997004F7566 /* Unit.swift */; };
 		E327FDDB2C505DD30082EF11 /* UIColor+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E327FDDA2C505DD30082EF11 /* UIColor+Ext.swift */; };
+		E3316C0D2C66E2EB00F90117 /* RBOnboardingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3316C0C2C66E2EB00F90117 /* RBOnboardingController.swift */; };
+		E3316C102C6B5E9A00F90117 /* TextFieldContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3316C0F2C6B5E9A00F90117 /* TextFieldContentView.swift */; };
 		E336B63829FDF7D20025CC38 /* RecipeFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336B63729FDF7D20025CC38 /* RecipeFolder.swift */; };
+		E33AFC422C7010E2003681A8 /* UIResponder+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E33AFC412C7010E2003681A8 /* UIResponder+Ext.swift */; };
 		E3427C0E29E158FC002C81E2 /* RecipeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3427C0D29E158FC002C81E2 /* RecipeVC.swift */; };
 		E3427C1029E15D1B002C81E2 /* RecipeIngredientCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3427C0F29E15D1B002C81E2 /* RecipeIngredientCell.swift */; };
 		E349B13A29DFDB2D0097A338 /* PersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E349B13929DFDB2D0097A338 /* PersistenceManager.swift */; };
@@ -43,21 +47,16 @@
 		E3931E562B9D61930015A127 /* GroceryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3931E552B9D61930015A127 /* GroceryCell.swift */; };
 		E3931E5A2BA7EEEE0015A127 /* GroceryList.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3931E592BA7EEEE0015A127 /* GroceryList.swift */; };
 		E3931E5C2BA81DE30015A127 /* RBAddGroceriesAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3931E5B2BA81DE30015A127 /* RBAddGroceriesAlert.swift */; };
-		E39D32A72B16DA4F00D7511B /* RBIconTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39D32A62B16DA4F00D7511B /* RBIconTextField.swift */; };
 		E39D32A92B1AC02100D7511B /* UIImage+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39D32A82B1AC02100D7511B /* UIImage+Ext.swift */; };
 		E39D32AB2B1D70FF00D7511B /* Security.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39D32AA2B1D70FF00D7511B /* Security.swift */; };
 		E39D32AE2B23E17000D7511B /* SwiftEmailValidator in Frameworks */ = {isa = PBXBuildFile; productRef = E39D32AD2B23E17000D7511B /* SwiftEmailValidator */; };
-		E39D32B02B24037A00D7511B /* RBKeyboardToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39D32AF2B24037A00D7511B /* RBKeyboardToolbar.swift */; };
 		E3B1C73929CD205C00736C96 /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73829CD205C00736C96 /* Recipe.swift */; };
 		E3B1C73C29CE1CF600736C96 /* UITableView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73B29CE1CF600736C96 /* UITableView+Ext.swift */; };
 		E3B1C73E29CE1E9600736C96 /* RecipeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73D29CE1E9600736C96 /* RecipeCell.swift */; };
 		E3B1C74229CE68BC00736C96 /* RBBodyLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C74129CE68BC00736C96 /* RBBodyLabel.swift */; };
 		E3B1C74529CE6A9400736C96 /* RBTitleLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C74429CE6A9400736C96 /* RBTitleLabel.swift */; };
 		E3B1C74729CE6CC900736C96 /* UIView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C74629CE6CC900736C96 /* UIView+Ext.swift */; };
-		E3C1D3772B01F282002E26D1 /* OnboardingVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C1D3762B01F282002E26D1 /* OnboardingVC.swift */; };
 		E3C1D37A2B06FF30002E26D1 /* WelcomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C1D3792B06FF30002E26D1 /* WelcomeVC.swift */; };
-		E3C1D37C2B07001B002E26D1 /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C1D37B2B07001B002E26D1 /* LoginVC.swift */; };
-		E3C1D37E2B07004C002E26D1 /* RegisterVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C1D37D2B07004C002E26D1 /* RegisterVC.swift */; };
 		E3C1D3802B083004002E26D1 /* RBButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C1D37F2B083004002E26D1 /* RBButton.swift */; };
 		E3C4660429FF4AE500791576 /* StateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C4660329FF4AE500791576 /* StateManager.swift */; };
 		E3C466062A00B2D100791576 /* RecipeItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C466052A00B2D100791576 /* RecipeItem.swift */; };
@@ -105,10 +104,14 @@
 
 /* Begin PBXFileReference section */
 		E3011DD229E38D7D00490919 /* RecipeInstructionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeInstructionCell.swift; sourceTree = "<group>"; };
+		E3138BD42C6C6A4000F8E05E /* OnboardingFormVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFormVC.swift; sourceTree = "<group>"; };
 		E316DF1A2C630A9C009550B1 /* QuantityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuantityTests.swift; sourceTree = "<group>"; };
 		E3277D9B2BC10997004F7566 /* Unit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Unit.swift; sourceTree = "<group>"; };
 		E327FDDA2C505DD30082EF11 /* UIColor+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Ext.swift"; sourceTree = "<group>"; };
+		E3316C0C2C66E2EB00F90117 /* RBOnboardingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBOnboardingController.swift; sourceTree = "<group>"; };
+		E3316C0F2C6B5E9A00F90117 /* TextFieldContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldContentView.swift; sourceTree = "<group>"; };
 		E336B63729FDF7D20025CC38 /* RecipeFolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeFolder.swift; sourceTree = "<group>"; };
+		E33AFC412C7010E2003681A8 /* UIResponder+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIResponder+Ext.swift"; sourceTree = "<group>"; };
 		E3427C0D29E158FC002C81E2 /* RecipeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeVC.swift; sourceTree = "<group>"; };
 		E3427C0F29E15D1B002C81E2 /* RecipeIngredientCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeIngredientCell.swift; sourceTree = "<group>"; };
 		E349B13929DFDB2D0097A338 /* PersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManager.swift; sourceTree = "<group>"; };
@@ -139,20 +142,15 @@
 		E3931E552B9D61930015A127 /* GroceryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryCell.swift; sourceTree = "<group>"; };
 		E3931E592BA7EEEE0015A127 /* GroceryList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryList.swift; sourceTree = "<group>"; };
 		E3931E5B2BA81DE30015A127 /* RBAddGroceriesAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBAddGroceriesAlert.swift; sourceTree = "<group>"; };
-		E39D32A62B16DA4F00D7511B /* RBIconTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBIconTextField.swift; sourceTree = "<group>"; };
 		E39D32A82B1AC02100D7511B /* UIImage+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Ext.swift"; sourceTree = "<group>"; };
 		E39D32AA2B1D70FF00D7511B /* Security.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Security.swift; sourceTree = "<group>"; };
-		E39D32AF2B24037A00D7511B /* RBKeyboardToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBKeyboardToolbar.swift; sourceTree = "<group>"; };
 		E3B1C73829CD205C00736C96 /* Recipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
 		E3B1C73B29CE1CF600736C96 /* UITableView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+Ext.swift"; sourceTree = "<group>"; };
 		E3B1C73D29CE1E9600736C96 /* RecipeCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeCell.swift; sourceTree = "<group>"; };
 		E3B1C74129CE68BC00736C96 /* RBBodyLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBBodyLabel.swift; sourceTree = "<group>"; };
 		E3B1C74429CE6A9400736C96 /* RBTitleLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBTitleLabel.swift; sourceTree = "<group>"; };
 		E3B1C74629CE6CC900736C96 /* UIView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Ext.swift"; sourceTree = "<group>"; };
-		E3C1D3762B01F282002E26D1 /* OnboardingVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingVC.swift; sourceTree = "<group>"; };
 		E3C1D3792B06FF30002E26D1 /* WelcomeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeVC.swift; sourceTree = "<group>"; };
-		E3C1D37B2B07001B002E26D1 /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
-		E3C1D37D2B07004C002E26D1 /* RegisterVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterVC.swift; sourceTree = "<group>"; };
 		E3C1D37F2B083004002E26D1 /* RBButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBButton.swift; sourceTree = "<group>"; };
 		E3C4660329FF4AE500791576 /* StateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateManager.swift; sourceTree = "<group>"; };
 		E3C466052A00B2D100791576 /* RecipeItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeItem.swift; sourceTree = "<group>"; };
@@ -192,6 +190,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E3316C0B2C66E2A400F90117 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				E3316C0C2C66E2EB00F90117 /* RBOnboardingController.swift */,
+				E3573E6229CC161C000F7877 /* RBTabBarController.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		E3316C0E2C6B5E5000F90117 /* Configurations */ = {
+			isa = PBXGroup;
+			children = (
+				E3316C0F2C6B5E9A00F90117 /* TextFieldContentView.swift */,
+			);
+			path = Configurations;
+			sourceTree = "<group>";
+		};
 		E349B13829DFDB1F0097A338 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
@@ -205,7 +220,6 @@
 			isa = PBXGroup;
 			children = (
 				E349B13E29DFE2390097A338 /* RBEmptyStateView.swift */,
-				E39D32AF2B24037A00D7511B /* RBKeyboardToolbar.swift */,
 				E3C4B51B2B84346700E8ACE5 /* RBNoConnectionView.swift */,
 				E3D374D02B95604900A0EF70 /* RBProcessingView.swift */,
 			);
@@ -228,6 +242,7 @@
 		E34B4CEF29CF78800063A9A2 /* Cells */ = {
 			isa = PBXGroup;
 			children = (
+				E3316C0E2C6B5E5000F90117 /* Configurations */,
 				E3931E552B9D61930015A127 /* GroceryCell.swift */,
 				E3B1C73D29CE1E9600736C96 /* RecipeCell.swift */,
 				E34B4D0629D15A480063A9A2 /* RecipeFormCell.swift */,
@@ -252,7 +267,6 @@
 			children = (
 				E34B4CF329CF80060063A9A2 /* RBCellTextField.swift */,
 				E3F3EF022B0EE96D0050991C /* RBTextField.swift */,
-				E39D32A62B16DA4F00D7511B /* RBIconTextField.swift */,
 			);
 			path = Inputs;
 			sourceTree = "<group>";
@@ -309,7 +323,6 @@
 				E34B4CEF29CF78800063A9A2 /* Cells */,
 				E34B4D0129D0FB660063A9A2 /* Inputs */,
 				E3B1C74329CE6A7E00736C96 /* Labels */,
-				E3573E6229CC161C000F7877 /* RBTabBarController.swift */,
 				E349B13D29DFE20E0097A338 /* Views */,
 			);
 			path = "Custom Views";
@@ -318,6 +331,7 @@
 		E3573E6429CC16A2000F7877 /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				E3316C0B2C66E2A400F90117 /* Controllers */,
 				E3C1D3782B06FEA4002E26D1 /* Onboarding */,
 				E3FD19F92A1323E300ACA346 /* FolderTreeVC.swift */,
 				E3573E6829CC16DC000F7877 /* GroceryListVC.swift */,
@@ -365,6 +379,7 @@
 				E3B1C73B29CE1CF600736C96 /* UITableView+Ext.swift */,
 				E3B1C74629CE6CC900736C96 /* UIView+Ext.swift */,
 				E34B4CED29CF77CC0063A9A2 /* UIViewController+Ext.swift */,
+				E33AFC412C7010E2003681A8 /* UIResponder+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -381,10 +396,8 @@
 		E3C1D3782B06FEA4002E26D1 /* Onboarding */ = {
 			isa = PBXGroup;
 			children = (
-				E3C1D37B2B07001B002E26D1 /* LoginVC.swift */,
-				E3C1D3762B01F282002E26D1 /* OnboardingVC.swift */,
-				E3C1D37D2B07004C002E26D1 /* RegisterVC.swift */,
 				E3C1D3792B06FF30002E26D1 /* WelcomeVC.swift */,
+				E3138BD42C6C6A4000F8E05E /* OnboardingFormVC.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -514,14 +527,14 @@
 				E38FF6692AA5369F00D8ED7A /* RBWarningAlert.swift in Sources */,
 				E3C4660429FF4AE500791576 /* StateManager.swift in Sources */,
 				E3C1D3802B083004002E26D1 /* RBButton.swift in Sources */,
+				E3138BD52C6C6A4000F8E05E /* OnboardingFormVC.swift in Sources */,
 				E349B13A29DFDB2D0097A338 /* PersistenceManager.swift in Sources */,
-				E3C1D3772B01F282002E26D1 /* OnboardingVC.swift in Sources */,
 				E3EAC2AC2BAE8D3400B4B7B6 /* String+Ext.swift in Sources */,
 				E3DE28FC2C4465E8007FBDC5 /* RBDeleteAlert.swift in Sources */,
 				E3931E542B9D46C70015A127 /* Ingredient.swift in Sources */,
 				E3427C1029E15D1B002C81E2 /* RecipeIngredientCell.swift in Sources */,
 				E349B14229E002100097A338 /* RBDeleteRecipeItemAlert.swift in Sources */,
-				E3C1D37E2B07004C002E26D1 /* RegisterVC.swift in Sources */,
+				E3316C0D2C66E2EB00F90117 /* RBOnboardingController.swift in Sources */,
 				E39D32AB2B1D70FF00D7511B /* Security.swift in Sources */,
 				E34B4D0529D154AF0063A9A2 /* RecipeFormVC.swift in Sources */,
 				E3F3EF032B0EE96D0050991C /* RBTextField.swift in Sources */,
@@ -532,10 +545,12 @@
 				E327FDDB2C505DD30082EF11 /* UIColor+Ext.swift in Sources */,
 				E38FF6702AA584A500D8ED7A /* Network.swift in Sources */,
 				E336B63829FDF7D20025CC38 /* RecipeFolder.swift in Sources */,
+				E3316C102C6B5E9A00F90117 /* TextFieldContentView.swift in Sources */,
 				E3E3E9632A0892F7006A9E00 /* RBErrorAlertController.swift in Sources */,
 				E3B1C73E29CE1E9600736C96 /* RecipeCell.swift in Sources */,
 				E3573E6929CC16DC000F7877 /* GroceryListVC.swift in Sources */,
 				E3931E5A2BA7EEEE0015A127 /* GroceryList.swift in Sources */,
+				E33AFC422C7010E2003681A8 /* UIResponder+Ext.swift in Sources */,
 				E3931E562B9D61930015A127 /* GroceryCell.swift in Sources */,
 				E3573E6629CC16C1000F7877 /* RecipeListVC.swift in Sources */,
 				E391D8A82AAEB6E400265060 /* RecipeTitleCell.swift in Sources */,
@@ -546,7 +561,6 @@
 				E3E542322C5CB5FE0018C5AE /* Int+Ext.swift in Sources */,
 				E3D374D12B95604900A0EF70 /* RBProcessingView.swift in Sources */,
 				E3B1C73C29CE1CF600736C96 /* UITableView+Ext.swift in Sources */,
-				E39D32A72B16DA4F00D7511B /* RBIconTextField.swift in Sources */,
 				E3C466062A00B2D100791576 /* RecipeItem.swift in Sources */,
 				E349B13C29DFDD3C0097A338 /* RBError.swift in Sources */,
 				E38FF66E2AA5472A00D8ED7A /* Parse.swift in Sources */,
@@ -555,9 +569,7 @@
 				E3573E6329CC161C000F7877 /* RBTabBarController.swift in Sources */,
 				E3427C0E29E158FC002C81E2 /* RecipeVC.swift in Sources */,
 				E3C4B51A2B721FF700E8ACE5 /* API.swift in Sources */,
-				E3C1D37C2B07001B002E26D1 /* LoginVC.swift in Sources */,
 				E3931E5C2BA81DE30015A127 /* RBAddGroceriesAlert.swift in Sources */,
-				E39D32B02B24037A00D7511B /* RBKeyboardToolbar.swift in Sources */,
 				E3B1C74229CE68BC00736C96 /* RBBodyLabel.swift in Sources */,
 				E34B4D0729D15A480063A9A2 /* RecipeFormCell.swift in Sources */,
 				E3277D9C2BC10997004F7566 /* Unit.swift in Sources */,

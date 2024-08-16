@@ -19,14 +19,17 @@ extension UIView {
         self.layer.rasterizationScale = UIScreen.main.scale
     }
 
-    func pinToEdges(of superView: UIView) {
+    func pinToEdges(of superView: UIView, insets: UIEdgeInsets? = nil) {
         self.translatesAutoresizingMaskIntoConstraints = false
+        self.leadingAnchor.constraint(equalTo: superView.leadingAnchor, constant: insets?.left ?? 0).isActive = true
+        self.trailingAnchor.constraint(equalTo: superView.trailingAnchor, constant: -(insets?.right ?? 0)).isActive = true
+        self.topAnchor.constraint(equalTo: superView.topAnchor, constant: insets?.top ?? 0).isActive = true
+        self.bottomAnchor.constraint(equalTo: superView.bottomAnchor, constant: -(insets?.bottom ?? 0)).isActive = true
+    }
 
-        NSLayoutConstraint.activate([
-            self.topAnchor.constraint(equalTo: superView.topAnchor),
-            self.leadingAnchor.constraint(equalTo: superView.leadingAnchor),
-            self.trailingAnchor.constraint(equalTo: superView.trailingAnchor),
-            self.bottomAnchor.constraint(equalTo: superView.bottomAnchor),
-        ])
+    func pinToSides(of superView: UIView, insets: UIEdgeInsets? = nil) {
+        self.translatesAutoresizingMaskIntoConstraints = false
+        self.leadingAnchor.constraint(equalTo: superView.leadingAnchor, constant: insets?.left ?? 0).isActive = true
+        self.trailingAnchor.constraint(equalTo: superView.trailingAnchor, constant: -(insets?.right ?? 0)).isActive = true
     }
 }

@@ -42,7 +42,7 @@ class GroceryListVC: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.configureNavigationBar()
+        self.title = "Groceries"
         self.applySnapshot(animatingDifferences: false)
     }
 
@@ -50,12 +50,6 @@ class GroceryListVC: UIViewController {
         super.viewDidLoad()
         self.configureViewController()
         self.configureTableView()
-    }
-
-    private func configureNavigationBar() {
-        self.title = "Groceries"
-        self.navigationController?.navigationBar.prefersLargeTitles = true
-        self.navigationController?.navigationBar.tintColor = .systemYellow
     }
 
     private func configureViewController() {
