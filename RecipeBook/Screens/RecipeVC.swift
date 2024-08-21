@@ -7,33 +7,35 @@
 
 import UIKit
 
-protocol RecipeVCDelegate: AnyObject {
-    func didDeleteRecipe(recipe: Recipe)
-}
-
+//
+// Displays a recipe with its ingredients list and instructions
+//
 class RecipeVC: UIViewController {
+    static let reuseID = "RecipeCell"
 
-    enum Section: Int {
+    protocol Delegate: AnyObject {
+        func didDeleteRecipe(recipe: Recipe)
+    }
+
+    enum Section: Int, CaseIterable {
         case title
         case ingredients
         case instructions
-
-        var title: String? {
-            switch self {
-            case .title:
-                return nil
-            case .ingredients:
-                return "Ingredients"
-            case .instructions:
-                return "Instructions"
-            }
-        }
     }
 
-    let tableView = UITableView()
+    private let tableView = UITableView()
 
-    var recipe: Recipe!
-    weak var delegate: RecipeVCDelegate?
+    private var recipe: Recipe
+    weak var delegate: Delegate?
+
+    init(recipe: Recipe) {
+        self.recipe = recipe
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -53,7 +55,6 @@ class RecipeVC: UIViewController {
 
     private func configureViewController() {
         self.view.backgroundColor = .systemBackground
-
         self.navigationItem.largeTitleDisplayMode = .never
 
         let contextMenuItem = UIBarButtonItem(image: SFSymbols.contextMenu, menu: self.createContextMenu())
@@ -64,24 +65,16 @@ class RecipeVC: UIViewController {
     private func configureTableView() {
         self.view.addSubview(self.tableView)
 
+        self.tableView.frame = self.view.bounds
         self.tableView.delegate = self
         self.tableView.dataSource = self
-
         self.tableView.contentInset.bottom = 16
-        self.tableView.frame = self.view.bounds
         self.tableView.allowsSelection = false
         self.tableView.separatorStyle = .none
+        self.tableView.sectionHeaderTopPadding = 10
         self.tableView.removeExcessCells()
 
-        self.tableView.register(
-            RecipeTitleCell.self,
-            forCellReuseIdentifier: RecipeTitleCell.reuseID)
-        self.tableView.register(
-            RecipeIngredientCell.self,
-            forCellReuseIdentifier: RecipeIngredientCell.reuseID)
-        self.tableView.register(
-            RecipeInstructionCell.self,
-            forCellReuseIdentifier: RecipeInstructionCell.reuseID)
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: RecipeVC.reuseID)
     }
 
     func editRecipe(_ action: UIAction) {
@@ -110,12 +103,11 @@ class RecipeVC: UIViewController {
 extension RecipeVC: UITableViewDataSource, UITableViewDelegate {
 
     func numberOfSections(in tableView: UITableView) -> Int {
-        // title and ingredients and instructions
-        return 3
+        return Section.allCases.count
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let section = Section(rawValue: section)!
+        guard let section = Section(rawValue: section) else { return 0 }
         switch section {
         case .title:
             return 1
@@ -127,37 +119,43 @@ extension RecipeVC: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        let section = Section(rawValue: section)!
-        return section.title
+        guard let section = Section(rawValue: section) else { return nil }
+        switch section {
+        case .title:
+            return nil
+        case .ingredients:
+            return "Ingredients"
+        case .instructions:
+            return "Instructions"
+        }
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let section = Section(rawValue: indexPath.section)!
-        let i = indexPath.row
+        let cell = tableView.dequeueReusableCell(withIdentifier: RecipeVC.reuseID)!
 
         switch section {
         case .title:
-            let cell = tableView.dequeueReusableCell(
-                withIdentifier: RecipeTitleCell.reuseID) as! RecipeTitleCell
-            cell.set(title: self.recipe.title)
-            return cell
-
+            var content = cell.defaultContentConfiguration()
+            content.text = self.recipe.title
+            content.textProperties.font = .systemFont(ofSize: 24, weight: .bold)
+            cell.contentConfiguration = content
         case .ingredients:
-            let cell = tableView.dequeueReusableCell(
-                withIdentifier: RecipeIngredientCell.reuseID) as! RecipeIngredientCell
-            cell.set(ingredient: self.recipe.ingredients[i])
-            return cell
-
+            var content = ListContentConfiguration(style: .unordered)
+            content.text = self.recipe.ingredients[indexPath.row].toString()
+            cell.contentConfiguration = content
         case .instructions:
-            let cell = tableView.dequeueReusableCell(
-                withIdentifier: RecipeInstructionCell.reuseID) as! RecipeInstructionCell
-            cell.set(n: i + 1, instruction: self.recipe.instructions[i])
-            return cell
+            var content = ListContentConfiguration(style: .ordered)
+            content.text = self.recipe.instructions[indexPath.row]
+            content.row = indexPath.row + 1
+            cell.contentConfiguration = content
         }
+
+        return cell
     }
 }
 
-extension RecipeVC: RecipeFormVCDelegate {
+extension RecipeVC: RecipeFormVC.Delegate {
 
     func didSaveRecipe(style: RecipeFormVC.Style, recipe: Recipe) {
         // NOTE: ignoring style, should always be edit

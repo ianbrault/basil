@@ -16,6 +16,7 @@ struct TextFieldContentConfiguration: UIContentConfiguration {
     var placeholder: String = ""
     var keyboardType: UIKeyboardType = .default
     var isSecureTextEntry: Bool = false
+    var autocapitalizationType: UITextAutocapitalizationType = .none
 
     var onChange: ((String?, UIView) -> Void)?
 
@@ -67,7 +68,7 @@ class TextFieldContentView: UIView, UIContentView {
         self.textField.placeholder = configuration.placeholder
         self.textField.keyboardType = configuration.keyboardType
         self.textField.isSecureTextEntry = configuration.isSecureTextEntry
-        self.textField.autocapitalizationType = .none
+        self.textField.autocapitalizationType = configuration.autocapitalizationType
         self.textField.clearButtonMode = .whileEditing
         self.textField.translatesAutoresizingMaskIntoConstraints = false
 
@@ -83,9 +84,16 @@ class TextFieldContentView: UIView, UIContentView {
             equalTo: self.leadingAnchor, constant: (configuration.imageSize / 2) + configuration.contentInset
         ).isActive = true
 
-        self.textField.leadingAnchor.constraint(
-            equalTo: self.imageView.centerXAnchor, constant: (configuration.imageSize / 2) + configuration.imageToTextPadding
-        ).isActive = true
+        // pin the text field directly to the leading anchor if there is not an image
+        if let _ = configuration.image {
+            self.textField.leadingAnchor.constraint(
+                equalTo: self.imageView.centerXAnchor, constant: (configuration.imageSize / 2) + configuration.imageToTextPadding
+            ).isActive = true
+        } else {
+            self.textField.leadingAnchor.constraint(
+                equalTo: self.leadingAnchor, constant: configuration.imageToTextPadding
+            ).isActive = true
+        }
         self.textField.trailingAnchor.constraint(
             equalTo: self.trailingAnchor, constant: -configuration.contentInset
         ).isActive = true

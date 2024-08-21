@@ -2,142 +2,94 @@
 //  RecipeFormCell.swift
 //  RecipeBook
 //
-//  Created by Ian Brault on 3/26/23.
+//  Created by Ian Brault on 8/18/24.
 //
 
 import UIKit
 
-protocol RecipeFormCellDelegate: AnyObject {
-    func textFieldDidChange(_: UUID, text: String?)
-    func ingredientsButtonPressed()
-    func instructionsButtonPressed()
-}
-
 class RecipeFormCell: UITableViewCell {
-    static let reuseID = "RecipeFormCell"
+    static let textFieldReuseID = "RecipeFormCell__TF"
+    static let buttonReuseID = "RecipeFormCell__BT"
 
-    enum ContentType {
-        case input
-        case actionButton
+    typealias Info = RecipeFormVC.Cell
+    typealias Section = RecipeFormVC.Section
+
+    protocol Delegate: AnyObject {
+        func textFieldDidChange(text: String, sender: UIResponder)
     }
 
-    struct Content {
-        var type: ContentType
-        var uuid: UUID
-        var text: String? = nil
+    weak var delegate: Delegate?
 
-        static func createInput() -> Content {
-            return Content(type: .input, uuid: UUID(), text: "")
+    private func setTextField(with text: String?, for indexPath: IndexPath) {
+        guard let text, let section = Section(rawValue: indexPath.section) else { return }
+        var content = TextFieldContentConfiguration()
+
+        content.text = text
+        content.placeholder = RecipeFormCell.textFieldPlaceholder(for: section)
+        content.onChange =  { [weak self] (text, sender) in
+            guard let text else { return }
+            self?.delegate?.textFieldDidChange(text: text, sender: sender)
         }
 
-        static func createInput(text: String) -> Content {
-            return Content(type: .input, uuid: UUID(), text: text)
-
+        switch section {
+        case .title:
+            content.autocapitalizationType = .words
+        case .ingredients, .instructions:
+            content.autocapitalizationType = .sentences
         }
 
-        static func createInput(uuid: UUID, text: String) -> Content {
-            return Content(type: .input, uuid: uuid, text: text)
-        }
-
-        static func createButton() -> Content {
-            return Content(type: .actionButton, uuid: UUID())
-        }
+        self.contentConfiguration = content
+        self.selectionStyle = .none
     }
 
-    var section: RecipeFormVC.Section?
-    var uuid: UUID?
-    var textField: RBCellTextField?
-    var textFieldTrailingConstraint: NSLayoutConstraint?
-    var actionButton: RBPlainButton?
+    private func setButton(for indexPath: IndexPath) {
+        guard let section = Section(rawValue: indexPath.section) else { return }
+        var content = self.defaultContentConfiguration()
 
-    weak var delegate: RecipeFormCellDelegate?
+        content.image = SFSymbols.addRecipe
+        content.imageProperties.tintColor = .systemYellow
+        content.text = RecipeFormCell.buttonText(for: section)
+        content.textProperties.color = .systemYellow
 
-    override func prepareForReuse() {
-        super.prepareForReuse()
-
-        self.textField?.removeFromSuperview()
-        self.textField = nil
-        self.textFieldTrailingConstraint = nil
-
-        self.actionButton?.removeFromSuperview()
-        self.actionButton = nil
+        self.contentConfiguration = content
+        self.selectionStyle = .default
     }
 
-    override func setEditing(_ editing: Bool, animated: Bool) {
-        super.setEditing(editing, animated: animated)
-
-        // only needed for non-title text fields
-        if let textField = self.textField, section != .title {
-            // create space for the drag icon on the right
-            let pad: CGFloat = editing ? -30 : 0
-            self.textFieldTrailingConstraint?.constant = pad
-            self.setNeedsDisplay()
-            // disable text field editing when in edit mode
-            textField.isUserInteractionEnabled = !editing
+    func set(_ info: Info, for indexPath: IndexPath) {
+        switch info.style {
+        case .textField:
+            self.setTextField(with: info.text, for: indexPath)
+        case .button:
+            self.setButton(for: indexPath)
         }
     }
 
-    func setInput(section: RecipeFormVC.Section, uuid: UUID, text: String) {
-        self.section = section
-        self.uuid = uuid
-
-        self.textField = RBCellTextField(placeholder: section.textFieldPlaceholder, horizontalPadding: 20)
-        self.textField?.text = text
-        if section == .title {
-            self.textField?.autocapitalizationType = .words
+    override func becomeFirstResponder() -> Bool {
+        if let textFieldView = self.contentView as? TextFieldContentView {
+            textFieldView.textField.becomeFirstResponder()
         }
-        self.textField?.addTarget(self, action: #selector(self.textFieldDidChange(_:)), for: .editingChanged)
-        self.addSubview(self.textField!)
-
-        self.textFieldTrailingConstraint = self.textField!.trailingAnchor.constraint(equalTo: self.trailingAnchor)
-        NSLayoutConstraint.activate([
-            self.textField!.topAnchor.constraint(equalTo: self.topAnchor, constant: 1),
-            self.textField!.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -1),
-            self.textField!.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            self.textFieldTrailingConstraint!,
-        ])
+        return false
     }
 
-    func setActionButton(section: RecipeFormVC.Section, uuid: UUID) {
-        self.section = section
-        self.uuid = uuid
-
-        self.actionButton = RBPlainButton(title: section.actionButtonText!, image: SFSymbols.addRecipe, buttonSize: .mini)
-        self.actionButton!.addTarget(self, action: #selector(buttonPressed), for: .touchUpInside)
-        self.addSubview(self.actionButton!)
-
-        NSLayoutConstraint.activate([
-            self.actionButton!.topAnchor.constraint(equalTo: self.topAnchor, constant: 4),
-            self.actionButton!.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -4),
-            self.actionButton!.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 8),
-        ])
-    }
-
-    func set(section: RecipeFormVC.Section, content: Content) {
-        self.contentView.isUserInteractionEnabled = false
-
-        switch content.type {
-        case .input:
-            self.setInput(section: section, uuid: content.uuid, text: content.text!)
-        case .actionButton:
-            self.setActionButton(section: section, uuid: content.uuid)
+    static func buttonText(for section: Section) -> String {
+        switch section {
+        case .title:
+            return ""
+        case .ingredients:
+            return "Add another ingredient"
+        case .instructions:
+            return "Add another step"
         }
     }
 
-    @objc func textFieldDidChange(_ textField: UITextField) {
-        self.delegate?.textFieldDidChange(self.uuid!, text: textField.text)
-    }
-
-    @objc func buttonPressed() {
-        if let section = self.section {
-            switch section {
-            case .title:
-                break
-            case .ingredients:
-                self.delegate?.ingredientsButtonPressed()
-            case .instructions:
-                self.delegate?.instructionsButtonPressed()
-            }
+    static func textFieldPlaceholder(for section: Section) -> String {
+        switch section {
+        case .title:
+            return "Title"
+        case .ingredients:
+            return "ex: 1 tbsp. olive oil"
+        case .instructions:
+            return "ex: Preheat the oven to 350°F"
         }
     }
 }

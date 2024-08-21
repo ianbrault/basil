@@ -12,6 +12,7 @@ import UIKit
 // Allows users to add/delete/move recipes
 //
 class RecipeListVC: UIViewController {
+    static let reuseID = "RecipeListCell"
 
     private var addButton: UIBarButtonItem!
     private var editButton: UIBarButtonItem!
@@ -21,23 +22,39 @@ class RecipeListVC: UIViewController {
 
     private var textFieldAlert: RBTextFieldAlert? = nil
 
-    private var folderId: UUID!
+    private var folderId: UUID
     private var items: [RecipeItem] = []
+
+    private let tableView = UITableView()
 
     typealias DataSource = UITableViewDiffableDataSource<Int, RecipeItem>
     typealias Snapshot = NSDiffableDataSourceSnapshot<Int, RecipeItem>
 
-    private let tableView = UITableView()
+    private lazy var dataSource = DataSource(tableView: self.tableView) { (tableView, indexPath, item) -> UITableViewCell? in
+        let cell = tableView.dequeueReusableCell(withIdentifier: RecipeListVC.reuseID, for: indexPath)
 
-    private lazy var dataSource = DataSource(tableView: self.tableView) { (tableView, indexPath, item) -> RecipeCell? in
-        let cell = tableView.dequeueReusableCell(withIdentifier: RecipeCell.reuseID, for: indexPath) as? RecipeCell
-        cell?.set(item: item)
+        var content = cell.defaultContentConfiguration()
+        content.imageProperties.tintColor = .systemYellow
+        content.textProperties.lineBreakMode = .byTruncatingTail
+        content.textProperties.numberOfLines = 1
+
+        switch item {
+        case .recipe(let recipe):
+            cell.accessoryType = .none
+            content.text = recipe.title
+        case .folder(let folder):
+            cell.accessoryType = .disclosureIndicator
+            content.image = SFSymbols.folder
+            content.text = folder.name
+        }
+
+        cell.contentConfiguration = content
         return cell
     }
 
     init(folderId: UUID) {
-        super.init(nibName: nil, bundle: nil)
         self.folderId = folderId
+        super.init(nibName: nil, bundle: nil)
 
         let folder = State.manager.getFolder(uuid: folderId)!
         self.title = folder.name.isEmpty ? "Recipes" : folder.name
@@ -121,12 +138,13 @@ class RecipeListVC: UIViewController {
 
         self.tableView.frame = self.view.bounds
         self.tableView.delegate = self
+        self.tableView.tintColor = .systemYellow
         self.tableView.removeExcessCells()
 
         self.tableView.allowsMultipleSelection = true
         self.tableView.allowsMultipleSelectionDuringEditing = true
 
-        self.tableView.register(RecipeCell.self, forCellReuseIdentifier: RecipeCell.reuseID)
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: RecipeListVC.reuseID)
     }
 
     private func createAddButtonContextMenu() -> UIMenu {
@@ -373,6 +391,7 @@ class RecipeListVC: UIViewController {
             placeholder: "URL",
             confirmText: "Import"
         ) { [weak self] (text) in
+            // TODO: open editing window before adding
             guard let self else { return }
             Network.get(text) { (response) in
                 let result = response.flatMap { (body) in
@@ -484,8 +503,7 @@ extension RecipeListVC: UITableViewDelegate {
         let item = self.items[indexPath.row]
         switch item {
         case .recipe(let recipe):
-            let recipeVC = RecipeVC()
-            recipeVC.recipe = recipe
+            let recipeVC = RecipeVC(recipe: recipe)
             recipeVC.delegate = self
             self.navigationController?.pushViewController(recipeVC, animated: true)
 
@@ -546,7 +564,7 @@ extension RecipeListVC: UITableViewDelegate {
     }
 }
 
-extension RecipeListVC: RecipeFormVCDelegate {
+extension RecipeListVC: RecipeFormVC.Delegate {
 
     func didSaveRecipe(style: RecipeFormVC.Style, recipe: Recipe) {
         switch style {
@@ -573,7 +591,7 @@ extension RecipeListVC: RecipeFormVCDelegate {
     }
 }
 
-extension RecipeListVC: RecipeVCDelegate {
+extension RecipeListVC: RecipeVC.Delegate {
 
     func didDeleteRecipe(recipe: Recipe) {
         // remove the recipe view first

@@ -8,6 +8,7 @@
 import UIKit
 
 class RecipeFolder: Codable {
+
     let uuid: UUID
     var folderId: UUID?
     var name: String
@@ -40,22 +41,6 @@ class RecipeFolder: Codable {
 
     func removeSubfolder(uuid: UUID) {
         self.subfolders.removeAll { $0 == uuid }
-    }
-
-    func attributedText(namePlaceholder: String = "", isEnabled: Bool = true) -> NSAttributedString {
-        let name = self.name.isEmpty ? namePlaceholder : self.name
-
-        let imageAttachment = NSTextAttachment()
-        imageAttachment.image = SFSymbols.folder?.withTintColor(isEnabled ? .systemYellow : .systemGray3)
-
-        let padding = NSTextAttachment()
-        padding.bounds = CGRect(x: 0, y: 0, width: 10, height: 0)
-
-        let message = NSMutableAttributedString(attachment: imageAttachment)
-        message.append(NSMutableAttributedString(attachment: padding))
-        message.append(NSMutableAttributedString(string: name))
-
-        return message
     }
 
     func update(with other: RecipeFolder) {

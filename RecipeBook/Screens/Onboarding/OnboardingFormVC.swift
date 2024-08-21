@@ -74,11 +74,14 @@ class OnboardingFormVC: UIViewController {
         self.configureViewController()
         self.configureTableView()
         self.configureButton()
-        self.createDismissKeyboardTapGesture()
     }
 
     private func configureViewController() {
         self.view.backgroundColor = .secondarySystemGroupedBackground
+        
+        let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing))
+        self.view.addGestureRecognizer(tap)
+
         switch style {
         case .register:
             self.title = "Create Account"
@@ -93,7 +96,7 @@ class OnboardingFormVC: UIViewController {
         self.tableView.frame = self.view.bounds
         self.tableView.dataSource = self
         self.tableView.delegate = self
-        self.tableView.contentInset = UIEdgeInsets(top: 16, left: 0, bottom: 0, right: 0)
+        self.tableView.contentInset.top = 16
         self.tableView.separatorInsetReference = .fromAutomaticInsets
         self.tableView.removeExcessCells()
 
@@ -108,12 +111,6 @@ class OnboardingFormVC: UIViewController {
         self.button.pinToSides(of: self.view, insets: self.insets)
         self.button.bottomAnchor.constraint(equalTo: self.view.keyboardLayoutGuide.topAnchor, constant: -self.insets.bottom).isActive = true
         self.button.heightAnchor.constraint(equalToConstant: self.buttonHeight).isActive = true
-    }
-
-    private func createDismissKeyboardTapGesture() {
-        // dismiss the keyboard when the view is tapped
-        let tap = UITapGestureRecognizer(target: view, action: #selector(UIView.endEditing))
-        self.view.addGestureRecognizer(tap)
     }
 
     func validateForm() -> Bool {

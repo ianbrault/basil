@@ -18,11 +18,11 @@ class FolderTreeVC: UIViewController {
         let indentLevel: Int
     }
 
-    let tableView = UITableView()
+    private let tableView = UITableView()
 
-    var items: [Item] = []
-    var currentFolder: UUID!
-    var completionHander: ((RecipeFolder) -> Void)!
+    private var items: [Item] = []
+    private var currentFolder: UUID!
+    private var completionHander: ((RecipeFolder) -> Void)!
 
     init(currentFolder: UUID, completionHandler: @escaping (RecipeFolder) -> Void) {
         super.init(nibName: nil, bundle: nil)
@@ -95,16 +95,17 @@ extension FolderTreeVC: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: FolderTreeVC.reuseID)!
         let item = self.items[indexPath.row]
         let isEnabled = item.folder.uuid != self.currentFolder
 
-        let cell = tableView.dequeueReusableCell(withIdentifier: FolderTreeVC.reuseID)!
-        cell.indentationLevel = item.indentLevel * 2
-
         var content = cell.defaultContentConfiguration()
-        // TODO: needs update to use image/text
-        content.attributedText = item.folder.attributedText(namePlaceholder: "Recipes", isEnabled: isEnabled)
+        content.image = SFSymbols.folder
+        content.imageProperties.tintColor = isEnabled ? .systemYellow : .systemGray3
+        content.text = item.folder.name.isEmpty ? "Recipes" : item.folder.name
+
         cell.contentConfiguration = content
+        cell.indentationLevel = item.indentLevel * 2
         cell.isUserInteractionEnabled = isEnabled
 
         return cell

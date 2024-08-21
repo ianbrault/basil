@@ -8,6 +8,7 @@
 import Foundation
 
 class Recipe: Codable {
+
     var uuid: UUID
     var folderId: UUID
     var title: String
