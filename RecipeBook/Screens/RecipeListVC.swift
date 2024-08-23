@@ -23,9 +23,12 @@ class RecipeListVC: UIViewController {
     private var textFieldAlert: RBTextFieldAlert? = nil
 
     private var folderId: UUID
+    private var loadErrors: [RBError] = []
     private var items: [RecipeItem] = []
+    private var itemsMatchingSearch: [RecipeItem] = []
 
     private let tableView = UITableView()
+    private let searchController = UISearchController(searchResultsController: nil)
 
     typealias DataSource = UITableViewDiffableDataSource<Int, RecipeItem>
     typealias Snapshot = NSDiffableDataSourceSnapshot<Int, RecipeItem>
@@ -58,6 +61,7 @@ class RecipeListVC: UIViewController {
 
         let folder = State.manager.getFolder(uuid: folderId)!
         self.title = folder.name.isEmpty ? "Recipes" : folder.name
+        self.loadItems()
     }
 
     required init?(coder: NSCoder) {
@@ -72,23 +76,24 @@ class RecipeListVC: UIViewController {
             if let folder = State.manager.getFolder(uuid: folderId) {
                 folderItems.append(.folder(folder))
             } else {
-                self.presentErrorAlert(.missingItem(.folder, folderId))
+                self.loadErrors.append(.missingItem(.folder, folderId))
             }
         }
         for recipeId in folder.recipes {
             if let recipe = State.manager.getRecipe(uuid: recipeId) {
                 folderItems.append(.recipe(recipe))
             } else {
-                self.presentErrorAlert(.missingItem(.recipe, recipeId))
+                self.loadErrors.append(.missingItem(.recipe, recipeId))
             }
         }
         self.items = folderItems.sorted(by: RecipeItem.sort)
+        self.itemsMatchingSearch = self.items
     }
 
     func applySnapshot(reload identifiers: [RecipeItem] = [], animatingDifferences: Bool = true) {
         var snapshot = Snapshot()
         snapshot.appendSections([0])
-        snapshot.appendItems(self.items, toSection: 0)
+        snapshot.appendItems(self.itemsMatchingSearch, toSection: 0)
         snapshot.reloadItems(identifiers)
         self.dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
 
@@ -99,9 +104,17 @@ class RecipeListVC: UIViewController {
         }
     }
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.configureViewController()
+        self.configureTableView()
+        self.configureSearchController()
+    }
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.loadItems()
+        self.updateItemsForSearchText()
         self.applySnapshot(animatingDifferences: false)
         // check-in with the server if it has not been done already
         if !State.manager.serverPoked {
@@ -109,10 +122,12 @@ class RecipeListVC: UIViewController {
         }
     }
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        self.configureViewController()
-        self.configureTableView()
+    override func viewDidAppear(_ animated: Bool) {
+        // show any errors that occurred when loading items
+        for error in self.loadErrors {
+            self.presentErrorAlert(error)
+        }
+        self.loadErrors.removeAll()
     }
 
     private func configureViewController() {
@@ -147,6 +162,15 @@ class RecipeListVC: UIViewController {
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: RecipeListVC.reuseID)
     }
 
+    private func configureSearchController() {
+        self.searchController.searchResultsUpdater = self
+        self.searchController.searchBar.placeholder = "Search for recipes or folders"
+        self.searchController.searchBar.autocapitalizationType = .none
+        self.searchController.obscuresBackgroundDuringPresentation = false
+
+        self.navigationItem.searchController = self.searchController
+    }
+
     private func createAddButtonContextMenu() -> UIMenu {
         let recipeMenuItems = [
             UIAction(title: "Add new recipe", image: SFSymbols.addRecipe, handler: self.addNewRecipe),
@@ -163,16 +187,14 @@ class RecipeListVC: UIViewController {
 
     private func createRecipeLongPressContextMenu(recipe: Recipe) -> UIContextMenuConfiguration {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] (_) in
-            guard let self = self else { return UIMenu() }
-
             let editAction = UIAction(title: "Edit recipe", image: SFSymbols.editRecipe) { (action) in
-                self.editRecipe(action, recipe: recipe)
+                self?.editRecipe(action, recipe: recipe)
             }
             let moveAction = UIAction(title: "Move to folder", image: SFSymbols.folder) { (action) in
-                self.moveItemToFolder(action, uuid: recipe.uuid)
+                self?.moveItemToFolder(action, uuid: recipe.uuid)
             }
             let deleteAction = UIAction(title: "Delete recipe", image: SFSymbols.trash, attributes: .destructive) { (action) in
-                self.deleteItem(action, item: .recipe(recipe))
+                self?.deleteItem(action, item: .recipe(recipe))
             }
             return UIMenu(title: "", children: [editAction, moveAction, deleteAction])
         }
@@ -180,17 +202,15 @@ class RecipeListVC: UIViewController {
 
     private func createFolderLongPressContextMenu(folder: RecipeFolder) -> UIContextMenuConfiguration {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] (_) in
-            guard let self = self else { return UIMenu() }
-
             let editAction = UIAction(title: "Edit folder", image: SFSymbols.editRecipe) { (action) in
-                self.editFolder(action, folder: folder)
+                self?.editFolder(action, folder: folder)
             }
             let moveAction = UIAction(title: "Move to folder", image: SFSymbols.folder) { (action) in
-                self.moveItemToFolder(action, uuid: folder.uuid)
+                self?.moveItemToFolder(action, uuid: folder.uuid)
 
             }
             let deleteAction = UIAction(title: "Delete folder", image: SFSymbols.trash, attributes: .destructive) { (action) in
-                self.deleteItem(action, item: .folder(folder))
+                self?.deleteItem(action, item: .folder(folder))
             }
             return UIMenu(title: "", children: [editAction, moveAction, deleteAction])
         }
@@ -262,6 +282,7 @@ class RecipeListVC: UIViewController {
         // find the sorted position for the item
         let pos = self.items.firstIndex { RecipeItem.sort(item, $0) } ?? self.items.endIndex
         self.items.insert(item, at: pos)
+        self.updateItemsForSearchText()
         self.applySnapshot()
     }
 
@@ -269,6 +290,7 @@ class RecipeListVC: UIViewController {
         // find the item using the given UUID
         if let indexPath = self.findItem(uuid: uuid) {
             self.items.remove(at: indexPath.row)
+            self.updateItemsForSearchText()
             self.applySnapshot()
         } else {
             // this branch should never be hit
@@ -294,7 +316,26 @@ class RecipeListVC: UIViewController {
         let rows = Set(indexPaths.map { $0.row })
         let newItems = self.items.enumerated().filter { !rows.contains($0.offset) }.map { $0.element }
         self.items = newItems
+        self.updateItemsForSearchText()
         self.applySnapshot()
+    }
+
+    func updateItemsForSearchText() {
+        guard let text = self.searchController.searchBar.text else { return }
+        // initial implementation: search the current folder for substring matches
+        // TODO: search the entire tree for substring matches
+        if text.isEmpty {
+            self.itemsMatchingSearch = self.items
+        } else {
+            self.itemsMatchingSearch = self.items.filter({ (item) in
+                switch item {
+                case .recipe(let recipe):
+                    return recipe.title.lowercased().contains(text.lowercased())
+                case .folder(let folder):
+                    return folder.name.lowercased().contains(text.lowercased())
+                }
+            })
+        }
     }
 
     func addNewRecipe(_ action: UIAction) {
@@ -313,13 +354,11 @@ class RecipeListVC: UIViewController {
             placeholder: "Name",
             confirmText: "Save"
         ) { [weak self] (text) in
-            guard let self else { return }
-
-            let folder = RecipeFolder(folderId: self.folderId, name: text)
+            let folder = RecipeFolder(folderId: self?.folderId, name: text)
             if let error = State.manager.addFolder(folder: folder) {
-                self.presentErrorAlert(error)
+                self?.presentErrorAlert(error)
             } else {
-                self.insertItem(item: .folder(folder))
+                self?.insertItem(item: .folder(folder))
             }
         }
         self.presentTextFieldAlert()
@@ -340,7 +379,8 @@ class RecipeListVC: UIViewController {
             message: "Enter a name for this folder",
             placeholder: "Name",
             confirmText: "Save"
-        ) { (text) in
+        ) { [weak self] (text) in
+            guard let self else { return }
             folder.name = text
             if let error = State.manager.updateFolder(folder: folder) {
                 self.presentErrorAlert(error)
@@ -348,6 +388,7 @@ class RecipeListVC: UIViewController {
                 // update the items array with the updated folder
                 if let indexPath = self.findItem(uuid: folder.uuid) {
                     self.items[indexPath.row] = .folder(folder)
+                    self.updateItemsForSearchText()
                     self.applySnapshot(reload: [self.items[indexPath.row]])
                 } else {
                     self.presentErrorAlert(.missingItem(.folder, folder.uuid))
@@ -360,13 +401,11 @@ class RecipeListVC: UIViewController {
 
     func moveItemToFolder(_ action: UIAction, uuid: UUID) {
         let destVC = FolderTreeVC(currentFolder: self.folderId) { [weak self] (selectedFolder) in
-            guard let self = self else { return }
-
             if let error = State.manager.moveItemToFolder(uuid: uuid, folderId: selectedFolder.uuid) {
-                self.presentErrorAlert(error)
-            } else if selectedFolder.uuid != self.folderId {
+                self?.presentErrorAlert(error)
+            } else if selectedFolder.uuid != self?.folderId {
                 // item has been moved to a folder on another screen so remove it
-                self.removeItem(uuid: uuid)
+                self?.removeItem(uuid: uuid)
             }
         }
         let navController = UINavigationController(rootViewController: destVC)
@@ -391,8 +430,8 @@ class RecipeListVC: UIViewController {
             placeholder: "URL",
             confirmText: "Import"
         ) { [weak self] (text) in
-            // TODO: open editing window before adding
             guard let self else { return }
+            // TODO: open editing window before adding
             Network.get(text) { (response) in
                 let result = response.flatMap { (body) in
                     NYTRecipeParser.parse(body: body, folderId: self.folderId)
@@ -449,15 +488,13 @@ class RecipeListVC: UIViewController {
             let uuids = selectedRows.map { self.items[$0.row] }.map { $0.uuid }
 
             let destVC = FolderTreeVC(currentFolder: self.folderId) { [weak self] (selectedFolder) in
-                guard let self = self else { return }
-
                 if let error = State.manager.moveItemsToFolder(uuids: uuids, folderId: selectedFolder.uuid) {
-                    self.presentErrorAlert(error)
-                } else if selectedFolder.uuid != self.folderId {
+                    self?.presentErrorAlert(error)
+                } else if selectedFolder.uuid != self?.folderId {
                     // items have been moved to a folder on another screen so remove them
-                    self.removeItems(uuids: uuids)
+                    self?.removeItems(uuids: uuids)
                     // disable edit mode once the action has completed
-                    self.disableEditMode()
+                    self?.disableEditMode()
                 }
             }
             let navController = UINavigationController(rootViewController: destVC)
@@ -466,19 +503,17 @@ class RecipeListVC: UIViewController {
     }
 
     @objc func deleteSelectedItems(_ action: UIAction) {
-        if let selectedRows = tableView.indexPathsForSelectedRows, !selectedRows.isEmpty {
+        if let selectedRows = self.tableView.indexPathsForSelectedRows, !selectedRows.isEmpty {
             let uuids = selectedRows.map { self.items[$0.row] }.map { $0.uuid }
             let title = "Are you sure you want to delete these \(uuids.count) items?"
 
             let alert = RBDeleteAlert(title: title) { [weak self] () in
-                guard let self = self else { return }
-
                 if let error = State.manager.deleteItems(uuids: uuids) {
-                    self.presentErrorAlert(error)
+                    self?.presentErrorAlert(error)
                 } else {
-                    self.removeItems(uuids: uuids)
+                    self?.removeItems(uuids: uuids)
                     // disable edit mode once the action has completed
-                    self.disableEditMode()
+                    self?.disableEditMode()
                 }
             }
             self.present(alert, animated: true)
@@ -499,8 +534,8 @@ extension RecipeListVC: UITableViewDelegate {
             }
             return
         }
-
-        let item = self.items[indexPath.row]
+        // index path is relative to search results
+        let item = self.itemsMatchingSearch[indexPath.row]
         switch item {
         case .recipe(let recipe):
             let recipeVC = RecipeVC(recipe: recipe)
@@ -529,17 +564,16 @@ extension RecipeListVC: UITableViewDelegate {
         _ tableView: UITableView,
         trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
     ) -> UISwipeActionsConfiguration? {
-        let item = self.items[indexPath.row]
+        // index path is relative to search results
+        let item = self.itemsMatchingSearch[indexPath.row]
 
         let contextItem = UIContextualAction(style: .destructive, title: "Delete") {  (action, view, actionPerformed) in
             let alert = RBDeleteRecipeItemAlert(item: item) { [weak self] () in
-                guard let self = self else { return }
-
                 if let error = State.manager.deleteItem(uuid: item.uuid) {
-                    self.presentErrorAlert(error)
+                    self?.presentErrorAlert(error)
                     actionPerformed(false)
                 } else {
-                    self.removeItem(uuid: item.uuid)
+                    self?.removeItem(uuid: item.uuid)
                     actionPerformed(true)
                 }
             }
@@ -554,7 +588,8 @@ extension RecipeListVC: UITableViewDelegate {
         contextMenuConfigurationForRowAt indexPath: IndexPath,
         point: CGPoint
     ) -> UIContextMenuConfiguration? {
-        let item = self.items[indexPath.row]
+        // index path is relative to search results
+        let item = self.itemsMatchingSearch[indexPath.row]
         switch item {
         case .recipe(let recipe):
             return self.createRecipeLongPressContextMenu(recipe: recipe)
@@ -582,12 +617,21 @@ extension RecipeListVC: RecipeFormVC.Delegate {
                 // update the items array with the new recipe contents
                 if let indexPath = self.findItem(uuid: recipe.uuid) {
                     self.items[indexPath.row] = .recipe(recipe)
+                    self.updateItemsForSearchText()
                     self.applySnapshot(reload: [self.items[indexPath.row]])
                 } else {
                     self.presentErrorAlert(.missingItem(.recipe, recipe.uuid))
                 }
             }
         }
+    }
+}
+
+extension RecipeListVC: UISearchResultsUpdating {
+
+    func updateSearchResults(for searchController: UISearchController) {
+        self.updateItemsForSearchText()
+        self.applySnapshot()
     }
 }
 
