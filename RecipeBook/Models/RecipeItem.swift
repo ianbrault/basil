@@ -39,6 +39,19 @@ enum RecipeItem: Codable & Equatable & Hashable {
         }
     }
 
+    var text: String {
+        switch self {
+        case .recipe(let recipe):
+            return recipe.title
+        case .folder(let folder):
+            return folder.name
+        }
+    }
+
+    func includesText(_ string: String) -> Bool {
+        return self.text.lowercased().contains(string.lowercased())
+    }
+
     static func sort(_ this: RecipeItem, _ that: RecipeItem) -> Bool {
         // folders always come before recipes
         switch (this, that) {

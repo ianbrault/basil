@@ -10,6 +10,7 @@
 		E3138BD52C6C6A4000F8E05E /* OnboardingFormVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3138BD42C6C6A4000F8E05E /* OnboardingFormVC.swift */; };
 		E316DF1B2C630A9C009550B1 /* QuantityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E316DF1A2C630A9C009550B1 /* QuantityTests.swift */; };
 		E320DE3D2C708FB500C9D6DA /* ListContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E320DE3C2C708FB500C9D6DA /* ListContentView.swift */; };
+		E323AB552C79BA310028D6E3 /* Data+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E323AB542C79BA310028D6E3 /* Data+Ext.swift */; };
 		E3277D9C2BC10997004F7566 /* Unit.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3277D9B2BC10997004F7566 /* Unit.swift */; };
 		E3277D9D2BC112AA004F7566 /* Unit.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3277D9B2BC10997004F7566 /* Unit.swift */; };
 		E327FDDB2C505DD30082EF11 /* UIColor+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E327FDDA2C505DD30082EF11 /* UIColor+Ext.swift */; };
@@ -33,6 +34,7 @@
 		E3573E6629CC16C1000F7877 /* RecipeListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6529CC16C1000F7877 /* RecipeListVC.swift */; };
 		E3573E6929CC16DC000F7877 /* GroceryListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6829CC16DC000F7877 /* GroceryListVC.swift */; };
 		E3573E6C29CC185A000F7877 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6B29CC185A000F7877 /* Constants.swift */; };
+		E36CB20A2C795C2C00E74498 /* NSTextAttachment+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E36CB2092C795C2C00E74498 /* NSTextAttachment+Ext.swift */; };
 		E3839DDE2C61CFD500A4F6AF /* Int+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E542312C5CB5FE0018C5AE /* Int+Ext.swift */; };
 		E38FF66C2AA5466B00D8ED7A /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = E38FF66B2AA5466B00D8ED7A /* SwiftSoup */; };
 		E38FF66E2AA5472A00D8ED7A /* Parse.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38FF66D2AA5472A00D8ED7A /* Parse.swift */; };
@@ -99,6 +101,7 @@
 		E3138BD42C6C6A4000F8E05E /* OnboardingFormVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFormVC.swift; sourceTree = "<group>"; };
 		E316DF1A2C630A9C009550B1 /* QuantityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuantityTests.swift; sourceTree = "<group>"; };
 		E320DE3C2C708FB500C9D6DA /* ListContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListContentView.swift; sourceTree = "<group>"; };
+		E323AB542C79BA310028D6E3 /* Data+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Ext.swift"; sourceTree = "<group>"; };
 		E3277D9B2BC10997004F7566 /* Unit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Unit.swift; sourceTree = "<group>"; };
 		E327FDDA2C505DD30082EF11 /* UIColor+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Ext.swift"; sourceTree = "<group>"; };
 		E3316C0C2C66E2EB00F90117 /* RBOnboardingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBOnboardingController.swift; sourceTree = "<group>"; };
@@ -123,6 +126,7 @@
 		E3573E6529CC16C1000F7877 /* RecipeListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeListVC.swift; sourceTree = "<group>"; };
 		E3573E6829CC16DC000F7877 /* GroceryListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryListVC.swift; sourceTree = "<group>"; };
 		E3573E6B29CC185A000F7877 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		E36CB2092C795C2C00E74498 /* NSTextAttachment+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSTextAttachment+Ext.swift"; sourceTree = "<group>"; };
 		E38FF66D2AA5472A00D8ED7A /* Parse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parse.swift; sourceTree = "<group>"; };
 		E38FF66F2AA584A500D8ED7A /* Network.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
 		E3931E532B9D46C70015A127 /* Ingredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ingredient.swift; sourceTree = "<group>"; };
@@ -343,14 +347,16 @@
 		E3B1C73A29CE1CE200736C96 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				E323AB542C79BA310028D6E3 /* Data+Ext.swift */,
 				E3E542312C5CB5FE0018C5AE /* Int+Ext.swift */,
+				E36CB2092C795C2C00E74498 /* NSTextAttachment+Ext.swift */,
 				E3EAC2AB2BAE8D3400B4B7B6 /* String+Ext.swift */,
 				E327FDDA2C505DD30082EF11 /* UIColor+Ext.swift */,
 				E39D32A82B1AC02100D7511B /* UIImage+Ext.swift */,
+				E33AFC412C7010E2003681A8 /* UIResponder+Ext.swift */,
 				E3B1C73B29CE1CF600736C96 /* UITableView+Ext.swift */,
 				E3B1C74629CE6CC900736C96 /* UIView+Ext.swift */,
 				E34B4CED29CF77CC0063A9A2 /* UIViewController+Ext.swift */,
-				E33AFC412C7010E2003681A8 /* UIResponder+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -501,6 +507,7 @@
 				E3EAC2AC2BAE8D3400B4B7B6 /* String+Ext.swift in Sources */,
 				E3DE28FC2C4465E8007FBDC5 /* RBDeleteAlert.swift in Sources */,
 				E3931E542B9D46C70015A127 /* Ingredient.swift in Sources */,
+				E323AB552C79BA310028D6E3 /* Data+Ext.swift in Sources */,
 				E349B14229E002100097A338 /* RBDeleteRecipeItemAlert.swift in Sources */,
 				E3316C0D2C66E2EB00F90117 /* RBOnboardingController.swift in Sources */,
 				E39D32AB2B1D70FF00D7511B /* Security.swift in Sources */,
@@ -531,6 +538,7 @@
 				E38FF66E2AA5472A00D8ED7A /* Parse.swift in Sources */,
 				E3C1D37A2B06FF30002E26D1 /* WelcomeVC.swift in Sources */,
 				E3B1C74729CE6CC900736C96 /* UIView+Ext.swift in Sources */,
+				E36CB20A2C795C2C00E74498 /* NSTextAttachment+Ext.swift in Sources */,
 				E3573E6329CC161C000F7877 /* RBTabBarController.swift in Sources */,
 				E3427C0E29E158FC002C81E2 /* RecipeVC.swift in Sources */,
 				E3C4B51A2B721FF700E8ACE5 /* API.swift in Sources */,

@@ -130,6 +130,13 @@ class State {
         self.userId = info.id
         self.userKey = info.key
         self.root = info.root
+
+        // clear out existing structures
+        self.recipes.removeAll()
+        self.folders.removeAll()
+        self.recipeMap.removeAll()
+        self.folderMap.removeAll()
+        // then load recipes/folders from user info
         for recipe in info.recipes {
             self.recipes.append(recipe)
             self.recipeMap[recipe.uuid] = recipe
@@ -385,6 +392,23 @@ class State {
         return nil
     }
 
+    func itemsMatchingText(_ text: String) -> [RecipeItem] {
+        var items: [RecipeItem] = []
+
+        for folder in self.folders {
+            if folder.name.lowercased().contains(text.lowercased()) {
+                items.append(.folder(folder))
+            }
+        }
+        for recipe in self.recipes {
+            if recipe.title.lowercased().contains(text.lowercased()) {
+                items.append(.recipe(recipe))
+            }
+        }
+
+        return items
+    }
+
     //
     // Grocery List
     //
@@ -419,11 +443,27 @@ class State {
     // Debug functions
     //
 
+    func dump() -> String {
+        let data = Data(
+            userId: self.userId,
+            userKey: self.userKey,
+            root: self.root,
+            recipes: self.recipes,
+            folders: self.folders
+        )
+        let encoded = try? JSONEncoder().encode(data)
+        return encoded?.prettyPrintedJSONString ?? ""
+    }
+
     func clear() {
         // NOTE: this should only be used for development debugging
-        guard let rootId = self.root else { return }
-        guard let root = self.getFolder(uuid: rootId) else { return }
-        self.groceryList.clear()
-        let _ = self.deleteItems(uuids: root.subfolders + root.recipes)
+        self.userId = ""
+        self.userKey = nil
+        self.root = nil
+        self.recipes.removeAll()
+        self.folders.removeAll()
+        self.recipeMap.removeAll()
+        self.folderMap.removeAll()
+        self.storeToLocal()
     }
 }

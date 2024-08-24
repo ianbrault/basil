@@ -25,13 +25,18 @@ class RecipeListVC: UIViewController {
     private var folderId: UUID
     private var loadErrors: [RBError] = []
     private var items: [RecipeItem] = []
-    private var itemsMatchingSearch: [RecipeItem] = []
+    private var searchResults: [RecipeItem] = []
 
     private let tableView = UITableView()
     private let searchController = UISearchController(searchResultsController: nil)
 
     typealias DataSource = UITableViewDiffableDataSource<Int, RecipeItem>
     typealias Snapshot = NSDiffableDataSourceSnapshot<Int, RecipeItem>
+
+    private var isSearching: Bool {
+        guard let text = self.searchController.searchBar.text else { return false }
+        return !text.isEmpty
+    }
 
     private lazy var dataSource = DataSource(tableView: self.tableView) { (tableView, indexPath, item) -> UITableViewCell? in
         let cell = tableView.dequeueReusableCell(withIdentifier: RecipeListVC.reuseID, for: indexPath)
@@ -44,6 +49,7 @@ class RecipeListVC: UIViewController {
         switch item {
         case .recipe(let recipe):
             cell.accessoryType = .none
+            content.image = nil
             content.text = recipe.title
         case .folder(let folder):
             cell.accessoryType = .disclosureIndicator
@@ -87,13 +93,21 @@ class RecipeListVC: UIViewController {
             }
         }
         self.items = folderItems.sorted(by: RecipeItem.sort)
-        self.itemsMatchingSearch = self.items
+    }
+
+    func updateItemsForSearchText() {
+        guard let text = self.searchController.searchBar.text?.trim() else { return }
+        if text.isEmpty {
+            self.searchResults = self.items
+        } else {
+            self.searchResults = State.manager.itemsMatchingText(text).sorted(by: RecipeItem.sort)
+        }
     }
 
     func applySnapshot(reload identifiers: [RecipeItem] = [], animatingDifferences: Bool = true) {
         var snapshot = Snapshot()
         snapshot.appendSections([0])
-        snapshot.appendItems(self.itemsMatchingSearch, toSection: 0)
+        snapshot.appendItems(self.searchResults)
         snapshot.reloadItems(identifiers)
         self.dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
 
@@ -267,17 +281,6 @@ class RecipeListVC: UIViewController {
         }
     }
 
-    func findItem(uuid: UUID) -> IndexPath? {
-        var indexPath: IndexPath? = nil
-        for (index, item) in self.items.enumerated() {
-            if item.uuid == uuid {
-                indexPath = IndexPath(row: index, section: 0)
-                break
-            }
-        }
-        return indexPath
-    }
-
     func insertItem(item: RecipeItem) {
         // find the sorted position for the item
         let pos = self.items.firstIndex { RecipeItem.sort(item, $0) } ?? self.items.endIndex
@@ -288,54 +291,28 @@ class RecipeListVC: UIViewController {
 
     func removeItem(uuid: UUID) {
         // find the item using the given UUID
-        if let indexPath = self.findItem(uuid: uuid) {
+        if let indexPath = self.items.findItem(uuid: uuid) {
             self.items.remove(at: indexPath.row)
-            self.updateItemsForSearchText()
-            self.applySnapshot()
-        } else {
-            // this branch should never be hit
-            // item type is ambiguous but just assume recipe
-            self.presentErrorAlert(.missingItem(.recipe, uuid))
         }
-    }
-
-    func removeItems(uuids: [UUID]) {
-        // find the items using the given UUIDs
-        var indexPaths: [IndexPath] = []
-        for uuid in uuids {
-            if let indexPath = self.findItem(uuid: uuid) {
-                indexPaths.append(indexPath)
-            } else {
-                // this branch should never be hit
-                // item type is ambiguous but just assume recipe
-                self.presentErrorAlert(.missingItem(.recipe, uuid))
-            }
+        if let indexPath = self.searchResults.findItem(uuid: uuid) {
+            self.searchResults.remove(at: indexPath.row)
         }
-
-        // remove the items from the list
-        let rows = Set(indexPaths.map { $0.row })
-        let newItems = self.items.enumerated().filter { !rows.contains($0.offset) }.map { $0.element }
-        self.items = newItems
         self.updateItemsForSearchText()
         self.applySnapshot()
     }
 
-    func updateItemsForSearchText() {
-        guard let text = self.searchController.searchBar.text else { return }
-        // initial implementation: search the current folder for substring matches
-        // TODO: search the entire tree for substring matches
-        if text.isEmpty {
-            self.itemsMatchingSearch = self.items
-        } else {
-            self.itemsMatchingSearch = self.items.filter({ (item) in
-                switch item {
-                case .recipe(let recipe):
-                    return recipe.title.lowercased().contains(text.lowercased())
-                case .folder(let folder):
-                    return folder.name.lowercased().contains(text.lowercased())
-                }
-            })
+    func removeItems(uuids: [UUID]) {
+        // remove the items using the given UUIDs
+        for uuid in uuids {
+            if let indexPath = self.items.findItem(uuid: uuid) {
+                self.items.remove(at: indexPath.row)
+            }
+            if let indexPath = self.searchResults.findItem(uuid: uuid) {
+                self.searchResults.remove(at: indexPath.row)
+            }
         }
+        self.updateItemsForSearchText()
+        self.applySnapshot()
     }
 
     func addNewRecipe(_ action: UIAction) {
@@ -386,13 +363,15 @@ class RecipeListVC: UIViewController {
                 self.presentErrorAlert(error)
             } else {
                 // update the items array with the updated folder
-                if let indexPath = self.findItem(uuid: folder.uuid) {
-                    self.items[indexPath.row] = .folder(folder)
-                    self.updateItemsForSearchText()
-                    self.applySnapshot(reload: [self.items[indexPath.row]])
-                } else {
-                    self.presentErrorAlert(.missingItem(.folder, folder.uuid))
+                let item = RecipeItem.folder(folder)
+                if let indexPath = self.items.findItem(uuid: folder.uuid) {
+                    self.items[indexPath.row] = item
                 }
+                if let indexPath = self.searchResults.findItem(uuid: folder.uuid) {
+                    self.searchResults[indexPath.row] = item
+                }
+                self.updateItemsForSearchText()
+                self.applySnapshot(reload: [item])
             }
         }
         self.textFieldAlert?.text = folder.name
@@ -413,11 +392,11 @@ class RecipeListVC: UIViewController {
     }
 
     func deleteItem(_ action: UIAction, item: RecipeItem) {
-        let alert = RBDeleteRecipeItemAlert(item: item) { () in
+        let alert = RBDeleteRecipeItemAlert(item: item) { [weak self] () in
             if let error = State.manager.deleteItem(uuid: item.uuid) {
-                self.presentErrorAlert(error)
+                self?.presentErrorAlert(error)
             } else {
-                self.removeItem(uuid: item.uuid)
+                self?.removeItem(uuid: item.uuid)
             }
         }
         self.present(alert, animated: true)
@@ -535,7 +514,7 @@ extension RecipeListVC: UITableViewDelegate {
             return
         }
         // index path is relative to search results
-        let item = self.itemsMatchingSearch[indexPath.row]
+        let item = self.searchResults[indexPath.row]
         switch item {
         case .recipe(let recipe):
             let recipeVC = RecipeVC(recipe: recipe)
@@ -564,9 +543,10 @@ extension RecipeListVC: UITableViewDelegate {
         _ tableView: UITableView,
         trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
     ) -> UISwipeActionsConfiguration? {
-        // index path is relative to search results
-        let item = self.itemsMatchingSearch[indexPath.row]
+        // only allow swipe actions outside of search results
+        guard !self.isSearching else { return nil }
 
+        let item = self.items[indexPath.row]
         let contextItem = UIContextualAction(style: .destructive, title: "Delete") {  (action, view, actionPerformed) in
             let alert = RBDeleteRecipeItemAlert(item: item) { [weak self] () in
                 if let error = State.manager.deleteItem(uuid: item.uuid) {
@@ -589,7 +569,7 @@ extension RecipeListVC: UITableViewDelegate {
         point: CGPoint
     ) -> UIContextMenuConfiguration? {
         // index path is relative to search results
-        let item = self.itemsMatchingSearch[indexPath.row]
+        let item = self.searchResults[indexPath.row]
         switch item {
         case .recipe(let recipe):
             return self.createRecipeLongPressContextMenu(recipe: recipe)
@@ -615,13 +595,15 @@ extension RecipeListVC: RecipeFormVC.Delegate {
                 self.presentErrorAlert(error)
             } else {
                 // update the items array with the new recipe contents
-                if let indexPath = self.findItem(uuid: recipe.uuid) {
-                    self.items[indexPath.row] = .recipe(recipe)
-                    self.updateItemsForSearchText()
-                    self.applySnapshot(reload: [self.items[indexPath.row]])
-                } else {
-                    self.presentErrorAlert(.missingItem(.recipe, recipe.uuid))
+                let item = RecipeItem.recipe(recipe)
+                if let indexPath = self.items.findItem(uuid: recipe.uuid) {
+                    self.items[indexPath.row] = item
                 }
+                if let indexPath = self.searchResults.findItem(uuid: recipe.uuid) {
+                    self.searchResults[indexPath.row] = item
+                }
+                self.updateItemsForSearchText()
+                self.applySnapshot(reload: [item])
             }
         }
     }
@@ -646,5 +628,19 @@ extension RecipeListVC: RecipeVC.Delegate {
         } else {
             self.removeItem(uuid: recipe.uuid)
         }
+    }
+}
+
+extension Array<RecipeItem> {
+
+    func findItem(uuid: UUID) -> IndexPath? {
+        var indexPath: IndexPath? = nil
+        for (index, item) in self.enumerated() {
+            if item.uuid == uuid {
+                indexPath = IndexPath(row: index, section: 0)
+                break
+            }
+        }
+        return indexPath
     }
 }
