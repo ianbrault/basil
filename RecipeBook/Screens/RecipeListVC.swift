@@ -19,6 +19,7 @@ class RecipeListVC: UIViewController {
     private var doneButton: UIBarButtonItem!
     private var moveButton: UIBarButtonItem!
     private var deleteButton: UIBarButtonItem!
+    private var settingsButton: UIBarButtonItem!
 
     private var textFieldAlert: RBTextFieldAlert? = nil
 
@@ -42,7 +43,7 @@ class RecipeListVC: UIViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: RecipeListVC.reuseID, for: indexPath)
 
         var content = cell.defaultContentConfiguration()
-        content.imageProperties.tintColor = .systemYellow
+        content.imageProperties.tintColor = Style.colors.primary
         content.textProperties.lineBreakMode = .byTruncatingTail
         content.textProperties.numberOfLines = 1
 
@@ -145,7 +146,7 @@ class RecipeListVC: UIViewController {
     }
 
     private func configureViewController() {
-        self.view.backgroundColor = .systemBackground
+        self.view.backgroundColor = Style.colors.background
 
         // create the bar button items
         self.addButton = UIBarButtonItem(systemItem: .add, menu: self.createAddButtonContextMenu())
@@ -154,12 +155,13 @@ class RecipeListVC: UIViewController {
         self.moveButton = UIBarButtonItem(title: nil, image: SFSymbols.folder, target: self, action: #selector(self.moveSelectedItems))
         self.moveButton.isEnabled = false
         self.deleteButton = UIBarButtonItem(title: nil, image: SFSymbols.trash, target: self, action: #selector(self.deleteSelectedItems))
-        self.deleteButton.tintColor = .systemRed
+        self.deleteButton.tintColor = Style.colors.error
         self.deleteButton.isEnabled = false
+        self.settingsButton = UIBarButtonItem(title: nil, image: SFSymbols.settings, target: self, action: #selector(self.showSettingsView))
 
         // start with the add/edit buttons in the navigation bar
         // these will be swapped out when the table edit mode is toggled
-        self.navigationItem.rightBarButtonItems = [self.editButton, self.addButton]
+        self.navigationItem.rightBarButtonItems = [self.settingsButton, self.editButton, self.addButton]
     }
 
     private func configureTableView() {
@@ -167,7 +169,7 @@ class RecipeListVC: UIViewController {
 
         self.tableView.frame = self.view.bounds
         self.tableView.delegate = self
-        self.tableView.tintColor = .systemYellow
+        self.tableView.tintColor = Style.colors.primary
         self.tableView.removeExcessCells()
 
         self.tableView.allowsMultipleSelection = true
@@ -453,13 +455,13 @@ class RecipeListVC: UIViewController {
         }
         self.tableView.setEditing(true, animated: true)
         // navigation bar should contain the delete and move and done buttons when edit mode is enabled
-        self.navigationItem.rightBarButtonItems = [self.doneButton, self.moveButton, self.deleteButton]
+        self.navigationItem.rightBarButtonItems = [self.settingsButton, self.doneButton, self.moveButton, self.deleteButton]
     }
 
     @objc func disableEditMode(_ action: UIAction? = nil) {
         self.tableView.setEditing(false, animated: true)
         // navigation bar should contain the add and edit buttons when edit mode is disabled
-        self.navigationItem.rightBarButtonItems = [self.editButton, self.addButton]
+        self.navigationItem.rightBarButtonItems = [self.settingsButton, self.editButton, self.addButton]
     }
 
     @objc func moveSelectedItems(_ action: UIAction) {
@@ -497,6 +499,12 @@ class RecipeListVC: UIViewController {
             }
             self.present(alert, animated: true)
         }
+    }
+
+    @objc func showSettingsView(_ action: UIAction) {
+        let destVC = SettingsVC()
+        let navController = UINavigationController(rootViewController: destVC)
+        self.present(navController, animated: true)
     }
 }
 
@@ -581,7 +589,7 @@ extension RecipeListVC: UITableViewDelegate {
 
 extension RecipeListVC: RecipeFormVC.Delegate {
 
-    func didSaveRecipe(style: RecipeFormVC.Style, recipe: Recipe) {
+    func didSaveRecipe(style: RecipeFormVC.FormStyle, recipe: Recipe) {
         switch style {
         case .new:
             if let error = State.manager.addRecipe(recipe: recipe) {

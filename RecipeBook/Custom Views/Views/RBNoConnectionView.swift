@@ -42,7 +42,7 @@ class RBNoConnectionView: UIView {
         self.addSubview(self.imageView)
         self.imageView.translatesAutoresizingMaskIntoConstraints = false
 
-        let image = SFSymbols.warning?.withTintColor(.systemYellow, renderingMode: .alwaysOriginal)
+        let image = SFSymbols.warning?.withTintColor(Style.colors.primary, renderingMode: .alwaysOriginal)
         let targetSize = image?.getImageSize(size: self.imageSize) ?? .zero
         self.imageView.image = image?.imageWith(newSize: targetSize).withRenderingMode(.alwaysOriginal)
 
@@ -59,10 +59,10 @@ class RBNoConnectionView: UIView {
         self.addSubview(self.bodyLabel)
 
         self.titleLabel.text = "Failed to connect to the server"
-        self.titleLabel.textColor = .darkYellow
+        self.titleLabel.textColor = Style.colors.styledText
 
         self.bodyLabel.text = "Changes will not be saved to the server until you are back online"
-        self.bodyLabel.textColor = .darkYellow
+        self.bodyLabel.textColor = Style.colors.styledText
         self.bodyLabel.numberOfLines = 3
         self.bodyLabel.lineBreakMode = .byWordWrapping
 
@@ -85,9 +85,9 @@ class RBNoConnectionView: UIView {
         let endY = view.frame.size.height - self.height - self.verticalMargin
         self.frame = CGRect(x: self.horizontalMargin, y: startY, width: width, height: self.height)
 
-        self.backgroundColor = .paleYellow
+        self.backgroundColor = Style.colors.styledBackground
         self.layer.borderWidth = 1.5
-        self.layer.borderColor = UIColor.systemYellow.cgColor
+        self.layer.borderColor = Style.colors.primary.cgColor
         self.layer.cornerRadius = 12
         self.addShadow()
 

@@ -10,7 +10,7 @@ import UIKit
 struct TextFieldContentConfiguration: UIContentConfiguration {
 
     var image: UIImage? = nil
-    var tintColor: UIColor = .systemYellow
+    var tintColor: UIColor = Style.colors.primary
 
     var text: String = ""
     var placeholder: String = ""

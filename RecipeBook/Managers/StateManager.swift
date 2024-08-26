@@ -21,13 +21,14 @@ class State {
     // use a separate data type for encoding/decoding
     struct Data: Codable {
         let userId: String
+        let userEmail: String
         let userKey: UUID?
         let root: UUID?
         let recipes: [Recipe]
         let folders: [RecipeFolder]
 
         static func empty() -> Data {
-            return Data(userId: "", userKey: nil, root: nil, recipes: [], folders: [])
+            return Data(userId: "", userEmail: "", userKey: nil, root: nil, recipes: [], folders: [])
         }
     }
 
@@ -36,8 +37,9 @@ class State {
     // window used to present error alerts
     var window: UIWindow?
 
-    // user ID and key
+    // user information
     var userId: String = ""
+    var userEmail: String = ""
     var userKey: UUID? = nil
 
     // ID of the root folder
@@ -81,6 +83,7 @@ class State {
     func load() {
         let data = PersistenceManager.shared.state
         self.userId = data.userId
+        self.userEmail = data.userEmail
         self.userKey = data.userKey
         self.root = data.root
         self.loadRecipes(recipes: data.recipes)
@@ -92,6 +95,7 @@ class State {
     func storeToLocal() {
         let data = Data(
             userId: self.userId,
+            userEmail: self.userEmail,
             userKey: self.userKey,
             root: self.root,
             recipes: self.recipes,
@@ -128,6 +132,7 @@ class State {
 
     func addUserInfo(info: API.UserInfo) {
         self.userId = info.id
+        self.userEmail = info.email
         self.userKey = info.key
         self.root = info.root
 
@@ -145,6 +150,19 @@ class State {
             self.folders.append(folder)
             self.folderMap[folder.uuid] = folder
         }
+
+        self.storeToLocal()
+    }
+
+    func clearUserInfo() {
+        self.userId = ""
+        self.userEmail = ""
+        self.userKey = nil
+        self.root = nil
+        self.recipes.removeAll()
+        self.folders.removeAll()
+        self.recipeMap.removeAll()
+        self.folderMap.removeAll()
 
         self.storeToLocal()
     }
@@ -446,6 +464,7 @@ class State {
     func dump() -> String {
         let data = Data(
             userId: self.userId,
+            userEmail: self.userEmail,
             userKey: self.userKey,
             root: self.root,
             recipes: self.recipes,
@@ -458,6 +477,7 @@ class State {
     func clear() {
         // NOTE: this should only be used for development debugging
         self.userId = ""
+        self.userEmail = ""
         self.userKey = nil
         self.root = nil
         self.recipes.removeAll()

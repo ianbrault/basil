@@ -7,27 +7,25 @@
 
 import UIKit
 
+//
+// Named constants for UIKit system images
+//
 enum SFSymbols {
     static let add = UIImage(systemName: "plus")
     static let addRecipe = UIImage(systemName: "plus.circle")
-    static let arrowBack = UIImage(systemName: "chevron.backward")
-    static let arrowDown = UIImage(systemName: "chevron.down")
-    static let arrowUp = UIImage(systemName: "chevron.up")
-    static let atom = UIImage(systemName: "atom")
-    static let bug = UIImage(systemName: "ladybug")
     static let checkmarkCircle = UIImage(systemName: "checkmark.circle")
     static let checkmarkCircleFill = UIImage(systemName: "checkmark.circle.fill")
     static let circle = UIImage(systemName: "circle")
     static let confirmPassword = UIImage(systemName: "lock.badge.clock")
     static let contextMenu = UIImage(systemName: "ellipsis.circle")
     static let editRecipe = UIImage(systemName: "square.and.pencil")
-    static let email = UIImage(systemName: "person")
+    static let email = UIImage(systemName: "person.crop.circle")
     static let folder = UIImage(systemName: "folder")
     static let groceries = UIImage(systemName: "cart")
     static let importRecipe = UIImage(systemName: "tray.and.arrow.down")
-    static let login = UIImage(systemName: "person.crop.circle.fill.badge.checkmark")
+    static let logout = UIImage(systemName: "person.crop.circle.badge.xmark")
     static let recipeBook = UIImage(systemName: "text.book.closed")
-    static let register = UIImage(systemName: "person.crop.circle.fill.badge.plus")
+    static let settings = UIImage(systemName: "gearshape")
     static let password = UIImage(systemName: "lock")
     static let reorder = UIImage(systemName: "slider.horizontal.3")
     static let trash = UIImage(systemName: "trash")

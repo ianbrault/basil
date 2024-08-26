@@ -37,7 +37,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         State.manager.serverCommunicationEstablished = true
 
         window.rootViewController = RBTabBarController()
-        UIView.transition(with: window, duration: 0.6, options: .transitionCrossDissolve, animations: {})
+        UIView.transition(with: window, duration: 0.8, options: .transitionCrossDissolve, animations: {})
+    }
+
+    func sceneDidRemoveUser() {
+        guard let window = self.window else { return }
+
+        window.rootViewController = RBOnboardingController()
+        UIView.transition(with: window, duration: 0.8, options: .transitionCrossDissolve, animations: {})
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

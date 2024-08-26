@@ -9,12 +9,12 @@ import UIKit
 
 class RBButton: UIButton {
 
-    enum Style {
+    enum ButtonStyle {
         case primary
         case secondary
     }
 
-    init(title: String, image: UIImage? = nil, style: Style = .primary) {
+    init(title: String, image: UIImage? = nil, style: ButtonStyle = .primary) {
         super.init(frame: .zero)
         self.configure(title: title, image: image, style: style)
     }
@@ -23,17 +23,17 @@ class RBButton: UIButton {
         fatalError("init(coder:) has not been implemented")
     }
 
-    private func configure(title: String, image: UIImage? = nil, style: Style) {
+    private func configure(title: String, image: UIImage? = nil, style: ButtonStyle) {
         self.translatesAutoresizingMaskIntoConstraints = false
 
         self.configuration = .filled()
         switch style {
         case .primary:
-            self.configuration?.baseBackgroundColor = .systemYellow
-            self.configuration?.baseForegroundColor = .systemBackground
+            self.configuration?.baseBackgroundColor = Style.colors.primary
+            self.configuration?.baseForegroundColor = Style.colors.background
         case .secondary:
-            self.configuration?.baseBackgroundColor = .secondarySystemBackground
-            self.configuration?.baseForegroundColor = .systemYellow
+            self.configuration?.baseBackgroundColor = Style.colors.secondaryBackground
+            self.configuration?.baseForegroundColor = Style.colors.primary
         }
         self.configuration?.cornerStyle = .large
         self.configuration?.attributedTitle = AttributedString(

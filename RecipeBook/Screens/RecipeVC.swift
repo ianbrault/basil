@@ -157,7 +157,7 @@ extension RecipeVC: UITableViewDataSource, UITableViewDelegate {
 
 extension RecipeVC: RecipeFormVC.Delegate {
 
-    func didSaveRecipe(style: RecipeFormVC.Style, recipe: Recipe) {
+    func didSaveRecipe(style: RecipeFormVC.FormStyle, recipe: Recipe) {
         // NOTE: ignoring style, should always be edit
         if let error = State.manager.updateRecipe(recipe: recipe) {
             self.presentErrorAlert(error)

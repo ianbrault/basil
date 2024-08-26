@@ -12,8 +12,8 @@ class GroceryCell: UITableViewCell {
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        self.backgroundColor = .systemBackground
-        self.tintColor = .systemYellow
+        self.backgroundColor = Style.colors.background
+        self.tintColor = Style.colors.primary
     }
 
     required init?(coder: NSCoder) {
@@ -26,10 +26,10 @@ class GroceryCell: UITableViewCell {
 
         if grocery.complete {
             content.image = SFSymbols.checkmarkCircleFill
-            content.imageProperties.tintColor = .systemYellow
+            content.imageProperties.tintColor = Style.colors.primary
         } else {
             content.image = SFSymbols.circle
-            content.imageProperties.tintColor = .secondaryLabel
+            content.imageProperties.tintColor = Style.colors.secondaryText
         }
 
         self.contentConfiguration = content

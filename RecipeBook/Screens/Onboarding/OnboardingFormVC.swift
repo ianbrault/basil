@@ -15,7 +15,7 @@ import UIKit
 class OnboardingFormVC: UIViewController {
     static let reuseID = "OnboardingFormCell"
 
-    enum Style {
+    enum FormStyle {
         case register
         case login
     }
@@ -38,7 +38,7 @@ class OnboardingFormVC: UIViewController {
         }
     }
 
-    private var style: Style
+    private var style: FormStyle
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private var button: RBButton!
     private var cells: [Cell] = [
@@ -54,7 +54,7 @@ class OnboardingFormVC: UIViewController {
     private let buttonHeight: CGFloat = 54
     private let insets = UIEdgeInsets(top: 0, left: 40, bottom: 16, right: 40)
 
-    init(_ style: Style) {
+    init(_ style: FormStyle) {
         self.style = style
         switch style {
         case .register:
@@ -204,7 +204,7 @@ extension OnboardingFormVC: UITableViewDataSource, UITableViewDelegate {
 
         var content = TextFieldContentConfiguration()
         content.image = info.image
-        content.tintColor = info.hasError ? .systemRed : .systemYellow
+        content.tintColor = info.hasError ? Style.colors.error : Style.colors.primary
         content.text = info.text
         content.placeholder = info.placeholder
         content.keyboardType = info.keyboardType
@@ -226,6 +226,6 @@ extension OnboardingFormVC: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 48
+        return Style.tableCellHeight
     }
 }

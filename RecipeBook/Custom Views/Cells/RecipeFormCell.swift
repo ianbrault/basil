@@ -47,9 +47,9 @@ class RecipeFormCell: UITableViewCell {
         var content = self.defaultContentConfiguration()
 
         content.image = SFSymbols.addRecipe
-        content.imageProperties.tintColor = .systemYellow
+        content.imageProperties.tintColor = Style.colors.primary
         content.text = RecipeFormCell.buttonText(for: section)
-        content.textProperties.color = .systemYellow
+        content.textProperties.color = Style.colors.primary
 
         self.contentConfiguration = content
         self.selectionStyle = .default

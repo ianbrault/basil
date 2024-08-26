@@ -101,7 +101,7 @@ extension FolderTreeVC: UITableViewDataSource, UITableViewDelegate {
 
         var content = cell.defaultContentConfiguration()
         content.image = SFSymbols.folder
-        content.imageProperties.tintColor = isEnabled ? .systemYellow : .systemGray3
+        content.imageProperties.tintColor = isEnabled ? Style.colors.primary : .systemGray3
         content.text = item.folder.name.isEmpty ? "Recipes" : item.folder.name
 
         cell.contentConfiguration = content

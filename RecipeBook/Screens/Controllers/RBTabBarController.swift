@@ -11,7 +11,7 @@ class RBTabBarController: UITabBarController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        UITabBar.appearance().tintColor = .systemYellow
+        UITabBar.appearance().tintColor = Style.colors.primary
         self.viewControllers = [
             self.createRecipeListVC(),
             self.createGroceryListVC(),
@@ -22,7 +22,7 @@ class RBTabBarController: UITabBarController {
         let navigationController = UINavigationController(rootViewController: rootViewController)
 
         navigationController.navigationBar.prefersLargeTitles = true
-        navigationController.navigationBar.tintColor = .systemYellow
+        navigationController.navigationBar.tintColor = Style.colors.primary
 
         let appearance = UINavigationBarAppearance()
         appearance.largeTitleTextAttributes = [

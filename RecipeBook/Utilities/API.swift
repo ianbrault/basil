@@ -14,6 +14,7 @@ struct API {
 
     struct UserInfo: Codable {
         let id: String
+        let email: String
         let key: UUID?
         let root: UUID?
         let recipes: [Recipe]
@@ -97,7 +98,7 @@ struct API {
 
     static func updateUser(async: Bool = false, handler: Handler? = nil) {
         let body = UserInfo(
-            id: State.manager.userId, key: State.manager.userKey,
+            id: State.manager.userId, email: State.manager.userEmail, key: State.manager.userKey,
             root: State.manager.root, recipes: State.manager.recipes, folders: State.manager.folders
         )
         self.call(.update, body: body, async: async, handler: handler)

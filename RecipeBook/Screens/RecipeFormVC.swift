@@ -13,10 +13,10 @@ import UIKit
 class RecipeFormVC: UIViewController {
 
     protocol Delegate: AnyObject {
-        func didSaveRecipe(style: RecipeFormVC.Style, recipe: Recipe)
+        func didSaveRecipe(style: RecipeFormVC.FormStyle, recipe: Recipe)
     }
 
-    enum Style {
+    enum FormStyle {
         case new
         case edit
     }
@@ -28,16 +28,16 @@ class RecipeFormVC: UIViewController {
     }
 
     struct Cell: Hashable {
-        enum Style: Hashable {
+        enum CellStyle: Hashable {
             case textField
             case button
         }
 
         let id: UUID
-        let style: Style
+        let style: CellStyle
         var text: String
 
-        init(_ style: Style, text: String = "") {
+        init(_ style: CellStyle, text: String = "") {
             self.id = UUID()
             self.style = style
             self.text = text
@@ -111,12 +111,12 @@ class RecipeFormVC: UIViewController {
         return cell
     }
 
-    private var style: Style
+    private var style: FormStyle
     var uuid: UUID?
     var folderId: UUID?
     weak var delegate: Delegate?
 
-    init(style: Style) {
+    init(style: FormStyle) {
         self.style = style
         super.init(nibName: nil, bundle: nil)
     }
@@ -154,7 +154,7 @@ class RecipeFormVC: UIViewController {
         }
 
         self.navigationController?.navigationBar.prefersLargeTitles = true
-        self.navigationController?.navigationBar.tintColor = .systemYellow
+        self.navigationController?.navigationBar.tintColor = Style.colors.primary
         self.navigationController?.setNavigationBarHidden(false, animated: true)
     }
 
@@ -268,7 +268,7 @@ class RecipeFormVC: UIViewController {
 extension RecipeFormVC: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 44
+        return Style.tableCellHeight
     }
 
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
