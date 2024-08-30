@@ -7,6 +7,10 @@
 
 import UIKit
 
+//
+// Window containing user settings
+// Presented as a form sheet
+//
 class SettingsVC: UIViewController {
     static let reuseID = "SettingsCell"
 
