@@ -14,6 +14,7 @@ struct TextFieldContentConfiguration: UIContentConfiguration {
 
     var text: String = ""
     var placeholder: String = ""
+    var contentType: UITextContentType? = nil
     var keyboardType: UIKeyboardType = .default
     var isSecureTextEntry: Bool = false
     var autocapitalizationType: UITextAutocapitalizationType = .none
@@ -66,6 +67,7 @@ class TextFieldContentView: UIView, UIContentView {
 
         self.textField.text = configuration.text
         self.textField.placeholder = configuration.placeholder
+        self.textField.textContentType = configuration.contentType
         self.textField.keyboardType = configuration.keyboardType
         self.textField.isSecureTextEntry = configuration.isSecureTextEntry
         self.textField.autocapitalizationType = configuration.autocapitalizationType

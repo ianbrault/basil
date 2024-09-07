@@ -56,6 +56,7 @@ class SettingsVC: UIViewController {
         self.tableView.dataSource = self
         self.tableView.delegate = self
         self.tableView.contentInset.top = 16
+        self.tableView.keyboardDismissMode = .onDrag
         self.tableView.separatorInsetReference = .fromAutomaticInsets
         self.tableView.removeExcessCells()
 

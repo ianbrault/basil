@@ -70,6 +70,7 @@ class RecipeVC: UIViewController {
         self.tableView.dataSource = self
         self.tableView.contentInset.bottom = 16
         self.tableView.allowsSelection = false
+        self.tableView.keyboardDismissMode = .onDrag
         self.tableView.separatorStyle = .none
         self.tableView.sectionHeaderTopPadding = 10
         self.tableView.removeExcessCells()

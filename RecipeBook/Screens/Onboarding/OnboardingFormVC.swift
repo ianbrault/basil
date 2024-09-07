@@ -24,14 +24,22 @@ class OnboardingFormVC: UIViewController {
         let image: UIImage?
         var text: String
         let placeholder: String
+        let contentType: UITextContentType?
         let keyboardType: UIKeyboardType
         let isSecure: Bool
         var hasError: Bool
 
-        init(image: UIImage?, placeholder: String, keyboardType: UIKeyboardType = .default, isSecure: Bool = false) {
+        init(
+            image: UIImage?,
+            placeholder: String,
+            contentType: UITextContentType? = nil,
+            keyboardType: UIKeyboardType = .default,
+            isSecure: Bool = false
+        ) {
             self.image = image
             self.text = ""
             self.placeholder = placeholder
+            self.contentType = contentType
             self.keyboardType = keyboardType
             self.isSecure = isSecure
             self.hasError = false
@@ -41,11 +49,7 @@ class OnboardingFormVC: UIViewController {
     private var style: FormStyle
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private var button: RBButton!
-    private var cells: [Cell] = [
-        Cell(image: SFSymbols.email, placeholder: "Email", keyboardType: .emailAddress),
-        Cell(image: SFSymbols.password, placeholder: "Password", isSecure: true),
-        Cell(image: SFSymbols.confirmPassword, placeholder: "Confirm Password", isSecure: true),
-    ]
+    private var cells: [Cell]!
 
     private let emailIndex = IndexPath(row: 0, section: 0)
     private let passwordIndex = IndexPath(row: 1, section: 0)
@@ -59,8 +63,17 @@ class OnboardingFormVC: UIViewController {
         switch style {
         case .register:
             self.button = RBButton(title: "Register")
+            self.cells = [
+                Cell(image: SFSymbols.email, placeholder: "Email", contentType: .username, keyboardType: .emailAddress),
+                Cell(image: SFSymbols.password, placeholder: "Password", contentType: .newPassword, isSecure: true),
+                Cell(image: SFSymbols.confirmPassword, placeholder: "Confirm Password", contentType: .newPassword, isSecure: true),
+            ]
         case .login:
             self.button = RBButton(title: "Login")
+            self.cells = [
+                Cell(image: SFSymbols.email, placeholder: "Email", contentType: .username, keyboardType: .emailAddress),
+                Cell(image: SFSymbols.password, placeholder: "Password", contentType: .password, isSecure: true),
+            ]
         }
         super.init(nibName: nil, bundle: nil)
     }
@@ -78,9 +91,6 @@ class OnboardingFormVC: UIViewController {
 
     private func configureViewController() {
         self.view.backgroundColor = .secondarySystemGroupedBackground
-        
-        let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing))
-        self.view.addGestureRecognizer(tap)
 
         switch style {
         case .register:
@@ -97,6 +107,7 @@ class OnboardingFormVC: UIViewController {
         self.tableView.dataSource = self
         self.tableView.delegate = self
         self.tableView.contentInset.top = 16
+        self.tableView.keyboardDismissMode = .onDrag
         self.tableView.separatorInsetReference = .fromAutomaticInsets
         self.tableView.removeExcessCells()
 
@@ -207,7 +218,7 @@ extension OnboardingFormVC: UITableViewDataSource, UITableViewDelegate {
         content.tintColor = info.hasError ? Style.colors.error : Style.colors.primary
         content.text = info.text
         content.placeholder = info.placeholder
-        content.keyboardType = info.keyboardType
+        content.contentType = (self.style == .register && info.contentType == .password) ? .newPassword : info.contentType
         content.isSecureTextEntry = info.isSecure
 
         content.onChange =  { [weak self] (text, sender) in

@@ -21,8 +21,6 @@ class RecipeListVC: UIViewController {
     private var deleteButton: UIBarButtonItem!
     private var settingsButton: UIBarButtonItem!
 
-    private var textFieldAlert: RBTextFieldAlert? = nil
-
     private var folderId: UUID
     private var loadErrors: [RBError] = []
     private var items: [RecipeItem] = []
@@ -169,11 +167,11 @@ class RecipeListVC: UIViewController {
 
         self.tableView.frame = self.view.bounds
         self.tableView.delegate = self
-        self.tableView.tintColor = Style.colors.primary
-        self.tableView.removeExcessCells()
-
         self.tableView.allowsMultipleSelection = true
         self.tableView.allowsMultipleSelectionDuringEditing = true
+        self.tableView.tintColor = Style.colors.primary
+        self.tableView.keyboardDismissMode = .onDrag
+        self.tableView.removeExcessCells()
 
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: RecipeListVC.reuseID)
     }
@@ -327,7 +325,7 @@ class RecipeListVC: UIViewController {
     }
 
     func addNewFolder(_ action: UIAction) {
-        self.textFieldAlert = RBTextFieldAlert(
+        let alert = RBTextFieldAlert(
             title: "New Folder",
             message: "Enter a name for this folder",
             placeholder: "Name",
@@ -340,7 +338,7 @@ class RecipeListVC: UIViewController {
                 self?.insertItem(item: .folder(folder))
             }
         }
-        self.presentTextFieldAlert()
+        self.present(alert, animated: true)
     }
 
     func editRecipe(_ action: UIAction, recipe: Recipe) {
@@ -353,7 +351,7 @@ class RecipeListVC: UIViewController {
     }
 
     func editFolder(_ action: UIAction, folder: RecipeFolder) {
-        self.textFieldAlert = RBTextFieldAlert(
+        let alert = RBTextFieldAlert(
             title: "Edit Folder",
             message: "Enter a name for this folder",
             placeholder: "Name",
@@ -376,8 +374,8 @@ class RecipeListVC: UIViewController {
                 self.applySnapshot(reload: [item])
             }
         }
-        self.textFieldAlert?.text = folder.name
-        self.presentTextFieldAlert()
+        alert.text = folder.name
+        self.present(alert, animated: true)
     }
 
     func moveItemToFolder(_ action: UIAction, uuid: UUID) {
@@ -405,7 +403,7 @@ class RecipeListVC: UIViewController {
     }
 
     func importRecipe(_ action: UIAction) {
-        self.textFieldAlert = RBTextFieldAlert(
+        let alert = RBTextFieldAlert(
             title: "Import Recipe",
             message: "Enter the URL of the recipe",
             placeholder: "URL",
@@ -431,22 +429,7 @@ class RecipeListVC: UIViewController {
                 }
             }
         }
-        self.presentTextFieldAlert()
-    }
-
-    func presentTextFieldAlert() {
-        if let alert = self.textFieldAlert {
-            self.present(alert, animated: true) {
-                // add tap-to-dismiss gesture to background
-                let gesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissTextFieldAlert))
-                alert.view.superview?.subviews.first?.isUserInteractionEnabled = true
-                alert.view.superview?.subviews.first?.addGestureRecognizer(gesture)
-            }
-        }
-    }
-
-    @objc func dismissTextFieldAlert() {
-        self.textFieldAlert?.dismiss(animated: true)
+        self.present(alert, animated: true)
     }
 
     @objc func enableEditMode(_ action: UIAction? = nil) {

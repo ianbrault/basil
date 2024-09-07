@@ -161,10 +161,6 @@ class RecipeFormVC: UIViewController {
     private func configureViewController() {
         self.view.backgroundColor = .systemGroupedBackground
 
-        let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing))
-        tap.cancelsTouchesInView = false
-        self.view.addGestureRecognizer(tap)
-
         // create the bar button items
         self.cancelButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(self.dismissVC))
         self.editButton = UIBarButtonItem(title: nil, image: SFSymbols.reorder, target: self, action: #selector(self.enableEditMode))

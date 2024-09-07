@@ -18,7 +18,6 @@ class GroceryListVC: UIViewController {
 
     private let tableView = UITableView()
     private let feedback = UISelectionFeedbackGenerator()
-    private var textFieldAlert: RBTextFieldAlert? = nil
 
     private lazy var dataSource = DataSource(tableView: self.tableView) { (tableView, indexPath, grocery) -> GroceryCell? in
         let cell = tableView.dequeueReusableCell(withIdentifier: GroceryCell.reuseID, for: indexPath) as? GroceryCell
@@ -64,15 +63,16 @@ class GroceryListVC: UIViewController {
         self.view.addSubview(self.tableView)
 
         self.tableView.frame = self.view.bounds
-        self.tableView.separatorStyle = .none
         self.tableView.delegate = self
+        self.tableView.separatorStyle = .none
+        self.tableView.keyboardDismissMode = .onDrag
         self.tableView.removeExcessCells()
 
         self.tableView.register(GroceryCell.self, forCellReuseIdentifier: GroceryCell.reuseID)
     }
 
     @objc func addGrocery(_ action: UIAction) {
-        self.textFieldAlert = RBTextFieldAlert(
+        let alert = RBTextFieldAlert(
             title: "New Ingredient",
             message: "Enter the ingredient for the grocery list",
             placeholder: "ex. ½ red onion",
@@ -84,29 +84,14 @@ class GroceryListVC: UIViewController {
             State.manager.addToGroceryList(ingredient)
             self.applySnapshot(reload: [ingredient])
         }
-        self.textFieldAlert?.autocapitalizationType = UITextAutocapitalizationType.none
-        self.presentTextFieldAlert()
-    }
-
-    func presentTextFieldAlert() {
-        if let alert = self.textFieldAlert {
-            self.present(alert, animated: true) {
-                // add tap-to-dismiss gesture to background
-                let gesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissTextFieldAlert))
-                alert.view.superview?.subviews.first?.isUserInteractionEnabled = true
-                alert.view.superview?.subviews.first?.addGestureRecognizer(gesture)
-            }
-        }
-    }
-
-    @objc func dismissTextFieldAlert() {
-        self.textFieldAlert?.dismiss(animated: true)
+        alert.autocapitalizationType = UITextAutocapitalizationType.none
+        self.present(alert, animated: true)
     }
 
     @objc func editGrocery(_ action: UIAction, at indexPath: IndexPath) {
         let grocery = State.manager.groceryList.grocery(at: indexPath)
 
-        self.textFieldAlert = RBTextFieldAlert(
+        let alert = RBTextFieldAlert(
             title: "Edit Ingredient",
             message: "Enter the ingredient for the grocery list",
             placeholder: "ex. ½ red onion",
@@ -119,9 +104,9 @@ class GroceryListVC: UIViewController {
             let newGrocery = State.manager.groceryList.grocery(at: newIndexPath)
             self.applySnapshot(reload: [newGrocery])
         }
-        self.textFieldAlert?.text = grocery.toString()
-        self.textFieldAlert?.autocapitalizationType = UITextAutocapitalizationType.none
-        self.presentTextFieldAlert()
+        alert.text = grocery.toString()
+        alert.autocapitalizationType = UITextAutocapitalizationType.none
+        self.present(alert, animated: true)
     }
 
     @objc func deleteGrocery(_ action: UIAction, at indexPath: IndexPath) {

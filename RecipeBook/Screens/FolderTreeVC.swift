@@ -78,6 +78,7 @@ class FolderTreeVC: UIViewController {
         self.tableView.frame = self.view.bounds
         self.tableView.delegate = self
         self.tableView.dataSource = self
+        self.tableView.keyboardDismissMode = .onDrag
         self.tableView.removeExcessCells()
 
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: FolderTreeVC.reuseID)
