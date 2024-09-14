@@ -32,19 +32,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func sceneDidAddUser() {
         guard let window = self.window else { return }
-
         // this is triggered following login/registration which requires a successful server connection
         State.manager.serverCommunicationEstablished = true
-
-        window.rootViewController = RBTabBarController()
-        UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: {})
+        window.setRootViewController(RBTabBarController(), options: .init(direction: .toRight, style: .easeInOut))
     }
 
     func sceneDidRemoveUser() {
         guard let window = self.window else { return }
-
-        window.rootViewController = RBOnboardingController()
-        UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: {})
+        window.setRootViewController(RBOnboardingController(), options: .init(direction: .toLeft, style: .easeInOut))
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

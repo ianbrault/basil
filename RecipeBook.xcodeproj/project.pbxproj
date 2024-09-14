@@ -28,6 +28,7 @@
 		E34B4CEA29CEEA3E0063A9A2 /* RBTextFieldAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B4CE929CEEA3E0063A9A2 /* RBTextFieldAlert.swift */; };
 		E34B4CEE29CF77CC0063A9A2 /* UIViewController+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B4CED29CF77CC0063A9A2 /* UIViewController+Ext.swift */; };
 		E34B4D0529D154AF0063A9A2 /* RecipeFormVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B4D0429D154AF0063A9A2 /* RecipeFormVC.swift */; };
+		E34D13652C96281300FE0B2B /* UIWindow+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34D13642C96281300FE0B2B /* UIWindow+Ext.swift */; };
 		E3573E4D29CC14B3000F7877 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E4C29CC14B3000F7877 /* AppDelegate.swift */; };
 		E3573E4F29CC14B3000F7877 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E4E29CC14B3000F7877 /* SceneDelegate.swift */; };
 		E3573E5629CC14B6000F7877 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E3573E5529CC14B6000F7877 /* Assets.xcassets */; };
@@ -120,6 +121,7 @@
 		E34B4CE929CEEA3E0063A9A2 /* RBTextFieldAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBTextFieldAlert.swift; sourceTree = "<group>"; };
 		E34B4CED29CF77CC0063A9A2 /* UIViewController+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Ext.swift"; sourceTree = "<group>"; };
 		E34B4D0429D154AF0063A9A2 /* RecipeFormVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeFormVC.swift; sourceTree = "<group>"; };
+		E34D13642C96281300FE0B2B /* UIWindow+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIWindow+Ext.swift"; sourceTree = "<group>"; };
 		E3573E4929CC14B3000F7877 /* RecipeBook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RecipeBook.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3573E4C29CC14B3000F7877 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E3573E4E29CC14B3000F7877 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -365,6 +367,7 @@
 				E3B1C73B29CE1CF600736C96 /* UITableView+Ext.swift */,
 				E3B1C74629CE6CC900736C96 /* UIView+Ext.swift */,
 				E34B4CED29CF77CC0063A9A2 /* UIViewController+Ext.swift */,
+				E34D13642C96281300FE0B2B /* UIWindow+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -519,6 +522,7 @@
 				E323AB552C79BA310028D6E3 /* Data+Ext.swift in Sources */,
 				E349B14229E002100097A338 /* RBDeleteRecipeItemAlert.swift in Sources */,
 				E3316C0D2C66E2EB00F90117 /* RBOnboardingController.swift in Sources */,
+				E34D13652C96281300FE0B2B /* UIWindow+Ext.swift in Sources */,
 				E39D32AB2B1D70FF00D7511B /* Security.swift in Sources */,
 				E323AB572C7A58B60028D6E3 /* SettingsVC.swift in Sources */,
 				E34B4D0529D154AF0063A9A2 /* RecipeFormVC.swift in Sources */,
