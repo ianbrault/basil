@@ -13,10 +13,10 @@ import UIKit
 class RecipeFormVC: UIViewController {
 
     protocol Delegate: AnyObject {
-        func didSaveRecipe(style: RecipeFormVC.FormStyle, recipe: Recipe)
+        func didSaveRecipe(style: RecipeFormVC.Style, recipe: Recipe)
     }
 
-    enum FormStyle {
+    enum Style {
         case new
         case edit
     }
@@ -28,16 +28,16 @@ class RecipeFormVC: UIViewController {
     }
 
     struct Cell: Hashable {
-        enum CellStyle: Hashable {
+        enum Style: Hashable {
             case textField
             case button
         }
 
         let id: UUID
-        let style: CellStyle
+        let style: Style
         var text: String
 
-        init(_ style: CellStyle, text: String = "") {
+        init(_ style: Style, text: String = "") {
             self.id = UUID()
             self.style = style
             self.text = text
@@ -111,12 +111,12 @@ class RecipeFormVC: UIViewController {
         return cell
     }
 
-    private var style: FormStyle
+    private var style: Style
     var uuid: UUID?
     var folderId: UUID?
     weak var delegate: Delegate?
 
-    init(style: FormStyle) {
+    init(style: Style) {
         self.style = style
         super.init(nibName: nil, bundle: nil)
     }
@@ -154,7 +154,7 @@ class RecipeFormVC: UIViewController {
         }
 
         self.navigationController?.navigationBar.prefersLargeTitles = true
-        self.navigationController?.navigationBar.tintColor = Style.colors.primary
+        self.navigationController?.navigationBar.tintColor = StyleGuide.colors.primary
         self.navigationController?.setNavigationBarHidden(false, animated: true)
     }
 
@@ -262,10 +262,6 @@ class RecipeFormVC: UIViewController {
 }
 
 extension RecipeFormVC: UITableViewDelegate {
-
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return Style.tableCellHeight
-    }
 
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
         return .none

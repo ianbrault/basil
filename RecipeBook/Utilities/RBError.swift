@@ -21,6 +21,7 @@ enum RBError: Error {
     case missingInput(UUID)
     case missingItem(State.Item, UUID)
     case missingTitle
+    case noConnection
     case notImplemented
     case passwordsDoNotMatch
 
@@ -38,6 +39,8 @@ enum RBError: Error {
             return "Not implemented!"
         case .passwordsDoNotMatch:
             return "Passwords do not Match"
+        case .noConnection:
+            return "Could not reach server"
         case .cannotModifyRoot,
              .failedToDecode,
              .failedToEncode,
@@ -83,6 +86,8 @@ enum RBError: Error {
             }
         case .missingTitle:
             return "Add a title to the recipe and try again"
+        case .noConnection:
+            return "Changes will not be saved to the server until you are back online"
         case .notImplemented:
             return "This feature is not implemented. Try again later..."
         case .passwordsDoNotMatch:

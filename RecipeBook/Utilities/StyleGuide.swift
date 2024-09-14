@@ -1,5 +1,5 @@
 //
-//  Style.swift
+//  StyleGuide.swift
 //  RecipeBook
 //
 //  Created by Ian Brault on 8/24/24.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-struct Style {
+struct StyleGuide {
 
     struct Color {
         let primary = UIColor.systemYellow
@@ -25,5 +25,6 @@ struct Style {
     }
 
     static let colors = Color()
+    static let standardFontSize: CGFloat = 17
     static let tableCellHeight: CGFloat = 46
 }

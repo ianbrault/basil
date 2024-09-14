@@ -11,6 +11,7 @@ class RBErrorAlertController: UIAlertController {
 
     convenience init(error: RBError) {
         self.init(title: error.title, message: error.message, preferredStyle: .alert)
+        self.view.tintColor = StyleGuide.colors.primary
         self.addActions()
     }
 

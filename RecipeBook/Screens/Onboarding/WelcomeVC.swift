@@ -14,14 +14,14 @@ import UIKit
 class WelcomeVC: UIViewController {
 
     private let imageView = UIImageView()
-    private let titleLabel = RBTitleLabel(fontSize: 30, textAlignment: .center)
-    private let messageLabel = RBBodyLabel(fontSize: 18, textAlignment: .center)
+    private let titleLabel = RBTitleLabel(textAlignment: .center)
+    private let messageLabel = RBBodyLabel(textAlignment: .center)
     private let registerButton = RBButton(title: "Create a New Account", style: .primary)
     private let loginButton = RBButton(title: "Login to your Account", style: .secondary)
 
     private let imageSize: CGFloat = 140
     private let buttonHeight: CGFloat = 54
-    private let insets = UIEdgeInsets(top: 64, left: 40, bottom: 64, right: 40)
+    private let insets = UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40)
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,7 +38,7 @@ class WelcomeVC: UIViewController {
         self.titleLabel.text = "Welcome!"
         self.titleLabel.numberOfLines = 0
 
-        self.messageLabel.text = "Create an account to begin storing your recipes or log in to get access to your collection"
+        self.messageLabel.text = "Create a new account to begin storing your recipes or log in to access your collection"
         self.messageLabel.textColor = .secondaryLabel
         self.messageLabel.numberOfLines = 0
 

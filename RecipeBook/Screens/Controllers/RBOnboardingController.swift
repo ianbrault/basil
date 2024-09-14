@@ -15,7 +15,7 @@ class RBOnboardingController: UINavigationController {
         super.init(rootViewController: self.rootVC)
 
         self.navigationBar.prefersLargeTitles = true
-        self.navigationBar.tintColor = Style.colors.primary
+        self.navigationBar.tintColor = StyleGuide.colors.primary
 
         let appearance = UINavigationBarAppearance()
         appearance.largeTitleTextAttributes = [

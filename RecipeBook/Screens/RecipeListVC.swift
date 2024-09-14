@@ -41,7 +41,7 @@ class RecipeListVC: UIViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: RecipeListVC.reuseID, for: indexPath)
 
         var content = cell.defaultContentConfiguration()
-        content.imageProperties.tintColor = Style.colors.primary
+        content.imageProperties.tintColor = StyleGuide.colors.primary
         content.textProperties.lineBreakMode = .byTruncatingTail
         content.textProperties.numberOfLines = 1
 
@@ -144,7 +144,7 @@ class RecipeListVC: UIViewController {
     }
 
     private func configureViewController() {
-        self.view.backgroundColor = Style.colors.background
+        self.view.backgroundColor = StyleGuide.colors.background
 
         // create the bar button items
         self.addButton = UIBarButtonItem(systemItem: .add, menu: self.createAddButtonContextMenu())
@@ -153,7 +153,7 @@ class RecipeListVC: UIViewController {
         self.moveButton = UIBarButtonItem(title: nil, image: SFSymbols.folder, target: self, action: #selector(self.moveSelectedItems))
         self.moveButton.isEnabled = false
         self.deleteButton = UIBarButtonItem(title: nil, image: SFSymbols.trash, target: self, action: #selector(self.deleteSelectedItems))
-        self.deleteButton.tintColor = Style.colors.error
+        self.deleteButton.tintColor = StyleGuide.colors.error
         self.deleteButton.isEnabled = false
         self.settingsButton = UIBarButtonItem(title: nil, image: SFSymbols.settings, target: self, action: #selector(self.showSettingsView))
 
@@ -169,7 +169,7 @@ class RecipeListVC: UIViewController {
         self.tableView.delegate = self
         self.tableView.allowsMultipleSelection = true
         self.tableView.allowsMultipleSelectionDuringEditing = true
-        self.tableView.tintColor = Style.colors.primary
+        self.tableView.tintColor = StyleGuide.colors.primary
         self.tableView.keyboardDismissMode = .onDrag
         self.tableView.removeExcessCells()
 
@@ -230,30 +230,17 @@ class RecipeListVC: UIViewController {
         }
     }
 
-    private func showNoConnectionView() {
-        DispatchQueue.main.async {
-            let errorView = RBNoConnectionView(in: self.view)
-            self.view.window?.addSubview(errorView)
-            self.view.window?.bringSubviewToFront(errorView)
-        }
-    }
-
     private func showProcessingView() {
         DispatchQueue.main.async {
             // show the view while the local data is pushed to the server
-            let processingView = RBProcessingView(in: self.view)
-            self.view.window?.addSubview(processingView)
-            self.view.window?.bringSubviewToFront(processingView)
+            let vc = RBProcessingView()
+            self.present(vc, animated: true)
         }
     }
 
     private func hideProcessingView() {
         DispatchQueue.main.async {
-            for subview in self.view.window?.subviews ?? [] {
-                if let processingView = subview as? RBProcessingView {
-                    processingView.dismissView()
-                }
-            }
+            self.dismiss(animated: true)
         }
     }
 
@@ -261,7 +248,9 @@ class RecipeListVC: UIViewController {
         State.manager.serverPoked = true
         API.pokeServer { (error) in
             if let _ = error {
-                self.showNoConnectionView()
+                DispatchQueue.main.async {
+                    self.presentErrorAlert(.noConnection)
+                }
             } else {
                 State.manager.serverCommunicationEstablished = true
                 if PersistenceManager.shared.needsToUpdateServer {
@@ -410,7 +399,6 @@ class RecipeListVC: UIViewController {
             confirmText: "Import"
         ) { [weak self] (text) in
             guard let self else { return }
-            // TODO: open editing window before adding
             Network.get(text) { (response) in
                 let result = response.flatMap { (body) in
                     NYTRecipeParser.parse(body: body, folderId: self.folderId)
@@ -418,11 +406,14 @@ class RecipeListVC: UIViewController {
                 DispatchQueue.main.async {
                     switch result {
                     case .success(let recipe):
-                        if let error = State.manager.addRecipe(recipe: recipe) {
-                            self.presentErrorAlert(error)
-                        } else {
-                            self.insertItem(item: .recipe(recipe))
-                        }
+                        // open the recipei in an editing window to allow the user to change before adding
+                        let destVC = RecipeFormVC(style: .new)
+                        destVC.delegate = self
+                        destVC.set(recipe: recipe)
+
+                        let navController = UINavigationController(rootViewController: destVC)
+                        self.present(navController, animated: true)
+
                     case .failure(let error):
                         self.presentErrorAlert(error)
                     }
@@ -572,7 +563,7 @@ extension RecipeListVC: UITableViewDelegate {
 
 extension RecipeListVC: RecipeFormVC.Delegate {
 
-    func didSaveRecipe(style: RecipeFormVC.FormStyle, recipe: Recipe) {
+    func didSaveRecipe(style: RecipeFormVC.Style, recipe: Recipe) {
         switch style {
         case .new:
             if let error = State.manager.addRecipe(recipe: recipe) {

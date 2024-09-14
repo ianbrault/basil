@@ -34,7 +34,7 @@ class SettingsVC: UIViewController {
     private func configureNavigationController() {
         self.title = "Settings"
         self.navigationController?.navigationBar.prefersLargeTitles = true
-        self.navigationController?.navigationBar.tintColor = Style.colors.primary
+        self.navigationController?.navigationBar.tintColor = StyleGuide.colors.primary
         self.navigationController?.setNavigationBarHidden(false, animated: true)
 
         let appearance = UINavigationBarAppearance()
@@ -76,7 +76,7 @@ extension SettingsVC: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return Style.tableCellHeight
+        return StyleGuide.tableCellHeight
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -97,13 +97,13 @@ extension SettingsVC: UITableViewDataSource, UITableViewDelegate {
         switch section {
         case .account:
             content.text = State.manager.userEmail
-            content.textProperties.color = Style.colors.primaryText
+            content.textProperties.color = StyleGuide.colors.primaryText
             content.image = nil
         case .logout:
             content.text = "Sign out"
-            content.textProperties.color = Style.colors.error
+            content.textProperties.color = StyleGuide.colors.error
             content.image = SFSymbols.logout
-            content.imageProperties.tintColor = Style.colors.error
+            content.imageProperties.tintColor = StyleGuide.colors.error
         }
 
         cell.contentConfiguration = content

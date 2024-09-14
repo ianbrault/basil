@@ -22,7 +22,7 @@ class RecipeFormCell: UITableViewCell {
 
     private func setTextField(with text: String?, for indexPath: IndexPath) {
         guard let text, let section = Section(rawValue: indexPath.section) else { return }
-        var content = TextFieldContentConfiguration()
+        var content = TextViewContentConfiguration()
 
         content.text = text
         content.placeholder = RecipeFormCell.textFieldPlaceholder(for: section)
@@ -47,9 +47,9 @@ class RecipeFormCell: UITableViewCell {
         var content = self.defaultContentConfiguration()
 
         content.image = SFSymbols.addRecipe
-        content.imageProperties.tintColor = Style.colors.primary
+        content.imageProperties.tintColor = StyleGuide.colors.primary
         content.text = RecipeFormCell.buttonText(for: section)
-        content.textProperties.color = Style.colors.primary
+        content.textProperties.color = StyleGuide.colors.primary
 
         self.contentConfiguration = content
         self.selectionStyle = .default

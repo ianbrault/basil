@@ -23,8 +23,8 @@ class RBEmptyStateView: UIView {
         }
     }
 
-    let logoImageView = UIImageView()
-    let messageLabel = RBTitleLabel(fontSize: 16, weight: .regular, textAlignment: .center)
+    let imageView = UIImageView()
+    let label = RBBodyLabel(textAlignment: .center)
 
     let padding: CGFloat = 60
     let spacing: CGFloat = 20
@@ -72,35 +72,35 @@ class RBEmptyStateView: UIView {
     }
 
     private func configureLogoImageView(style: Style) {
-        self.addSubview(self.logoImageView)
+        self.addSubview(self.imageView)
 
         let symbol = UIImage(
             systemName: style.systemName,
             withConfiguration: UIImage.SymbolConfiguration(pointSize: self.imageSize, weight: .light))
         let image = symbol?.withTintColor(.tertiaryLabel, renderingMode: .alwaysOriginal)
 
-        self.logoImageView.image = image
-        self.logoImageView.translatesAutoresizingMaskIntoConstraints = false
+        self.imageView.image = image
+        self.imageView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            self.logoImageView.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            self.logoImageView.bottomAnchor.constraint(equalTo: self.centerYAnchor),
-            self.logoImageView.widthAnchor.constraint(equalToConstant: self.imageSize),
-            self.logoImageView.heightAnchor.constraint(equalToConstant: self.imageSize),
+            self.imageView.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+            self.imageView.bottomAnchor.constraint(equalTo: self.centerYAnchor),
+            self.imageView.widthAnchor.constraint(equalToConstant: self.imageSize),
+            self.imageView.heightAnchor.constraint(equalToConstant: self.imageSize),
         ])
     }
 
     private func configureMessageLabel(style: Style) {
-        self.addSubview(self.messageLabel)
+        self.addSubview(self.label)
 
-        self.messageLabel.attributedText = self.getMessageAttributedText(style: style)
-        self.messageLabel.numberOfLines = 3
-        self.messageLabel.textColor = .secondaryLabel
+        self.label.attributedText = self.getMessageAttributedText(style: style)
+        self.label.numberOfLines = 3
+        self.label.textColor = .secondaryLabel
 
         NSLayoutConstraint.activate([
-            self.messageLabel.topAnchor.constraint(equalTo: self.logoImageView.bottomAnchor, constant: self.spacing),
-            self.messageLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: self.padding),
-            self.messageLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -self.padding),
+            self.label.topAnchor.constraint(equalTo: self.imageView.bottomAnchor, constant: self.spacing),
+            self.label.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: self.padding),
+            self.label.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -self.padding),
         ])
     }
 }

@@ -29,11 +29,11 @@ class RBButton: UIButton {
         self.configuration = .filled()
         switch style {
         case .primary:
-            self.configuration?.baseBackgroundColor = Style.colors.primary
-            self.configuration?.baseForegroundColor = Style.colors.background
+            self.configuration?.baseBackgroundColor = StyleGuide.colors.primary
+            self.configuration?.baseForegroundColor = StyleGuide.colors.background
         case .secondary:
-            self.configuration?.baseBackgroundColor = Style.colors.secondaryBackground
-            self.configuration?.baseForegroundColor = Style.colors.primary
+            self.configuration?.baseBackgroundColor = StyleGuide.colors.secondaryBackground
+            self.configuration?.baseForegroundColor = StyleGuide.colors.primary
         }
         self.configuration?.cornerStyle = .large
         self.configuration?.attributedTitle = AttributedString(

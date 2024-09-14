@@ -215,7 +215,7 @@ extension OnboardingFormVC: UITableViewDataSource, UITableViewDelegate {
 
         var content = TextFieldContentConfiguration()
         content.image = info.image
-        content.tintColor = info.hasError ? Style.colors.error : Style.colors.primary
+        content.tintColor = info.hasError ? StyleGuide.colors.error : StyleGuide.colors.primary
         content.text = info.text
         content.placeholder = info.placeholder
         content.contentType = (self.style == .register && info.contentType == .password) ? .newPassword : info.contentType
@@ -237,6 +237,6 @@ extension OnboardingFormVC: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return Style.tableCellHeight
+        return StyleGuide.tableCellHeight
     }
 }

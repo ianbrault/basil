@@ -54,6 +54,7 @@ class RBTextFieldAlert: UIAlertController {
     }
 
     private func configure(placeholder: String, confirmText: String, completed: @escaping (String) -> Void) {
+        self.view.tintColor = StyleGuide.colors.primary
         let textFieldConfig = { (textField: UITextField) in
             textField.autocapitalizationType = .words
             textField.autocorrectionType = .yes

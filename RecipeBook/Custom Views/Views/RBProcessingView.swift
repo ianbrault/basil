@@ -7,80 +7,65 @@
 
 import UIKit
 
-class RBProcessingView: UIView {
+class RBProcessingView: UIViewController {
 
     let activityIndicator = UIActivityIndicatorView()
-    let label = RBBodyLabel(fontSize: 14)
+    let label = RBBodyLabel()
+    let insets = UIEdgeInsets(top: 32, left: 40, bottom: 32, right: 40)
 
-    let height: CGFloat = 40
-    let spinnerSize: CGFloat = 24
-
-    let horizontalPadding: CGFloat = 16
-    let verticalPadding: CGFloat = 10
-    let horizontalMargin: CGFloat = 36
-    let verticalMargin: CGFloat = 40
-
-    init(in view: UIView) {
-        super.init(frame: .zero)
-        self.configureSpinner()
-        self.configureLabels()
-        self.configureView(view: view)
+    init() {
+        super.init(nibName: nil, bundle: nil)
+        self.isModalInPresentation = true
+        self.modalPresentationStyle = .formSheet
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.configureViewController()
+        self.configureSpinner()
+        self.configureLabel()
+    }
+
+    private func configureViewController() {
+        self.view.backgroundColor = StyleGuide.colors.background
+        if let sheet = self.sheetPresentationController {
+            sheet.detents = [
+                .custom(identifier: UISheetPresentationController.Detent.Identifier("small")) { context in
+                    0.15 * context.maximumDetentValue
+                },
+            ]
+            sheet.prefersScrollingExpandsWhenScrolledToEdge = false
+            sheet.preferredCornerRadius = 32.0
+        }
+    }
+
     private func configureSpinner() {
-        self.addSubview(self.activityIndicator)
+        self.view.addSubview(self.activityIndicator)
+
         self.activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         self.activityIndicator.startAnimating()
 
         NSLayoutConstraint.activate([
-            self.activityIndicator.centerYAnchor.constraint(equalTo: self.centerYAnchor),
-            self.activityIndicator.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: self.horizontalPadding),
-            self.activityIndicator.heightAnchor.constraint(equalToConstant: self.spinnerSize),
+            self.activityIndicator.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: self.insets.left),
+            self.activityIndicator.centerYAnchor.constraint(equalTo: self.view.centerYAnchor, constant: -10),
         ])
     }
 
-    private func configureLabels() {
-        self.addSubview(self.label)
+    private func configureLabel() {
+        self.view.addSubview(self.label)
 
-        self.label.text = "Uploading your recipes to the server"
-        self.label.textColor = Style.colors.styledText
+        self.label.text = "Uploading offline recipes to the server, hang tight for a moment"
+        self.label.numberOfLines = 2
 
         NSLayoutConstraint.activate([
-            self.label.centerYAnchor.constraint(equalTo: self.centerYAnchor),
-            self.label.leadingAnchor.constraint(equalTo: self.activityIndicator.trailingAnchor, constant: 16),
-            self.label.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -self.horizontalPadding),
-            self.label.heightAnchor.constraint(equalToConstant: 18),
+            self.label.centerYAnchor.constraint(equalTo: self.view.centerYAnchor, constant: -10),
+            self.label.leadingAnchor.constraint(equalTo: self.activityIndicator.trailingAnchor, constant: 20),
+            self.label.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -self.insets.right),
+            self.label.heightAnchor.constraint(equalToConstant: 64),
         ])
-    }
-
-    private func configureView(view: UIView) {
-        let width = view.frame.size.width - (self.horizontalMargin * 2)
-        let startY = view.frame.size.height + self.height
-        let endY = view.frame.size.height - self.height - self.verticalMargin
-        self.frame = CGRect(x: self.horizontalMargin, y: startY, width: width, height: self.height)
-
-        self.backgroundColor = Style.colors.styledBackground
-        self.layer.borderWidth = 1.5
-        self.layer.borderColor = Style.colors.primary.cgColor
-        self.layer.cornerRadius = 12
-        self.addShadow()
-
-        // animate the modal appearance
-        UIView.animate(withDuration: 0.32) {
-            self.frame = CGRect(x: self.horizontalMargin, y: endY, width: width, height: self.height)
-        }
-    }
-
-    func dismissView() {
-        UIView.animate(withDuration: 0.32) {
-            self.frame = CGRect(x: self.frame.minX, y: self.frame.minY + 32, width: self.frame.width, height: self.frame.height)
-            self.layer.opacity = 0
-        } completion: { (_) in
-            self.removeFromSuperview()
-        }
     }
 }

@@ -15,6 +15,7 @@ class RBAddGroceriesAlert: UIAlertController {
     convenience init(recipe: Recipe) {
         let title = "Add the ingredients for \"\(recipe.title)\" to your grocery list?"
         self.init(title: title, message: nil, preferredStyle: .actionSheet)
+        self.view.tintColor = StyleGuide.colors.primary
         self.addActions(recipe: recipe)
     }
 

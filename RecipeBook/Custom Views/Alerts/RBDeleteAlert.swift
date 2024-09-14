@@ -14,6 +14,7 @@ class RBDeleteAlert: UIAlertController {
 
     convenience init(title: String, deleteAction: @escaping () -> Void) {
         self.init(title: title, message: nil, preferredStyle: .actionSheet)
+        self.view.tintColor = StyleGuide.colors.primary
         self.addActions(actionHandler: deleteAction)
     }
 
