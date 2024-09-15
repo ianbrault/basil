@@ -21,13 +21,13 @@ class FolderTreeVC: UIViewController {
     private let tableView = UITableView()
 
     private var items: [Item] = []
-    private var currentFolder: UUID!
-    private var completionHander: ((RecipeFolder) -> Void)!
+    private var currentFolder: UUID
+    private var completionHander: ((RecipeFolder) -> Void)
 
     init(currentFolder: UUID, completionHandler: @escaping (RecipeFolder) -> Void) {
-        super.init(nibName: nil, bundle: nil)
         self.currentFolder = currentFolder
         self.completionHander = completionHandler
+        super.init(nibName: nil, bundle: nil)
         self.loadFolderTree()
     }
 

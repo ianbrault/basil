@@ -19,7 +19,7 @@ class WelcomeVC: UIViewController {
     private let registerButton = RBButton(title: "Create a New Account", style: .primary)
     private let loginButton = RBButton(title: "Login to your Account", style: .secondary)
 
-    private let imageSize: CGFloat = 140
+    private let imageSize: CGFloat = 160
     private let buttonHeight: CGFloat = 54
     private let insets = UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40)
 
@@ -46,19 +46,16 @@ class WelcomeVC: UIViewController {
         self.titleLabel.bottomAnchor.constraint(equalTo: self.view.centerYAnchor, constant: -20).isActive = true
 
         self.messageLabel.pinToSides(of: self.view, insets: self.insets)
-        self.messageLabel.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor, constant: 10).isActive = true
+        self.messageLabel.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor, constant: 8).isActive = true
     }
 
     private func configureImageView() {
         self.view.addSubview(self.imageView)
 
-        let symbol = UIImage(
-            systemName: "text.book.closed",
-            withConfiguration: UIImage.SymbolConfiguration(pointSize: self.imageSize, weight: .light))
-        self.imageView.image = symbol?.withTintColor(.systemGray, renderingMode: .alwaysOriginal)
+        self.imageView.image = UIImage(named: "Logo")
         self.imageView.translatesAutoresizingMaskIntoConstraints = false
 
-        self.imageView.bottomAnchor.constraint(equalTo: self.titleLabel.topAnchor, constant: -20).isActive = true
+        self.imageView.bottomAnchor.constraint(equalTo: self.titleLabel.topAnchor, constant: -16).isActive = true
         self.imageView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
         self.imageView.widthAnchor.constraint(equalToConstant: self.imageSize).isActive = true
         self.imageView.heightAnchor.constraint(equalToConstant: self.imageSize).isActive = true
