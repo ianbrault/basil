@@ -1,6 +1,4 @@
-# Recipe Book
-
-an iOS app to store recipes
+# Basil Chef's Tools
 
 ## Privacy Policy
 
