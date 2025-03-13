@@ -31,6 +31,14 @@ struct API {
         let password: String
     }
 
+    struct UserRegisterInfo: Codable {
+        let email: String
+        let password: String
+        let root: UUID?
+        let recipes: [Recipe]
+        let folders: [RecipeFolder]
+    }
+
     static func parseResponse<T: Decodable>(body contents: Data?) -> Result<T, RBError> {
         guard let contents else {
             return .failure(.missingHTTPData)
@@ -88,8 +96,11 @@ struct API {
         }
     }
 
-    static func register(email: String, password: String, handler: @escaping BodyHandler<UserInfo>) {
-        let body = UserLoginInfo(email: email, password: password)
+    static func register(
+        email: String, password: String, root: UUID?, recipes: [Recipe], folders: [RecipeFolder],
+        handler: @escaping BodyHandler<UserInfo>
+    ) {
+        let body = UserRegisterInfo(email: email, password: password, root: root, recipes: recipes, folders: folders)
         Network.post(.register, body: body) { (response) in
             let result: Result<UserInfo, RBError> = response.flatMap(self.parseResponse)
             handler(result)

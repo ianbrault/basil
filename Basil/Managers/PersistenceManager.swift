@@ -24,6 +24,7 @@ class PersistenceManager {
     private enum Keys {
         static let dataVersion = "dataVersion"
         static let groceryList = "groceryList"
+        static let hasLaunched = "hasLaunched"
         static let needsToUpdateServer = "needsToUpdateServer"
         static let state = "state"
     }
@@ -55,6 +56,15 @@ class PersistenceManager {
             // NOTE: unwrap the JSONEncoder result, we should never have invalid JSON data
             let encoded = try! self.encoder.encode(newValue)
             self.defaults.set(encoded, forKey: Keys.groceryList)
+        }
+    }
+
+    var hasLaunched: Bool {
+        get {
+            return self.defaults.bool(forKey: Keys.hasLaunched)
+        }
+        set {
+            self.defaults.set(newValue, forKey: Keys.hasLaunched)
         }
     }
 

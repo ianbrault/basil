@@ -22,6 +22,7 @@ class RecipeListVC: UIViewController {
     private var settingsButton: UIBarButtonItem!
 
     private var folderId: UUID
+    private var isRoot: Bool
     private var loadErrors: [RBError] = []
     private var items: [RecipeItem] = []
     private var searchResults: [RecipeItem] = []
@@ -62,10 +63,8 @@ class RecipeListVC: UIViewController {
 
     init(folderId: UUID) {
         self.folderId = folderId
+        self.isRoot = folderId == State.manager.root
         super.init(nibName: nil, bundle: nil)
-
-        let folder = State.manager.getFolder(uuid: folderId)!
-        self.title = folder.name.isEmpty ? "Recipes" : folder.name
         self.loadItems()
     }
 
@@ -74,7 +73,13 @@ class RecipeListVC: UIViewController {
     }
 
     func loadItems() {
-        let folder = State.manager.getFolder(uuid: self.folderId)!
+        guard let folder = State.manager.getFolder(uuid: self.folderId) else {
+            self.title = "Recipes"
+            self.items.removeAll()
+            self.showEmptyStateView(.recipes, in: self.view)
+            return
+        }
+        self.title = folder.name.isEmpty ? "Recipes" : folder.name
         // load subfolder/recipe items using the IDs from the folder
         var folderItems: [RecipeItem] = []
         for folderId in folder.subfolders {
@@ -129,10 +134,6 @@ class RecipeListVC: UIViewController {
         self.loadItems()
         self.updateItemsForSearchText()
         self.applySnapshot(animatingDifferences: false)
-        // check-in with the server if it has not been done already
-        if !State.manager.serverPoked {
-            self.establishServerCommunication()
-        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -227,46 +228,6 @@ class RecipeListVC: UIViewController {
                 self?.deleteItem(action, item: .folder(folder))
             }
             return UIMenu(title: "", children: [editAction, moveAction, deleteAction])
-        }
-    }
-
-    private func showProcessingView() {
-        DispatchQueue.main.async {
-            // show the view while the local data is pushed to the server
-            let vc = ProcessingView()
-            self.present(vc, animated: true)
-        }
-    }
-
-    private func hideProcessingView() {
-        DispatchQueue.main.async {
-            self.dismiss(animated: true)
-        }
-    }
-
-    private func establishServerCommunication() {
-        State.manager.serverPoked = true
-        API.pokeServer { (error) in
-            if let _ = error {
-                DispatchQueue.main.async {
-                    self.presentErrorAlert(.noConnection)
-                }
-            } else {
-                State.manager.serverCommunicationEstablished = true
-                if PersistenceManager.shared.needsToUpdateServer {
-                    self.showProcessingView()
-                    API.updateUser { (error) in
-                        self.hideProcessingView()
-                        if let error {
-                            DispatchQueue.main.async {
-                                self.presentErrorAlert(error)
-                            }
-                        } else {
-                            PersistenceManager.shared.needsToUpdateServer = false
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -477,6 +438,7 @@ class RecipeListVC: UIViewController {
 
     @objc func showSettingsView(_ action: UIAction) {
         let destVC = SettingsVC()
+        destVC.delegate = self
         let navController = UINavigationController(rootViewController: destVC)
         self.present(navController, animated: true)
     }
@@ -609,6 +571,19 @@ extension RecipeListVC: RecipeVC.Delegate {
             self.presentErrorAlert(error)
         } else {
             self.removeItem(uuid: recipe.uuid)
+        }
+    }
+}
+
+extension RecipeListVC: SettingsVC.Delegate {
+
+    func didChangeUser() {
+        if self.isRoot {
+            guard let root = State.manager.root else { return }
+            self.folderId = root
+            self.loadItems()
+        } else {
+            self.navigationController?.popToRootViewController(animated: true)
         }
     }
 }

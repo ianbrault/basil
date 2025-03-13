@@ -12,7 +12,7 @@ fileprivate var containerView: UIView!
 extension UIViewController {
 
     func presentErrorAlert(_ error: RBError) {
-        let alert = ErrorAlertController(error: error)
+        let alert = ErrorAlert(error: error)
         self.present(alert, animated: true)
     }
 

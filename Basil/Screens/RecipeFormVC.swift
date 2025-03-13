@@ -235,7 +235,7 @@ class RecipeFormVC: UIViewController {
         // gather the ingredients
         var ingredients: [Ingredient] = []
         for cell in self.cells[Section.ingredients.rawValue] {
-            if cell.style == .button {
+            if cell.style == .button || cell.text.isEmpty {
                 continue
             }
             let ingredient = IngredientParser.shared.parse(string: cell.text)
@@ -244,7 +244,7 @@ class RecipeFormVC: UIViewController {
         // gather the instructions
         var instructions: [String] = []
         for cell in self.cells[Section.instructions.rawValue] {
-            if cell.style == .button {
+            if cell.style == .button || cell.text.isEmpty {
                 continue
             }
             instructions.append(cell.text)

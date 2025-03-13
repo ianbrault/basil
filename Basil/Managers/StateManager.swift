@@ -34,9 +34,6 @@ class State {
 
     static let manager = State()
 
-    // window used to present error alerts
-    var window: UIWindow?
-
     // user information
     var userId: String = ""
     var userEmail: String = ""
@@ -85,9 +82,18 @@ class State {
         self.userId = data.userId
         self.userEmail = data.userEmail
         self.userKey = data.userKey
-        self.root = data.root
-        self.loadRecipes(recipes: data.recipes)
-        self.loadFolders(folders: data.folders)
+        // create a root folder if it does not already exist
+        // this should be the case on the first launch
+        if let root = data.root {
+            self.root = root
+            self.loadRecipes(recipes: data.recipes)
+            self.loadFolders(folders: data.folders)
+        } else {
+            let root = RecipeFolder(folderId: nil, name: "")
+            self.root = root.uuid
+            self.loadRecipes(recipes: [])
+            self.loadFolders(folders: [root])
+        }
 
         self.groceryList = PersistenceManager.shared.groceryList
     }
@@ -104,26 +110,33 @@ class State {
         PersistenceManager.shared.state = data
     }
 
-    func storeGroceryList() {
-        PersistenceManager.shared.groceryList = self.groceryList
-    }
+    func storeToServer() {
+        // only store to the server if the user is logged into an account
+        guard !self.userId.isEmpty else { return }
 
-    func store() {
         PersistenceManager.shared.needsToUpdateServer = true
-        // first store to persistence storage
-        self.storeToLocal()
-        // then push to the server asynchronously
         if self.serverCommunicationEstablished {
             API.updateUser(async: true) { (error) in
                 if let error {
                     // present an alert on the main window and disable further communication with the server
-                    self.window?.rootViewController?.presentErrorAlert(error)
+                    UIApplication.shared.windowRootViewController?.presentErrorAlert(error)
                     self.serverCommunicationEstablished = false
                 } else {
                     PersistenceManager.shared.needsToUpdateServer = false
                 }
             }
         }
+    }
+
+    func storeGroceryList() {
+        PersistenceManager.shared.groceryList = self.groceryList
+    }
+
+    func store() {
+        // first store to persistence storage
+        self.storeToLocal()
+        // then push to the server asynchronously
+        self.storeToServer()
     }
 
     //
@@ -163,6 +176,12 @@ class State {
         self.folders.removeAll()
         self.recipeMap.removeAll()
         self.folderMap.removeAll()
+
+        // create a new root
+        let root = RecipeFolder(folderId: nil, name: "")
+        self.root = root.uuid
+        self.loadRecipes(recipes: [])
+        self.loadFolders(folders: [root])
 
         self.storeToLocal()
     }

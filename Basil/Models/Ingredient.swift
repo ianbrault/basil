@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Ingredient: Codable {
+class Ingredient: Decodable {
 
     var quantity: Quantity
     var unit: Unit?
@@ -18,6 +18,15 @@ class Ingredient: Codable {
         self.quantity = quantity
         self.unit = unit
         self.item = item
+        self.complete = false
+    }
+
+    required init(from decoder: any Decoder) throws {
+        let string = try decoder.singleValueContainer().decode(String.self)
+        let ingredient = IngredientParser.shared.parse(string: string)
+        self.quantity = ingredient.quantity
+        self.unit = ingredient.unit
+        self.item = ingredient.item
         self.complete = false
     }
 
@@ -50,6 +59,13 @@ class Ingredient: Codable {
             (lhs.item == rhs.item) &&
             (lhs.unit == rhs.unit) &&
             (lhs.quantity == rhs.quantity))
+    }
+}
+
+extension Ingredient: Encodable {
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(self.toString())
     }
 }
 

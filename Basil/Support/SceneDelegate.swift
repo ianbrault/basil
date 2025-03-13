@@ -19,27 +19,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         self.window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         self.window?.windowScene = windowScene
-        State.manager.window = self.window
-
-        // check if the user has been registered
-        if State.manager.userId.isEmpty {
-            self.window?.rootViewController = OnboardingController()
-        } else {
-            self.window?.rootViewController = TabBarController()
-        }
+        self.window?.rootViewController = TabBarController()
         self.window?.makeKeyAndVisible()
-    }
-
-    func sceneDidAddUser() {
-        guard let window = self.window else { return }
-        // this is triggered following login/registration which requires a successful server connection
-        State.manager.serverCommunicationEstablished = true
-        window.setRootViewController(TabBarController(), options: .init(direction: .toRight, style: .easeInOut))
-    }
-
-    func sceneDidRemoveUser() {
-        guard let window = self.window else { return }
-        window.setRootViewController(OnboardingController(), options: .init(direction: .toLeft, style: .easeInOut))
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

@@ -47,6 +47,8 @@ class OnboardingFormVC: UIViewController {
     }
 
     private var style: FormStyle
+    private var onCompletion: ((RBError?) -> Void)?
+
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private var button: Button!
     private var cells: [Cell]!
@@ -58,8 +60,9 @@ class OnboardingFormVC: UIViewController {
     private let buttonHeight: CGFloat = 54
     private let insets = UIEdgeInsets(top: 0, left: 40, bottom: 16, right: 40)
 
-    init(_ style: FormStyle) {
+    init(_ style: FormStyle, onCompletion: @escaping (RBError?) -> Void) {
         self.style = style
+        self.onCompletion = onCompletion
         switch style {
         case .register:
             self.button = Button(title: "Register")
@@ -98,6 +101,15 @@ class OnboardingFormVC: UIViewController {
         case .login:
             self.title = "Log in"
         }
+
+        self.navigationController?.navigationBar.prefersLargeTitles = true
+        self.navigationController?.navigationBar.tintColor = StyleGuide.colors.primary
+
+        let appearance = UINavigationBarAppearance()
+        appearance.largeTitleTextAttributes = [
+            NSAttributedString.Key.font: UIFont.systemFont(ofSize: 32, weight: .bold),
+        ]
+        self.navigationController?.navigationBar.standardAppearance = appearance
     }
 
     private func configureTableView() {
@@ -120,7 +132,9 @@ class OnboardingFormVC: UIViewController {
         self.button.addTarget(self, action: #selector(self.onSubmit), for: .touchUpInside)
 
         self.button.pinToSides(of: self.view, insets: self.insets)
-        self.button.bottomAnchor.constraint(equalTo: self.view.keyboardLayoutGuide.topAnchor, constant: -self.insets.bottom).isActive = true
+        self.button.bottomAnchor.constraint(
+            equalTo: self.view.keyboardLayoutGuide.topAnchor, constant: -self.insets.bottom
+        ).isActive = true
         self.button.heightAnchor.constraint(equalToConstant: self.buttonHeight).isActive = true
     }
 
@@ -167,33 +181,34 @@ class OnboardingFormVC: UIViewController {
         case .success(let hash):
             hashedPassword = hash.base64EncodedString()
         case .failure(let error):
-            self.presentErrorAlert(error)
+            self.onCompletion?(error)
             return
         }
 
-        var handler: (String, String, @escaping API.BodyHandler<API.UserInfo>) -> (Void)
-        switch self.style {
-        case .register:
-            handler = API.register
-        case .login:
-            handler = API.login
+        // common response handler for login/register endpoints
+        let handler: API.BodyHandler<API.UserInfo> = { [weak self] (result) in
+            var error: RBError? = nil
+            switch result {
+            case .success(let userInfo):
+                // store the user info to the app state
+                State.manager.addUserInfo(info: userInfo)
+            case .failure(let e):
+                error = e
+            }
+            self?.dismissLoadingView()
+            self?.onCompletion?(error)
         }
 
         self.showLoadingView()
-        handler(email, hashedPassword) { [weak self] (result) in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let userInfo):
-                    // store the user info to the app state and transition to the normal flow
-                    State.manager.addUserInfo(info: userInfo)
-                    if let delegate = self?.view.window?.windowScene?.delegate as? SceneDelegate {
-                        delegate.sceneDidAddUser()
-                    }
-                case .failure(let error):
-                    self?.presentErrorAlert(error)
-                }
-            }
-            self?.dismissLoadingView()
+        switch self.style {
+        case .register:
+            API.register(
+                email: email, password: hashedPassword,
+                root: State.manager.root, recipes: State.manager.recipes, folders: State.manager.folders,
+                handler: handler
+            )
+        case .login:
+            API.login(email: email, password: hashedPassword, handler: handler)
         }
     }
 }

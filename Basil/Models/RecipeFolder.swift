@@ -23,10 +23,6 @@ class RecipeFolder: Codable {
         self.subfolders = subfolders
     }
 
-    static func root() -> RecipeFolder {
-        return RecipeFolder(folderId: nil, name: "Recipes")
-    }
-
     func addRecipe(uuid: UUID) {
         self.recipes.append(uuid)
     }
