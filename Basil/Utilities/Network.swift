@@ -20,8 +20,8 @@ struct Network {
 
         var url: URL {
             // toggle for local development
-            let baseURL = "http://127.0.0.1:3030"
-            // let baseURL = "https://brault.dev"
+            // let baseURL = "http://127.0.0.1:3030"
+            let baseURL = "https://brault.dev"
             switch self {
             case .login:
                 return URL(string: "\(baseURL)/basil/login")!

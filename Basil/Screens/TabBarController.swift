@@ -9,13 +9,17 @@ import UIKit
 
 class TabBarController: UITabBarController {
 
+    private var tag: Int = 0
+
     override func viewDidLoad() {
         super.viewDidLoad()
         UITabBar.appearance().tintColor = StyleGuide.colors.primary
         self.viewControllers = [
-            self.createRecipeListVC(),
             self.createGroceryListVC(),
+            self.createRecipeListVC(),
+            self.createSettingsVC(),
         ]
+        self.selectedIndex = 1
         self.checkForFirstLaunch()
     }
 
@@ -41,18 +45,28 @@ class TabBarController: UITabBarController {
         return navigationController
     }
 
+    private func createGroceryListVC() -> UINavigationController {
+        let groceryListVC = GroceryListVC()
+        groceryListVC.tabBarItem = UITabBarItem(title: "Groceries", image: SFSymbols.groceries, tag: self.tag)
+
+        self.tag += 1
+        return self.createNavigationController(rootViewController: groceryListVC)
+    }
+
     private func createRecipeListVC() -> UINavigationController {
         let recipeListVC = RecipeListVC(folderId: State.manager.root!)
-        recipeListVC.tabBarItem = UITabBarItem(title: "Recipes", image: SFSymbols.recipeBook, tag: 0)
+        recipeListVC.tabBarItem = UITabBarItem(title: "Recipes", image: SFSymbols.recipeBook, tag: self.tag)
 
+        self.tag += 1
         return self.createNavigationController(rootViewController: recipeListVC)
     }
 
-    private func createGroceryListVC() -> UINavigationController {
-        let groceryListVC = GroceryListVC()
-        groceryListVC.tabBarItem = UITabBarItem(title: "Groceries", image: SFSymbols.groceries, tag: 1)
+    private func createSettingsVC() -> UINavigationController {
+        let settingsVC = SettingsVC()
+        settingsVC.tabBarItem = UITabBarItem(title: "Settings", image: SFSymbols.settings, tag: self.tag)
 
-        return self.createNavigationController(rootViewController: groceryListVC)
+        self.tag += 1
+        return self.createNavigationController(rootViewController: settingsVC)
     }
 
     private func checkForFirstLaunch() {

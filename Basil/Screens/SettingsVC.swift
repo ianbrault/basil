@@ -18,10 +18,6 @@ import UIKit
 class SettingsVC: UIViewController {
     static let reuseID = "SettingsCell"
 
-    protocol Delegate: AnyObject {
-        func didChangeUser()
-    }
-
     struct Section {
         let cell: (inout UIListContentConfiguration) -> Void
         let action: (() -> Void)?
@@ -29,12 +25,10 @@ class SettingsVC: UIViewController {
 
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private var sections: [[Section]] = []
-    weak var delegate: Delegate?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configureNavigationController()
-        self.configureViewController()
         self.configureTableView()
     }
 
@@ -105,11 +99,6 @@ class SettingsVC: UIViewController {
         self.navigationController?.navigationBar.standardAppearance = appearance
     }
 
-    private func configureViewController() {
-        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(self.dismissVC))
-        self.navigationItem.rightBarButtonItem = doneButton
-    }
-
     private func configureTableView() {
         self.view.addSubview(self.tableView)
 
@@ -138,19 +127,13 @@ class SettingsVC: UIViewController {
     }
 
     private func loginAction() {
+        // NOTE: logging in will wipe away any recipes/folders that were created before logging in
         // TODO: add an option to import the recipes/folders into the account after logging in
-        if !State.manager.recipes.isEmpty || State.manager.folders.count > 1 {
-            let message = "Logging in to an existing account will remove your previously-saved recipes. " +
-                          "Are you sure you want to continue?"
-            let warning = WarningAlert(message) {
-                let vc = OnboardingFormVC(.login, onCompletion: self.userAdded)
-                self.navigationController?.pushViewController(vc, animated: true)
-            }
-            self.present(warning, animated: true)
-        } else {
-            let vc = OnboardingFormVC(.login, onCompletion: self.userAdded)
-            self.navigationController?.pushViewController(vc, animated: true)
+        let vc = OnboardingFormVC(.login) { (error) in
+            State.manager.userChanged = error == nil
+            self.userAdded(error)
         }
+        self.navigationController?.pushViewController(vc, animated: true)
     }
 
     private func registerAction() {
@@ -162,17 +145,14 @@ class SettingsVC: UIViewController {
         let message = "Logging out will remove any saved recipes until you log back in to your account. " +
                       "Are you sure you want to continue?"
         let warning = WarningAlert(message) {
-            // clear all stored user state and return to the previous screen
-            // FIXME: this does not refresh the recipe list view
+            // clear all stored user state
             State.manager.clearUserInfo()
-            self.dismissVC()
-            self.delegate?.didChangeUser()
+            State.manager.userChanged = true
+            // then reload the settings view
+            self.registerSections()
+            self.tableView.reloadData()
         }
         self.present(warning, animated: true)
-    }
-
-    @objc func dismissVC() {
-        self.dismiss(animated: true)
     }
 }
 

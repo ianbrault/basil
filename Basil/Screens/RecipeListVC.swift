@@ -19,7 +19,6 @@ class RecipeListVC: UIViewController {
     private var doneButton: UIBarButtonItem!
     private var moveButton: UIBarButtonItem!
     private var deleteButton: UIBarButtonItem!
-    private var settingsButton: UIBarButtonItem!
 
     private var folderId: UUID
     private var isRoot: Bool
@@ -74,6 +73,7 @@ class RecipeListVC: UIViewController {
 
     func loadItems() {
         guard let folder = State.manager.getFolder(uuid: self.folderId) else {
+            // this should never happen but including as a fail-safe
             self.title = "Recipes"
             self.items.removeAll()
             self.showEmptyStateView(.recipes, in: self.view)
@@ -131,6 +131,17 @@ class RecipeListVC: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        // if the user info has changed since the view was last loaded, refresh the root folder
+        if State.manager.userChanged {
+            State.manager.userChanged = false
+            if self.isRoot {
+                self.folderId = State.manager.root!
+            } else {
+                // if this is not the root folder, return to the root
+                self.navigationController?.popToRootViewController(animated: true)
+                return
+            }
+        }
         self.loadItems()
         self.updateItemsForSearchText()
         self.applySnapshot(animatingDifferences: false)
@@ -156,11 +167,10 @@ class RecipeListVC: UIViewController {
         self.deleteButton = UIBarButtonItem(title: nil, image: SFSymbols.trash, target: self, action: #selector(self.deleteSelectedItems))
         self.deleteButton.tintColor = StyleGuide.colors.error
         self.deleteButton.isEnabled = false
-        self.settingsButton = UIBarButtonItem(title: nil, image: SFSymbols.settings, target: self, action: #selector(self.showSettingsView))
 
         // start with the add/edit buttons in the navigation bar
         // these will be swapped out when the table edit mode is toggled
-        self.navigationItem.rightBarButtonItems = [self.settingsButton, self.editButton, self.addButton]
+        self.navigationItem.rightBarButtonItems = [self.editButton, self.addButton]
     }
 
     private func configureTableView() {
@@ -390,13 +400,13 @@ class RecipeListVC: UIViewController {
         }
         self.tableView.setEditing(true, animated: true)
         // navigation bar should contain the delete and move and done buttons when edit mode is enabled
-        self.navigationItem.rightBarButtonItems = [self.settingsButton, self.doneButton, self.moveButton, self.deleteButton]
+        self.navigationItem.rightBarButtonItems = [self.doneButton, self.moveButton, self.deleteButton]
     }
 
     @objc func disableEditMode(_ action: UIAction? = nil) {
         self.tableView.setEditing(false, animated: true)
         // navigation bar should contain the add and edit buttons when edit mode is disabled
-        self.navigationItem.rightBarButtonItems = [self.settingsButton, self.editButton, self.addButton]
+        self.navigationItem.rightBarButtonItems = [self.editButton, self.addButton]
     }
 
     @objc func moveSelectedItems(_ action: UIAction) {
@@ -438,7 +448,6 @@ class RecipeListVC: UIViewController {
 
     @objc func showSettingsView(_ action: UIAction) {
         let destVC = SettingsVC()
-        destVC.delegate = self
         let navController = UINavigationController(rootViewController: destVC)
         self.present(navController, animated: true)
     }
@@ -571,19 +580,6 @@ extension RecipeListVC: RecipeVC.Delegate {
             self.presentErrorAlert(error)
         } else {
             self.removeItem(uuid: recipe.uuid)
-        }
-    }
-}
-
-extension RecipeListVC: SettingsVC.Delegate {
-
-    func didChangeUser() {
-        if self.isRoot {
-            guard let root = State.manager.root else { return }
-            self.folderId = root
-            self.loadItems()
-        } else {
-            self.navigationController?.popToRootViewController(animated: true)
         }
     }
 }

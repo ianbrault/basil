@@ -56,6 +56,8 @@ class State {
     var serverCommunicationEstablished: Bool = false
     // prevent unnecessary pokes if we were not able to establish server communication
     var serverPoked: Bool = false
+    // a user has logged in or out so information might need to be reloaded
+    var userChanged: Bool = false
 
     private init() {}
 
