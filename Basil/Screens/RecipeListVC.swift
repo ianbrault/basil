@@ -15,7 +15,7 @@ class RecipeListVC: UIViewController {
     static let reuseID = "RecipeListCell"
 
     private var addButton: UIBarButtonItem!
-    private var editButton: UIBarButtonItem!
+    private var menuButton: UIBarButtonItem!
     private var doneButton: UIBarButtonItem!
     private var moveButton: UIBarButtonItem!
     private var deleteButton: UIBarButtonItem!
@@ -159,8 +159,8 @@ class RecipeListVC: UIViewController {
         self.view.backgroundColor = StyleGuide.colors.background
 
         // create the bar button items
-        self.addButton = UIBarButtonItem(systemItem: .add, menu: self.createAddButtonContextMenu())
-        self.editButton = UIBarButtonItem(title: nil, image: SFSymbols.contextMenu, target: self, action: #selector(self.enableEditMode))
+        self.addButton = UIBarButtonItem(title: nil, image: SFSymbols.add, target: self, action: #selector(self.addNewRecipe))
+        self.menuButton = UIBarButtonItem(image: SFSymbols.contextMenu, menu: self.createMenuButtonContextMenu())
         self.doneButton = UIBarButtonItem(title: nil, image: SFSymbols.checkmarkCircle, target: self, action: #selector(self.disableEditMode))
         self.moveButton = UIBarButtonItem(title: nil, image: SFSymbols.folder, target: self, action: #selector(self.moveSelectedItems))
         self.moveButton.isEnabled = false
@@ -170,7 +170,7 @@ class RecipeListVC: UIViewController {
 
         // start with the add/edit buttons in the navigation bar
         // these will be swapped out when the table edit mode is toggled
-        self.navigationItem.rightBarButtonItems = [self.editButton, self.addButton]
+        self.navigationItem.rightBarButtonItems = [self.menuButton, self.addButton]
     }
 
     private func configureTableView() {
@@ -196,7 +196,7 @@ class RecipeListVC: UIViewController {
         self.navigationItem.searchController = self.searchController
     }
 
-    private func createAddButtonContextMenu() -> UIMenu {
+    private func createMenuButtonContextMenu() -> UIMenu {
         let recipeMenuItems = [
             UIAction(title: "Add new recipe", image: SFSymbols.addRecipe, handler: self.addNewRecipe),
             UIAction(title: "Import recipe", image: SFSymbols.importRecipe, handler: self.importRecipe),
@@ -204,10 +204,14 @@ class RecipeListVC: UIViewController {
         let folderMenuItems = [
             UIAction(title: "Add new folder", image: SFSymbols.folder, handler: self.addNewFolder),
         ]
+        let editMenuItems = [
+            UIAction(title: "Edit recipes", image: SFSymbols.reorder, handler: self.enableEditMode),
+        ]
 
         let recipeMenu = UIMenu(title: "", image: nil, identifier: nil, options: .displayInline, children: recipeMenuItems)
         let folderMenu = UIMenu(title: "", image: nil, identifier: nil, options: .displayInline, children: folderMenuItems)
-        return UIMenu(title: "", image: nil, identifier: nil, options: [], children: [recipeMenu, folderMenu])
+        let editMenu = UIMenu(title: "", image: nil, identifier: nil, options: .displayInline, children: editMenuItems)
+        return UIMenu(title: "", image: nil, identifier: nil, options: [], children: [recipeMenu, folderMenu, editMenu])
     }
 
     private func createRecipeLongPressContextMenu(recipe: Recipe) -> UIContextMenuConfiguration {
@@ -275,7 +279,7 @@ class RecipeListVC: UIViewController {
         self.applySnapshot()
     }
 
-    func addNewRecipe(_ action: UIAction) {
+    @objc func addNewRecipe(_ action: UIAction) {
         let destVC = RecipeFormVC(style: .new)
         destVC.delegate = self
         destVC.folderId = self.folderId
@@ -406,7 +410,7 @@ class RecipeListVC: UIViewController {
     @objc func disableEditMode(_ action: UIAction? = nil) {
         self.tableView.setEditing(false, animated: true)
         // navigation bar should contain the add and edit buttons when edit mode is disabled
-        self.navigationItem.rightBarButtonItems = [self.editButton, self.addButton]
+        self.navigationItem.rightBarButtonItems = [self.menuButton, self.addButton]
     }
 
     @objc func moveSelectedItems(_ action: UIAction) {
