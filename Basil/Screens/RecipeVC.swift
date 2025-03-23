@@ -58,8 +58,9 @@ class RecipeVC: UIViewController {
         self.navigationItem.largeTitleDisplayMode = .never
 
         let contextMenuItem = UIBarButtonItem(image: SFSymbols.contextMenu, menu: self.createContextMenu())
+        let cookingMenuItem = UIBarButtonItem(title: nil, image: SFSymbols.cook, target: self, action: #selector(self.startCooking))
         let groceriesMenuItem = UIBarButtonItem(title: nil, image: SFSymbols.groceries, target: self, action: #selector(self.addToGroceryList))
-        self.navigationItem.rightBarButtonItems = [contextMenuItem, groceriesMenuItem]
+        self.navigationItem.rightBarButtonItems = [contextMenuItem, cookingMenuItem, groceriesMenuItem]
     }
 
     private func configureTableView() {
@@ -79,16 +80,16 @@ class RecipeVC: UIViewController {
     }
 
     func editRecipe(_ action: UIAction) {
-        let destVC = RecipeFormVC(style: .edit)
-        destVC.delegate = self
-        destVC.set(recipe: self.recipe)
+        let viewController = RecipeFormVC(style: .edit)
+        viewController.delegate = self
+        viewController.set(recipe: self.recipe)
 
-        let navController = UINavigationController(rootViewController: destVC)
-        self.present(navController, animated: true)
+        let navigationController = NavigationController(rootViewController: viewController)
+        self.present(navigationController, animated: true)
     }
 
     func deleteRecipe(_ action: UIAction) {
-        let alert = DeleteRecipeItemAlert(item: .recipe(self.recipe)) { [weak self] () in
+        let alert = DeleteRecipeItemAlert(item: .recipe(self.recipe)) { [weak self] in
             guard let self = self else { return }
             self.delegate?.didDeleteRecipe(recipe: self.recipe)
         }
@@ -98,6 +99,12 @@ class RecipeVC: UIViewController {
     @objc func addToGroceryList(_ action: UIAction) {
         let alert = AddGroceriesAlert(recipe: self.recipe)
         self.present(alert, animated: true)
+    }
+
+    @objc func startCooking(_ action: UIAction) {
+        if let tabBar = self.tabBarController as? TabBarController {
+            tabBar.addRecipeToCookingView(recipe: self.recipe)
+        }
     }
 }
 

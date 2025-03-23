@@ -34,9 +34,9 @@ class TextViewContentView: UIView, UIContentView {
         }
     }
 
-    let textView = UITextView()
-    let placeholderLabel = BodyLabel()
-    var onChange: ((String?, UIView) -> Void)?
+    private let textView = UITextView()
+    private let placeholderLabel = BodyLabel()
+    private var onChange: ((String?, UIView) -> Void)?
 
     static func attributedText(_ text: String, color: UIColor = .label) -> NSAttributedString {
         let font = UIFont.preferredFont(forTextStyle: .body)

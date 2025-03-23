@@ -12,6 +12,7 @@ import UIKit
 // Allows users to add/delete groceries and check/reorder items
 //
 class GroceryListVC: UIViewController {
+    static let reuseID = "GroceryCell"
 
     typealias DataSource = UITableViewDiffableDataSource<Int, Ingredient>
     typealias Snapshot = NSDiffableDataSourceSnapshot<Int, Ingredient>
@@ -19,9 +20,20 @@ class GroceryListVC: UIViewController {
     private let tableView = UITableView()
     private let feedback = UISelectionFeedbackGenerator()
 
-    private lazy var dataSource = DataSource(tableView: self.tableView) { (tableView, indexPath, grocery) -> GroceryCell? in
-        let cell = tableView.dequeueReusableCell(withIdentifier: GroceryCell.reuseID, for: indexPath) as? GroceryCell
-        cell?.set(grocery: grocery)
+    private lazy var dataSource = DataSource(tableView: self.tableView) { (tableView, indexPath, grocery) -> UITableViewCell? in
+        var cell = tableView.dequeueReusableCell(withIdentifier: GroceryListVC.reuseID, for: indexPath)
+
+        var configuration = cell.defaultContentConfiguration()
+        configuration.text = grocery.toString()
+        if grocery.complete {
+            configuration.image = SFSymbols.checkmarkCircleFill
+            configuration.imageProperties.tintColor = StyleGuide.colors.primary
+        } else {
+            configuration.image = SFSymbols.circle
+            configuration.imageProperties.tintColor = StyleGuide.colors.secondaryText
+        }
+        cell.contentConfiguration = configuration
+
         return cell
     }
 
@@ -68,7 +80,7 @@ class GroceryListVC: UIViewController {
         self.tableView.keyboardDismissMode = .onDrag
         self.tableView.removeExcessCells()
 
-        self.tableView.register(GroceryCell.self, forCellReuseIdentifier: GroceryCell.reuseID)
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: GroceryListVC.reuseID)
     }
 
     @objc func addGrocery(_ action: UIAction) {

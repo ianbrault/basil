@@ -9,6 +9,7 @@ import UIKit
 
 class TabBarController: UITabBarController {
 
+    var cookingView: UINavigationController? = nil
     private var tag: Int = 0
 
     override func viewDidLoad() {
@@ -30,43 +31,25 @@ class TabBarController: UITabBarController {
         }
     }
 
-    private func createNavigationController(rootViewController: UIViewController) -> UINavigationController {
-        let navigationController = UINavigationController(rootViewController: rootViewController)
-
-        navigationController.navigationBar.prefersLargeTitles = true
-        navigationController.navigationBar.tintColor = StyleGuide.colors.primary
-
-        let appearance = UINavigationBarAppearance()
-        appearance.largeTitleTextAttributes = [
-            NSAttributedString.Key.font: UIFont.systemFont(ofSize: 32, weight: .bold),
-        ]
-        navigationController.navigationBar.standardAppearance = appearance
-
-        return navigationController
-    }
-
     private func createGroceryListVC() -> UINavigationController {
         let groceryListVC = GroceryListVC()
         groceryListVC.tabBarItem = UITabBarItem(title: "Groceries", image: SFSymbols.groceries, tag: self.tag)
-
         self.tag += 1
-        return self.createNavigationController(rootViewController: groceryListVC)
+        return NavigationController(rootViewController: groceryListVC)
     }
 
     private func createRecipeListVC() -> UINavigationController {
         let recipeListVC = RecipeListVC(folderId: State.manager.root!)
         recipeListVC.tabBarItem = UITabBarItem(title: "Recipes", image: SFSymbols.recipeBook, tag: self.tag)
-
         self.tag += 1
-        return self.createNavigationController(rootViewController: recipeListVC)
+        return NavigationController(rootViewController: recipeListVC)
     }
 
     private func createSettingsVC() -> UINavigationController {
         let settingsVC = SettingsVC()
         settingsVC.tabBarItem = UITabBarItem(title: "Settings", image: SFSymbols.settings, tag: self.tag)
-
         self.tag += 1
-        return self.createNavigationController(rootViewController: settingsVC)
+        return NavigationController(rootViewController: settingsVC)
     }
 
     private func checkForFirstLaunch() {
@@ -125,5 +108,35 @@ class TabBarController: UITabBarController {
                 }
             }
         }
+    }
+
+    func addRecipeToCookingView(recipe: Recipe) {
+        var present = false
+        if self.cookingView == nil {
+            let viewController = CookingVC()
+            viewController.cookingDelegate = self
+            self.cookingView = NavigationController(rootViewController: viewController)
+            present = true
+        }
+
+        guard let controller = self.cookingView, let view = controller.topViewController as? CookingVC else {
+            return
+        }
+        view.addRecipe(recipe: recipe)
+        if let sheetController = view.sheetPresentationController {
+            sheetController.animateChanges {
+                sheetController.selectedDetentIdentifier = .large
+            }
+        }
+        if present {
+            self.present(controller, animated: true)
+        }
+    }
+}
+
+extension TabBarController: CookingVC.Delegate {
+
+    func doneCooking() {
+        self.cookingView = nil
     }
 }

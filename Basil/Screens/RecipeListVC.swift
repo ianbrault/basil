@@ -280,12 +280,12 @@ class RecipeListVC: UIViewController {
     }
 
     @objc func addNewRecipe(_ action: UIAction) {
-        let destVC = RecipeFormVC(style: .new)
-        destVC.delegate = self
-        destVC.folderId = self.folderId
+        let viewController = RecipeFormVC(style: .new)
+        viewController.delegate = self
+        viewController.folderId = self.folderId
 
-        let navController = UINavigationController(rootViewController: destVC)
-        self.present(navController, animated: true)
+        let navigationController = NavigationController(rootViewController: viewController)
+        self.present(navigationController, animated: true)
     }
 
     func addNewFolder(_ action: UIAction) {
@@ -306,12 +306,12 @@ class RecipeListVC: UIViewController {
     }
 
     func editRecipe(_ action: UIAction, recipe: Recipe) {
-        let destVC = RecipeFormVC(style: .edit)
-        destVC.delegate = self
-        destVC.set(recipe: recipe)
+        let viewController = RecipeFormVC(style: .edit)
+        viewController.delegate = self
+        viewController.set(recipe: recipe)
 
-        let navController = UINavigationController(rootViewController: destVC)
-        self.present(navController, animated: true)
+        let navigationController = NavigationController(rootViewController: viewController)
+        self.present(navigationController, animated: true)
     }
 
     func editFolder(_ action: UIAction, folder: RecipeFolder) {
@@ -343,7 +343,7 @@ class RecipeListVC: UIViewController {
     }
 
     func moveItemToFolder(_ action: UIAction, uuid: UUID) {
-        let destVC = FolderTreeVC(currentFolder: self.folderId) { [weak self] (selectedFolder) in
+        let viewController = FolderTreeVC(currentFolder: self.folderId) { [weak self] (selectedFolder) in
             if let error = State.manager.moveItemToFolder(uuid: uuid, folderId: selectedFolder.uuid) {
                 self?.presentErrorAlert(error)
             } else if selectedFolder.uuid != self?.folderId {
@@ -351,8 +351,8 @@ class RecipeListVC: UIViewController {
                 self?.removeItem(uuid: uuid)
             }
         }
-        let navController = UINavigationController(rootViewController: destVC)
-        self.present(navController, animated: true)
+        let navigationController = NavigationController(rootViewController: viewController)
+        self.present(navigationController, animated: true)
     }
 
     func deleteItem(_ action: UIAction, item: RecipeItem) {
@@ -382,12 +382,12 @@ class RecipeListVC: UIViewController {
                     switch result {
                     case .success(let recipe):
                         // open the recipei in an editing window to allow the user to change before adding
-                        let destVC = RecipeFormVC(style: .new)
-                        destVC.delegate = self
-                        destVC.set(recipe: recipe)
+                        let viewController = RecipeFormVC(style: .new)
+                        viewController.delegate = self
+                        viewController.set(recipe: recipe)
 
-                        let navController = UINavigationController(rootViewController: destVC)
-                        self.present(navController, animated: true)
+                        let navigationController = NavigationController(rootViewController: viewController)
+                        self.present(navigationController, animated: true)
 
                     case .failure(let error):
                         self.presentErrorAlert(error)
@@ -417,7 +417,7 @@ class RecipeListVC: UIViewController {
         if let selectedRows = tableView.indexPathsForSelectedRows, !selectedRows.isEmpty {
             let uuids = selectedRows.map { self.items[$0.row] }.map { $0.uuid }
 
-            let destVC = FolderTreeVC(currentFolder: self.folderId) { [weak self] (selectedFolder) in
+            let viewController = FolderTreeVC(currentFolder: self.folderId) { [weak self] (selectedFolder) in
                 if let error = State.manager.moveItemsToFolder(uuids: uuids, folderId: selectedFolder.uuid) {
                     self?.presentErrorAlert(error)
                 } else if selectedFolder.uuid != self?.folderId {
@@ -427,8 +427,8 @@ class RecipeListVC: UIViewController {
                     self?.disableEditMode()
                 }
             }
-            let navController = UINavigationController(rootViewController: destVC)
-            self.present(navController, animated: true)
+            let navigationController = NavigationController(rootViewController: viewController)
+            self.present(navigationController, animated: true)
         }
     }
 
@@ -448,12 +448,6 @@ class RecipeListVC: UIViewController {
             }
             self.present(alert, animated: true)
         }
-    }
-
-    @objc func showSettingsView(_ action: UIAction) {
-        let destVC = SettingsVC()
-        let navController = UINavigationController(rootViewController: destVC)
-        self.present(navController, animated: true)
     }
 }
 

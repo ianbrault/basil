@@ -42,7 +42,7 @@ class TextFieldContentView: UIView, UIContentView {
         }
     }
 
-    let imageView = UIImageView()
+    let image = UIImageView()
     let textField = UITextField()
 
     init(configuration: TextFieldContentConfiguration) {
@@ -57,13 +57,13 @@ class TextFieldContentView: UIView, UIContentView {
     private func configure() {
         guard let configuration = self.configuration as? TextFieldContentConfiguration else { return }
 
-        self.addSubview(self.imageView)
+        self.addSubview(self.image)
         self.addSubview(self.textField)
 
-        self.imageView.image = configuration.image
-        self.imageView.tintColor = configuration.tintColor
-        self.imageView.contentMode = .scaleAspectFill
-        self.imageView.translatesAutoresizingMaskIntoConstraints = false
+        self.image.image = configuration.image
+        self.image.tintColor = configuration.tintColor
+        self.image.contentMode = .scaleAspectFill
+        self.image.translatesAutoresizingMaskIntoConstraints = false
 
         self.textField.text = configuration.text
         self.textField.placeholder = configuration.placeholder
@@ -80,16 +80,16 @@ class TextFieldContentView: UIView, UIContentView {
             }
         }, for: .editingChanged)
 
-        self.imageView.heightAnchor.constraint(equalToConstant: configuration.imageSize).isActive = true
-        self.imageView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        self.imageView.centerXAnchor.constraint(
+        self.image.heightAnchor.constraint(equalToConstant: configuration.imageSize).isActive = true
+        self.image.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+        self.image.centerXAnchor.constraint(
             equalTo: self.leadingAnchor, constant: (configuration.imageSize / 2) + configuration.contentInset
         ).isActive = true
 
         // pin the text field directly to the leading anchor if there is not an image
         if let _ = configuration.image {
             self.textField.leadingAnchor.constraint(
-                equalTo: self.imageView.centerXAnchor, constant: (configuration.imageSize / 2) + configuration.imageToTextPadding
+                equalTo: self.image.centerXAnchor, constant: (configuration.imageSize / 2) + configuration.imageToTextPadding
             ).isActive = true
         } else {
             self.textField.leadingAnchor.constraint(

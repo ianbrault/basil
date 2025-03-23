@@ -71,6 +71,11 @@ class IngredientParser {
         self.quantity = .none
         self.unit = nil
 
+        // if there is only 1 part, don't try to parse quantity/unit
+        if self.parts.count == 1 {
+            return Ingredient(quantity: .none, unit: nil, item: self.parts[0])
+        }
+
         self.parseQuantity()
         self.parseUnit()
         // remaining string is the item

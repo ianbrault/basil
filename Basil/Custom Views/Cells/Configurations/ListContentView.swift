@@ -37,7 +37,7 @@ class ListContentView: UIView, UIContentView {
         }
     }
 
-    let label = UILabel()
+    private let label = UILabel()
 
     init(configuration: ListContentConfiguration) {
         self.configuration = configuration

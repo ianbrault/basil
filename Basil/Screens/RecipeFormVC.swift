@@ -152,9 +152,6 @@ class RecipeFormVC: UIViewController {
         case .edit:
             self.title = "Edit Recipe"
         }
-
-        self.navigationController?.navigationBar.prefersLargeTitles = true
-        self.navigationController?.navigationBar.tintColor = StyleGuide.colors.primary
         self.navigationController?.setNavigationBarHidden(false, animated: true)
     }
 
