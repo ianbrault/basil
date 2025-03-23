@@ -28,7 +28,7 @@ class RecipeFormVC: UIViewController {
     }
 
     struct Cell: Hashable {
-        enum Style: Hashable {
+        enum Style {
             case textField
             case button
         }
@@ -41,6 +41,14 @@ class RecipeFormVC: UIViewController {
             self.id = UUID()
             self.style = style
             self.text = text
+        }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(self.id)
+        }
+
+        static func == (lhs: Cell, rhs: Cell) -> Bool {
+            return lhs.id == rhs.id
         }
     }
 
@@ -330,6 +338,9 @@ extension RecipeFormVC: RecipeFormCell.Delegate {
         if let cell = sender.next(ofType: RecipeFormCell.self) {
             if let indexPath = tableView.indexPath(for: cell) {
                 self.cells[indexPath.section][indexPath.row].text = text
+                // allow text fields to expand or shrink lines
+                self.tableView.beginUpdates()
+                self.tableView.endUpdates()
             }
         }
     }
