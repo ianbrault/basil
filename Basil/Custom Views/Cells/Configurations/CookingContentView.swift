@@ -78,7 +78,7 @@ class CookingContentView: UIView, UIContentView {
         self.label.trailingAnchor.constraint(
             equalTo: self.trailingAnchor, constant: -configuration.contentInset
         ).isActive = true
-        self.label.topAnchor.constraint(equalTo: self.topAnchor, constant: 4).isActive = true
-        self.label.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -4).isActive = true
+        self.label.topAnchor.constraint(equalTo: self.topAnchor, constant: 6).isActive = true
+        self.label.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -6).isActive = true
     }
 }

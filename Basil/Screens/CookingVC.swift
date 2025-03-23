@@ -31,12 +31,21 @@ class CookingVC: UIPageViewController {
     }
 
     func addRecipe(recipe: Recipe) {
-        let viewController = CookingItemVC(recipe: recipe)
-        self.currentIndex = self.recipes.count
-        self.recipes.append(viewController)
-
+        var viewController: CookingItemVC
+        var direction: UIPageViewController.NavigationDirection
+        // check if the view already contains the recipe
+        if let index = self.recipes.firstIndex(where: { $0.recipe.uuid == recipe.uuid }) {
+            viewController = self.recipes[index]
+            direction = index >= self.currentIndex ? .forward : .reverse
+            self.currentIndex = index
+        } else {
+            viewController = CookingItemVC(recipe: recipe)
+            direction = .forward
+            self.currentIndex = self.recipes.count
+            self.recipes.append(viewController)
+        }
         self.title = recipe.title
-        self.setViewControllers([viewController], direction: .forward, animated: true)
+        self.setViewControllers([viewController], direction: direction, animated: true)
     }
 
     override func viewDidLoad() {
@@ -105,18 +114,8 @@ extension CookingVC: UISheetPresentationControllerDelegate {
     ) {
         if sheetPresentationController.selectedDetentIdentifier == .large {
             self.title = self.recipes[self.currentIndex].recipe.title
-            // self.navigationController?.navigationBar.prefersLargeTitles = true
-            // self.navigationItem.largeTitleDisplayMode = .always
-            // scroll to the top of the view to force the large title to re-appear
-            /*
-            if let scrollView = self.view.subviews.first(where: { $0 as? UIScrollView != nil }) as? UIScrollView {
-                scrollView.setContentOffset(CGPoint(x: scrollView.contentOffset.x, y: -1), animated: true)
-            }
-            */
         } else {
             self.title = "Cooking"
-            // self.navigationController?.navigationBar.prefersLargeTitles = false
-            // self.navigationItem.largeTitleDisplayMode = .never
         }
     }
 }

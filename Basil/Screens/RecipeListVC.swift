@@ -222,10 +222,15 @@ class RecipeListVC: UIViewController {
             let moveAction = UIAction(title: "Move to folder", image: SFSymbols.folder) { (action) in
                 self?.moveItemToFolder(action, uuid: recipe.uuid)
             }
+            let cookAction = UIAction(title: "Start cooking", image: SFSymbols.cook) { (action) in
+                if let tabBar = self?.tabBarController as? TabBarController {
+                    tabBar.addRecipeToCookingView(recipe: recipe)
+                }
+            }
             let deleteAction = UIAction(title: "Delete recipe", image: SFSymbols.trash, attributes: .destructive) { (action) in
                 self?.deleteItem(action, item: .recipe(recipe))
             }
-            return UIMenu(title: "", children: [editAction, moveAction, deleteAction])
+            return UIMenu(title: "", children: [editAction, moveAction, cookAction, deleteAction])
         }
     }
 
