@@ -3,7 +3,7 @@
 ## Support
 
 To ask questions, report issues, or request support, contact
-[basil@brault.dev](mailto://basil@brault.dev) or submit an issue on the
+[basil@brault.dev](mailto:basil@brault.dev) or submit an issue on the
 [GitHub issues page](https://github.com/ianbrault/basil/issues).
 
 ## Privacy Policy
