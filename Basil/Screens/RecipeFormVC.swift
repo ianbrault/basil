@@ -48,7 +48,7 @@ class RecipeFormVC: UIViewController {
         }
 
         static func == (lhs: Cell, rhs: Cell) -> Bool {
-            return lhs.id == rhs.id
+            return lhs.id == rhs.id && lhs.text == rhs.text
         }
     }
 

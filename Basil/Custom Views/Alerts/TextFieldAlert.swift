@@ -27,6 +27,21 @@ class TextFieldAlert: UIAlertController {
         }
     }
 
+    var isSecureTextEntry: Bool {
+        get {
+            if let textField = self.textFields?.first {
+                return textField.isSecureTextEntry
+            } else {
+                return false
+            }
+        }
+        set {
+            if let textField = self.textFields?.first {
+                textField.isSecureTextEntry = newValue
+            }
+        }
+    }
+
     var text: String? {
         get {
             if let textField = self.textFields?.first {
@@ -50,10 +65,27 @@ class TextFieldAlert: UIAlertController {
         completed: @escaping (String) -> Void
     ) {
         self.init(title: title, message: message, preferredStyle: UIAlertController.Style.alert)
-        self.configure(placeholder: placeholder, confirmText: confirmText, completed: completed)
+        self.configure(placeholder: placeholder, confirmText: confirmText, destructive: false, completed: completed)
     }
 
-    private func configure(placeholder: String, confirmText: String, completed: @escaping (String) -> Void) {
+    convenience init(
+        title: String,
+        message: String?,
+        placeholder: String,
+        confirmText: String,
+        destructive: Bool,
+        completed: @escaping (String) -> Void
+    ) {
+        self.init(title: title, message: message, preferredStyle: UIAlertController.Style.alert)
+        self.configure(placeholder: placeholder, confirmText: confirmText, destructive: destructive, completed: completed)
+    }
+
+    private func configure(
+        placeholder: String,
+        confirmText: String,
+        destructive: Bool,
+        completed: @escaping (String) -> Void
+    ) {
         self.view.tintColor = StyleGuide.colors.primary
         let textFieldConfig = { (textField: UITextField) in
             textField.autocapitalizationType = .words
@@ -61,11 +93,11 @@ class TextFieldAlert: UIAlertController {
             textField.placeholder = placeholder
         }
         self.addTextField(configurationHandler: textFieldConfig)
-        self.addActions(confirmText: confirmText, completed: completed)
+        self.addActions(confirmText: confirmText, destructive: destructive, completed: completed)
     }
 
-    private func addActions(confirmText: String, completed: @escaping (String) -> Void) {
-        let confirmAction = UIAlertAction(title: confirmText, style: .default) { (_) in
+    private func addActions(confirmText: String, destructive: Bool, completed: @escaping (String) -> Void) {
+        let confirmAction = UIAlertAction(title: confirmText, style: destructive ? .destructive : .default) { (_) in
             if let textField = self.textFields?.first, let text = textField.text {
                 completed(text)
             }

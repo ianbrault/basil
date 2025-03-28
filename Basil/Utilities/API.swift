@@ -26,6 +26,12 @@ struct API {
         let key: UUID?
     }
 
+    struct UserDeleteInfo: Codable {
+        let id: String
+        let key: UUID?
+        let password: String
+    }
+
     struct UserLoginInfo: Codable {
         let email: String
         let password: String
@@ -113,5 +119,10 @@ struct API {
             root: State.manager.root, recipes: State.manager.recipes, folders: State.manager.folders
         )
         self.call(.update, body: body, async: async, handler: handler)
+    }
+
+    static func deleteUser(password: String, handler: @escaping Handler) {
+        let body = UserDeleteInfo(id: State.manager.userId, key: State.manager.userKey, password: password)
+        self.call(.deleteAccount, body: body, handler: handler)
     }
 }

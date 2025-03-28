@@ -80,6 +80,15 @@ class SettingsVC: UIViewController {
                             content.imageProperties.tintColor = StyleGuide.colors.error
                         },
                         action: self.logoutAction
+                    ),
+                    Section(
+                        cell: { (content: inout UIListContentConfiguration) in
+                            content.text = "Delete account"
+                            content.textProperties.color = StyleGuide.colors.error
+                            content.image = SFSymbols.trash
+                            content.imageProperties.tintColor = StyleGuide.colors.error
+                        },
+                        action: self.deleteAccountAction
                     )
                 ]
             ]
@@ -143,7 +152,7 @@ class SettingsVC: UIViewController {
 
     private func logoutAction() {
         let message = "Logging out will remove any saved recipes until you log back in to your account. " +
-                      "Are you sure you want to continue?"
+        "Are you sure you want to continue?"
         let warning = WarningAlert(message) {
             // clear all stored user state
             State.manager.clearUserInfo()
@@ -153,6 +162,46 @@ class SettingsVC: UIViewController {
             self.tableView.reloadData()
         }
         self.present(warning, animated: true)
+    }
+
+    private func deleteAccountAction() {
+        let message = "This action is irreversible, are you sure you want to continue? " +
+        "Enter your password to confirm."
+        let alert = TextFieldAlert(
+            title: "Delete your Account", message: message, placeholder: "Password",
+            confirmText: "Delete", destructive: true
+        ) { [weak self](password) in
+            self?.showLoadingView()
+            // hash the password before sending to the server
+            var hashedPassword: String
+            switch hashPassword(password) {
+            case .success(let hash):
+                hashedPassword = hash.base64EncodedString()
+            case .failure(let error):
+                self?.presentErrorAlert(error)
+                self?.dismissLoadingView()
+                return
+            }
+            API.deleteUser(password: hashedPassword) { (error) in
+                self?.dismissLoadingView()
+                if let error {
+                    DispatchQueue.main.async {
+                        self?.presentErrorAlert(error)
+                    }
+                } else {
+                    // clear all stored user state
+                    State.manager.clearUserInfo()
+                    State.manager.userChanged = true
+                    // then reload the settings view
+                    DispatchQueue.main.async {
+                        self?.registerSections()
+                        self?.tableView.reloadData()
+                    }
+                }
+            }
+        }
+        alert.isSecureTextEntry = true
+        self.present(alert, animated: true)
     }
 }
 

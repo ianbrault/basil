@@ -13,6 +13,7 @@ import Foundation
 struct Network {
 
     enum Address {
+        case deleteAccount
         case login
         case poke
         case register
@@ -23,6 +24,8 @@ struct Network {
             // let baseURL = "http://127.0.0.1:3030"
             let baseURL = "https://brault.dev"
             switch self {
+            case .deleteAccount:
+                return URL(string: "\(baseURL)/basil/user/delete")!
             case .login:
                 return URL(string: "\(baseURL)/basil/login")!
             case .poke:
