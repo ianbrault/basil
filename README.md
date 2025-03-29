@@ -11,3 +11,8 @@ To ask questions, report issues, or request support, contact
 The user's email is collected to be used as an account identifier. No other
 data of any kind is collected, shared, or stored.
 
+## Release History
+
+[v0.1.0](https://github.com/ianbrault/basil/releases/tag/v0.1.0):
+initial release
+
