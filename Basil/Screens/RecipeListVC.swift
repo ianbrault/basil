@@ -14,8 +14,11 @@ import UIKit
 class RecipeListVC: UIViewController {
     static let reuseID = "RecipeListCell"
 
-    private var addButton: UIBarButtonItem!
+    // shown nominally
+    private var addRecipeButton: UIBarButtonItem!
+    private var addFolderButton: UIBarButtonItem!
     private var menuButton: UIBarButtonItem!
+    // shown in edit mode
     private var doneButton: UIBarButtonItem!
     private var moveButton: UIBarButtonItem!
     private var deleteButton: UIBarButtonItem!
@@ -159,18 +162,19 @@ class RecipeListVC: UIViewController {
         self.view.backgroundColor = StyleGuide.colors.background
 
         // create the bar button items
-        self.addButton = UIBarButtonItem(title: nil, image: SFSymbols.add, target: self, action: #selector(self.addNewRecipe))
-        self.menuButton = UIBarButtonItem(image: SFSymbols.contextMenu, menu: self.createMenuButtonContextMenu())
-        self.doneButton = UIBarButtonItem(title: nil, image: SFSymbols.checkmarkCircle, target: self, action: #selector(self.disableEditMode))
-        self.moveButton = UIBarButtonItem(title: nil, image: SFSymbols.folder, target: self, action: #selector(self.moveSelectedItems))
+        self.addRecipeButton = self.createBarButton(image: SFSymbols.add, action: #selector(self.addNewRecipe))
+        self.addFolderButton = self.createBarButton(image: SFSymbols.folder, action: #selector(self.addNewFolder))
+        self.menuButton = self.createBarButton(image: SFSymbols.contextMenu, menu: self.createMenuButtonContextMenu())
+        self.doneButton = self.createBarButton(image: SFSymbols.checkmarkCircle, action: #selector(self.disableEditMode))
+        self.moveButton = self.createBarButton(image: SFSymbols.folder, action: #selector(self.moveSelectedItems))
         self.moveButton.isEnabled = false
-        self.deleteButton = UIBarButtonItem(title: nil, image: SFSymbols.trash, target: self, action: #selector(self.deleteSelectedItems))
+        self.deleteButton = self.createBarButton(image: SFSymbols.trash, action: #selector(self.deleteSelectedItems))
         self.deleteButton.tintColor = StyleGuide.colors.error
         self.deleteButton.isEnabled = false
 
         // start with the add/edit buttons in the navigation bar
         // these will be swapped out when the table edit mode is toggled
-        self.navigationItem.rightBarButtonItems = [self.menuButton, self.addButton]
+        self.navigationItem.rightBarButtonItems = [self.menuButton, self.addFolderButton, self.addRecipeButton]
     }
 
     private func configureTableView() {
@@ -199,13 +203,13 @@ class RecipeListVC: UIViewController {
     private func createMenuButtonContextMenu() -> UIMenu {
         let recipeMenuItems = [
             UIAction(title: "Add new recipe", image: SFSymbols.addRecipe, handler: self.addNewRecipe),
-            UIAction(title: "Import recipe", image: SFSymbols.importRecipe, handler: self.importRecipe),
+            UIAction(title: "Import recipe", image: SFSymbols.link, handler: self.importRecipe),
         ]
         let folderMenuItems = [
             UIAction(title: "Add new folder", image: SFSymbols.folder, handler: self.addNewFolder),
         ]
         let editMenuItems = [
-            UIAction(title: "Edit recipes", image: SFSymbols.reorder, handler: self.enableEditMode),
+            UIAction(title: "Select recipes", image: SFSymbols.checkmarkCircle, handler: self.enableEditMode),
         ]
 
         let recipeMenu = UIMenu(title: "", image: nil, identifier: nil, options: .displayInline, children: recipeMenuItems)
@@ -293,7 +297,7 @@ class RecipeListVC: UIViewController {
         self.present(navigationController, animated: true)
     }
 
-    func addNewFolder(_ action: UIAction) {
+    @objc func addNewFolder(_ action: UIAction) {
         let alert = TextFieldAlert(
             title: "New Folder",
             message: "Enter a name for this folder",
@@ -386,7 +390,7 @@ class RecipeListVC: UIViewController {
                 DispatchQueue.main.async {
                     switch result {
                     case .success(let recipe):
-                        // open the recipei in an editing window to allow the user to change before adding
+                        // open the recipe in an editing window to allow the user to change before adding
                         let viewController = RecipeFormVC(style: .new)
                         viewController.delegate = self
                         viewController.set(recipe: recipe)
@@ -415,7 +419,7 @@ class RecipeListVC: UIViewController {
     @objc func disableEditMode(_ action: UIAction? = nil) {
         self.tableView.setEditing(false, animated: true)
         // navigation bar should contain the add and edit buttons when edit mode is disabled
-        self.navigationItem.rightBarButtonItems = [self.menuButton, self.addButton]
+        self.navigationItem.rightBarButtonItems = [self.menuButton, self.addFolderButton, self.addRecipeButton]
     }
 
     @objc func moveSelectedItems(_ action: UIAction) {

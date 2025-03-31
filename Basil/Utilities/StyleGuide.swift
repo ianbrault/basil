@@ -14,6 +14,7 @@ struct StyleGuide {
 
         let background = UIColor.systemBackground
         let secondaryBackground = UIColor.secondarySystemBackground
+        let groupedBackground = UIColor.systemGroupedBackground
 
         let primaryText = UIColor.label
         let secondaryText = UIColor.secondaryLabel

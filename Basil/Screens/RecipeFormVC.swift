@@ -164,13 +164,13 @@ class RecipeFormVC: UIViewController {
     }
 
     private func configureViewController() {
-        self.view.backgroundColor = .systemGroupedBackground
+        self.view.backgroundColor = StyleGuide.colors.groupedBackground
 
         // create the bar button items
-        self.cancelButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(self.dismissVC))
-        self.editButton = UIBarButtonItem(title: nil, image: SFSymbols.reorder, target: self, action: #selector(self.enableEditMode))
-        self.doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(self.disableEditMode))
-        self.saveButton = UIBarButtonItem(title: "Save", style: .done, target: self, action: #selector(self.saveRecipe))
+        self.cancelButton = self.createBarButton(systemItem: .cancel, action: #selector(self.dismissVC))
+        self.editButton = self.createBarButton(image: SFSymbols.reorder, action: #selector(self.enableEditMode))
+        self.doneButton = self.createBarButton(systemItem: .done, action: #selector(self.disableEditMode))
+        self.saveButton = self.createBarButton(title: "Save", style: .done, action: #selector(self.saveRecipe))
 
         self.navigationItem.leftBarButtonItem = self.cancelButton
         self.navigationItem.rightBarButtonItems = [self.saveButton, self.editButton]
