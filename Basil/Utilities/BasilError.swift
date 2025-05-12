@@ -25,7 +25,7 @@ enum BasilError: Error {
     case socketClosed(String)
     case socketReadError(String)
     case socketWriteError(String)
-    case socketUnexpectedMessage(SocketMessageType)
+    case socketUnexpectedMessage(API.SocketMessageType)
 
     var title: String {
         switch self {

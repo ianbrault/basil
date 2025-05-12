@@ -10,7 +10,7 @@ import Foundation
 //
 // Singleton class responsible for managing network requests and responses
 //
-class NetworkManager: NSObject {
+class NetworkManager {
 
     typealias Handler = (BasilError?) -> ()
     typealias BodyHandler<T> = (Result<T, BasilError>) -> ()
@@ -19,7 +19,7 @@ class NetworkManager: NSObject {
     static let baseURL = URL(string: "http://localhost:3030/basil/v2")!
     // static let baseURL = URL(string: "https://brault.dev/basil/v2")!
 
-    private override init() {}
+    private init() {}
 
     private static func statusIsError(_ status: Int) -> Bool {
         return status < 200 || status >= 300
