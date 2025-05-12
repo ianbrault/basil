@@ -96,7 +96,7 @@ enum Unit: Codable & Equatable & Hashable {
             case .grams:
                 return quantity * Unit.gramsPerOunce
             default:
-                throw RBError.invalidConversion(from, to)
+                throw BasilError.invalidConversion(from, to)
             }
         case .pounds:
             switch to {
@@ -107,7 +107,7 @@ enum Unit: Codable & Equatable & Hashable {
             case .grams:
                 return quantity * Unit.ouncesPerPound * Unit.gramsPerOunce
             default:
-                throw RBError.invalidConversion(from, to)
+                throw BasilError.invalidConversion(from, to)
             }
         case .grams:
             switch to {
@@ -118,7 +118,7 @@ enum Unit: Codable & Equatable & Hashable {
             case .grams:
                 return quantity
             default:
-                throw RBError.invalidConversion(from, to)
+                throw BasilError.invalidConversion(from, to)
             }
         case .teaspoons:
             switch to {
@@ -129,7 +129,7 @@ enum Unit: Codable & Equatable & Hashable {
             case .cups:
                 return quantity / (Unit.teaspoonsPerTablespoon * Unit.tablespoonsPerCup)
             default:
-                throw RBError.invalidConversion(from, to)
+                throw BasilError.invalidConversion(from, to)
             }
         case .tablespoons:
             switch to {
@@ -140,7 +140,7 @@ enum Unit: Codable & Equatable & Hashable {
             case .cups:
                 return quantity / Unit.tablespoonsPerCup
             default:
-                throw RBError.invalidConversion(from, to)
+                throw BasilError.invalidConversion(from, to)
             }
         case .cups:
             switch to {
@@ -151,7 +151,7 @@ enum Unit: Codable & Equatable & Hashable {
             case .cups:
                 return quantity
             default:
-                throw RBError.invalidConversion(from, to)
+                throw BasilError.invalidConversion(from, to)
             }
         }
     }

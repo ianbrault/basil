@@ -12,32 +12,6 @@ import Foundation
 //
 struct Network {
 
-    enum Address {
-        case deleteAccount
-        case login
-        case poke
-        case register
-        case update
-
-        var url: URL {
-            // toggle for local development
-            // let baseURL = "http://127.0.0.1:3030"
-            let baseURL = "https://brault.dev"
-            switch self {
-            case .deleteAccount:
-                return URL(string: "\(baseURL)/basil/user/delete")!
-            case .login:
-                return URL(string: "\(baseURL)/basil/login")!
-            case .poke:
-                return URL(string: "\(baseURL)/basil/user/poke")!
-            case .register:
-                return URL(string: "\(baseURL)/basil/register")!
-            case .update:
-                return URL(string: "\(baseURL)/basil/user/update")!
-            }
-        }
-    }
-
     static func statusIsError(_ status: Int) -> Bool {
         return status < 200 || status >= 300
     }
@@ -55,11 +29,7 @@ struct Network {
         }
     }
 
-    static func get(_ urlString: String, handler: @escaping (Result<Data, RBError>) -> ()) {
-        guard let url = URL(string: urlString) else {
-            handler(.failure(.invalidURL(urlString)))
-            return
-        }
+    static func get(url: URL, handler: @escaping (Result<Data, BasilError>) -> ()) {
         let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
             if let error {
                 handler(.failure(.httpError(error.localizedDescription)))
@@ -80,21 +50,29 @@ struct Network {
             if let data {
                 handler(.success(data))
             } else {
-                handler(.failure(.missingHTTPData))
+                handler(.failure(.httpError("Missing response data")))
             }
         }
         task.resume()
     }
 
-    static func post<T: Encodable>(_ address: Address, body: T, handler: @escaping (Result<Data?, RBError>) -> ()) {
-        var request = URLRequest(url: address.url)
+    static func get(string: String, handler: @escaping (Result<Data, BasilError>) -> ()) {
+        guard let url = URL(string: string) else {
+            handler(.failure(.invalidURL(string)))
+            return
+        }
+        self.get(url: url, handler: handler)
+    }
+
+    static func post<T: Encodable>(url: URL, body: T, handler: @escaping (Result<Data?, BasilError>) -> ()) {
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         do {
             request.httpBody = try JSONEncoder().encode(body)
         } catch {
-            handler(.failure(.failedToEncode))
+            handler(.failure(.encodeError))
             return
         }
 
@@ -118,5 +96,13 @@ struct Network {
             handler(.success(data))
         }
         task.resume()
+    }
+
+    static func post<T: Encodable>(_ string: String, body: T, handler: @escaping (Result<Data?, BasilError>) -> ()) {
+        guard let url = URL(string: string) else {
+            handler(.failure(.invalidURL(string)))
+            return
+        }
+        self.post(url: url, body: body, handler: handler)
     }
 }

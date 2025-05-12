@@ -7,23 +7,25 @@
 
 import Foundation
 
-enum RBError: Error {
+enum BasilError: Error {
     case cannotModifyRoot
-    case failedToDecode
-    case failedToEncode
-    case failedToLoadRecipes
-    case failedToParseRecipe(String?)
-    case failedToSaveRecipes
+    case decodeError
+    case encodeError
     case httpError(String)
     case invalidConversion(Unit, Unit)
     case invalidURL(String)
-    case missingHTTPData
-    case missingInput(UUID)
+    case keychainError(String)
     case missingItem(State.Item, UUID)
     case missingTitle
     case noConnection
     case notImplemented
     case passwordsDoNotMatch
+    case readOnly(String, State.Item)
+    case recipeParseError(String?)
+    case socketClosed(String)
+    case socketReadError(String)
+    case socketWriteError(String)
+    case socketUnexpectedMessage(SocketMessageType)
 
     var title: String {
         switch self {
@@ -41,15 +43,25 @@ enum RBError: Error {
             return "Passwords do not Match"
         case .noConnection:
             return "Could not reach server"
+        case .readOnly(let action, let itemType):
+            switch itemType {
+            case .recipe:
+                return "Cannot \(action) recipe"
+            case .folder:
+                return "Missing \(action) folder"
+            }
+        case .socketClosed(_):
+            return "Lost connection to the server"
+        case .socketReadError(_),
+             .socketWriteError(_):
+            return "Failed to communicate with the server"
         case .cannotModifyRoot,
-             .failedToDecode,
-             .failedToEncode,
-             .failedToLoadRecipes,
-             .failedToParseRecipe(_),
-             .failedToSaveRecipes,
-             .missingHTTPData,
-             .missingInput(_),
-             .missingItem(_, _):
+             .decodeError,
+             .encodeError,
+             .keychainError(_),
+             .missingItem(_, _),
+             .recipeParseError(_),
+             .socketUnexpectedMessage(_):
             return "Something went wrong"
         }
     }
@@ -58,25 +70,18 @@ enum RBError: Error {
         switch self {
         case .cannotModifyRoot:
             return "You cannot modify the root folder. How did you even get in this situation in the first place?"
-        case .failedToDecode:
+        case .decodeError:
             return "Failed to decode string"
-        case .failedToEncode:
+        case .encodeError:
             return "Failed to encode string"
-        case .failedToLoadRecipes,
-             .failedToSaveRecipes:
-            return "Something went wrong"
-        case .failedToParseRecipe(let message):
-            return message ?? "Error while parsing recipe"
+        case .keychainError(let message):
+            return "Keychain storage failure: \(message)"
         case .httpError(let error):
             return error
         case .invalidConversion(let from, let to):
             return "Cannot convert from \(from.toString()) to \(to.toString())"
         case .invalidURL(let string):
             return string
-        case .missingHTTPData:
-            return "Empty response body"
-        case .missingInput(let uuid):
-            return "Missing input \(uuid)"
         case .missingItem(let itemType, let uuid):
             switch itemType {
             case .recipe:
@@ -87,11 +92,21 @@ enum RBError: Error {
         case .missingTitle:
             return "Add a title to the recipe and try again"
         case .noConnection:
-            return "Changes will not be saved to the server until you are back online"
+            return "You will not be able to make changes until you are back online"
         case .notImplemented:
             return "This feature is not implemented. Try again later..."
         case .passwordsDoNotMatch:
             return "Re-enter your password and try again"
+        case .readOnly(_, _):
+            return "Cannot make changes to recipes or folders while offline in read-only mode"
+        case .recipeParseError(let message):
+            return message ?? "An error occurred while parsing the recipe"
+        case .socketClosed(let message),
+             .socketReadError(let message),
+             .socketWriteError(let message):
+            return message
+        case .socketUnexpectedMessage(let type):
+            return "Unexpected socket message of type \(type)"
         }
     }
 }

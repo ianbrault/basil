@@ -19,25 +19,26 @@ class State {
     }
 
     // use a separate data type for encoding/decoding
-    struct Data: Codable {
+    struct Storage: Codable {
         let userId: String
         let userEmail: String
-        let userKey: UUID?
         let root: UUID?
         let recipes: [Recipe]
         let folders: [RecipeFolder]
 
-        static func empty() -> Data {
-            return Data(userId: "", userEmail: "", userKey: nil, root: nil, recipes: [], folders: [])
+        static func empty() -> Storage {
+            return Storage(userId: "", userEmail: "", root: nil, recipes: [], folders: [])
         }
     }
 
     static let manager = State()
 
+    // device token, used for notifications
+    var deviceToken: UUID? = nil
+
     // user information
     var userId: String = ""
     var userEmail: String = ""
-    var userKey: UUID? = nil
 
     // ID of the root folder
     var root: UUID? = nil
@@ -52,10 +53,9 @@ class State {
     // grocery list
     var groceryList: GroceryList = GroceryList()
 
-    // has communication with the server been established?
-    var serverCommunicationEstablished: Bool = false
-    // prevent unnecessary pokes if we were not able to establish server communication
-    var serverPoked: Bool = false
+    // read-only mode
+    // toggled when a user is logged in but a connection cannot be made to the server
+    var readOnly: Bool = false
     // a user has logged in or out so information might need to be reloaded
     var userChanged: Bool = false
 
@@ -80,10 +80,11 @@ class State {
     }
 
     func load() {
+        self.deviceToken = UIDevice.current.identifierForVendor
+
         let data = PersistenceManager.shared.state
         self.userId = data.userId
         self.userEmail = data.userEmail
-        self.userKey = data.userKey
         // create a root folder if it does not already exist
         // this should be the case on the first launch
         if let root = data.root {
@@ -101,10 +102,9 @@ class State {
     }
 
     func storeToLocal() {
-        let data = Data(
+        let data = Storage(
             userId: self.userId,
             userEmail: self.userEmail,
-            userKey: self.userKey,
             root: self.root,
             recipes: self.recipes,
             folders: self.folders
@@ -115,19 +115,15 @@ class State {
     func storeToServer() {
         // only store to the server if the user is logged into an account
         guard !self.userId.isEmpty else { return }
-
-        PersistenceManager.shared.needsToUpdateServer = true
-        if self.serverCommunicationEstablished {
-            API.updateUser(async: true) { (error) in
-                if let error {
-                    // present an alert on the main window and disable further communication with the server
-                    UIApplication.shared.windowRootViewController?.presentErrorAlert(error)
-                    self.serverCommunicationEstablished = false
-                } else {
-                    PersistenceManager.shared.needsToUpdateServer = false
-                }
+        assertionFailure()
+        /*
+        API.updateUser(async: true) { (error) in
+            if let error {
+                // present an alert on the main window and disable further communication with the server
+                UIApplication.shared.windowRootViewController?.presentErrorAlert(error)
             }
         }
+        */
     }
 
     func storeGroceryList() {
@@ -148,7 +144,6 @@ class State {
     func addUserInfo(info: API.UserInfo) {
         self.userId = info.id
         self.userEmail = info.email
-        self.userKey = info.key
         self.root = info.root
 
         // clear out existing structures
@@ -172,7 +167,6 @@ class State {
     func clearUserInfo() {
         self.userId = ""
         self.userEmail = ""
-        self.userKey = nil
         self.root = nil
         self.recipes.removeAll()
         self.folders.removeAll()
@@ -200,7 +194,9 @@ class State {
         return self.folderMap[uuid]
     }
 
-    func addRecipe(recipe: Recipe) -> RBError? {
+    func addRecipe(recipe: Recipe) -> BasilError? {
+        guard !self.readOnly else { return .readOnly("add", .recipe) }
+
         // add the recipe to the stored recipe list
         self.recipes.append(recipe)
         // and to the volatile recipe map
@@ -216,7 +212,9 @@ class State {
         return nil
     }
 
-    func addFolder(folder: RecipeFolder) -> RBError? {
+    func addFolder(folder: RecipeFolder) -> BasilError? {
+        guard !self.readOnly else { return .readOnly("add", .folder) }
+
         // add the folder to the stored folder list
         self.folders.append(folder)
         // and to the volatile folder map
@@ -234,7 +232,9 @@ class State {
         return nil
     }
 
-    func updateRecipe(recipe updatedRecipe: Recipe) -> RBError? {
+    func updateRecipe(recipe updatedRecipe: Recipe) -> BasilError? {
+        guard !self.readOnly else { return .readOnly("modify", .recipe) }
+
         guard let recipe = self.getRecipe(uuid: updatedRecipe.uuid) else {
             return .missingItem(.recipe, updatedRecipe.uuid)
         }
@@ -244,7 +244,9 @@ class State {
         return nil
     }
 
-    func updateFolder(folder updatedFolder: RecipeFolder) -> RBError? {
+    func updateFolder(folder updatedFolder: RecipeFolder) -> BasilError? {
+        guard !self.readOnly else { return .readOnly("modify", .folder) }
+
         guard let folder = self.getFolder(uuid: updatedFolder.uuid) else {
             return .missingItem(.folder, updatedFolder.uuid)
         }
@@ -297,11 +299,15 @@ class State {
         }
     }
 
-    func deleteItem(uuid: UUID) -> RBError? {
+    func deleteItem(uuid: UUID) -> BasilError? {
+        guard !self.readOnly else { return .readOnly("delete", .recipe) }
+
         return self.deleteItems(uuids: [uuid])
     }
 
-    func deleteItems(uuids: [UUID]) -> RBError? {
+    func deleteItems(uuids: [UUID]) -> BasilError? {
+        guard !self.readOnly else { return .readOnly("delete", .recipe) }
+
         var recipes: [UUID] = []
         var folders: [UUID] = []
         for uuid in uuids {
@@ -320,7 +326,9 @@ class State {
         return nil
     }
 
-    func moveRecipeToFolder(recipe: Recipe, folderId: UUID) -> RBError? {
+    func moveRecipeToFolder(recipe: Recipe, folderId: UUID) -> BasilError? {
+        guard !self.readOnly else { return .readOnly("move", .recipe) }
+
         // first unhook from the parent folder
         if let oldParentFolder = self.getFolder(uuid: recipe.folderId) {
             oldParentFolder.removeRecipe(uuid: recipe.uuid)
@@ -338,7 +346,9 @@ class State {
         return nil
     }
 
-    func moveFolderToFolder(folder: RecipeFolder, folderId: UUID) -> RBError? {
+    func moveFolderToFolder(folder: RecipeFolder, folderId: UUID) -> BasilError? {
+        guard !self.readOnly else { return .readOnly("move", .folder) }
+
         // first unhook from the parent folder
         if let oldParentFolderId = folder.folderId {
             if let oldParentFolder = self.getFolder(uuid: oldParentFolderId) {
@@ -362,11 +372,14 @@ class State {
         return nil
     }
 
-    func moveItemToFolder(uuid: UUID, folderId: UUID) -> RBError? {
+    func moveItemToFolder(uuid: UUID, folderId: UUID) -> BasilError? {
+        guard !self.readOnly else { return .readOnly("move", .recipe) }
         return self.moveItemsToFolder(uuids: [uuid], folderId: folderId)
     }
 
-    func moveItemsToFolder(uuids: [UUID], folderId: UUID) -> RBError? {
+    func moveItemsToFolder(uuids: [UUID], folderId: UUID) -> BasilError? {
+        guard !self.readOnly else { return .readOnly("move", .recipe) }
+
         var recipes: [Recipe] = []
         var folders: [RecipeFolder] = []
         var recipeIds: Set<UUID> = []
@@ -380,7 +393,7 @@ class State {
         }
 
         for uuid in uuids {
-            var error: RBError? = nil
+            var error: BasilError? = nil
             if let recipe = self.recipeMap[uuid] {
                 // track the recipe so it can be updated via the API
                 if !recipeIds.contains(uuid) {
@@ -483,10 +496,9 @@ class State {
     //
 
     func dump() -> String {
-        let data = Data(
+        let data = Storage(
             userId: self.userId,
             userEmail: self.userEmail,
-            userKey: self.userKey,
             root: self.root,
             recipes: self.recipes,
             folders: self.folders
@@ -499,7 +511,6 @@ class State {
         // NOTE: this should only be used for development debugging
         self.userId = ""
         self.userEmail = ""
-        self.userKey = nil
         self.root = nil
         self.recipes.removeAll()
         self.folders.removeAll()

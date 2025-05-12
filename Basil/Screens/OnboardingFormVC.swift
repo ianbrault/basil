@@ -47,7 +47,7 @@ class OnboardingFormVC: UIViewController {
     }
 
     private var style: FormStyle
-    private var onCompletion: ((RBError?) -> Void)?
+    private var onCompletion: ((BasilError?) -> Void)?
 
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private var button: Button!
@@ -60,7 +60,7 @@ class OnboardingFormVC: UIViewController {
     private let buttonHeight: CGFloat = 54
     private let insets = UIEdgeInsets(top: 0, left: 40, bottom: 16, right: 40)
 
-    init(_ style: FormStyle, onCompletion: @escaping (RBError?) -> Void) {
+    init(_ style: FormStyle, onCompletion: @escaping (BasilError?) -> Void) {
         self.style = style
         self.onCompletion = onCompletion
         switch style {
@@ -172,24 +172,18 @@ class OnboardingFormVC: UIViewController {
 
     @objc func onSubmit(_ action: UIAction) {
         guard self.validateForm() else { return }
-
         let email = self.cells[self.emailIndex.row].text
         let password = self.cells[self.passwordIndex.row].text
-        // hash the password before sending to the server
-        var hashedPassword: String
-        switch hashPassword(password) {
-        case .success(let hash):
-            hashedPassword = hash.base64EncodedString()
-        case .failure(let error):
-            self.onCompletion?(error)
-            return
-        }
 
         // common response handler for login/register endpoints
         let handler: API.BodyHandler<API.UserInfo> = { [weak self] (result) in
-            var error: RBError? = nil
+            var error: BasilError? = nil
             switch result {
             case .success(let userInfo):
+                // add the password to the keychain
+                if let e = PersistenceManager.shared.storePassword(email: email, password: password) {
+                    error = e
+                }
                 // store the user info to the app state
                 State.manager.addUserInfo(info: userInfo)
             case .failure(let e):
@@ -203,12 +197,12 @@ class OnboardingFormVC: UIViewController {
         switch self.style {
         case .register:
             API.register(
-                email: email, password: hashedPassword,
+                email: email, password: password,
                 root: State.manager.root, recipes: State.manager.recipes, folders: State.manager.folders,
                 handler: handler
             )
         case .login:
-            API.login(email: email, password: hashedPassword, handler: handler)
+            API.authenticate(email: email, password: password, handler: handler)
         }
     }
 }

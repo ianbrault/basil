@@ -31,7 +31,7 @@ extension UIViewController {
         return UIBarButtonItem(image: image, menu: menu)
     }
 
-    func presentErrorAlert(_ error: RBError) {
+    func presentErrorAlert(_ error: BasilError) {
         let alert = ErrorAlert(error: error)
         self.present(alert, animated: true)
     }

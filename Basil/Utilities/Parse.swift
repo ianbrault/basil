@@ -92,7 +92,7 @@ enum NYTRecipeParser {
         if let header = headers.first() {
             return try header.text()
         } else {
-            throw RBError.failedToParseRecipe("Failed to find recipe title")
+            throw BasilError.recipeParseError("Failed to find recipe title")
         }
     }
 
@@ -140,7 +140,7 @@ enum NYTRecipeParser {
         for item in instructionItems {
             let paragraphs = try item.getElementsByClass("pantry--body-long")
             if paragraphs.isEmpty() {
-                throw RBError.failedToParseRecipe("Failed to find instruction text")
+                throw BasilError.recipeParseError("Failed to find instruction text")
             }
             let text = try paragraphs.map { try $0.text() }.joined(separator: " ")
             instructions.append(text)
@@ -149,16 +149,16 @@ enum NYTRecipeParser {
         return instructions
     }
 
-    static func parse(body contents: Data, folderId: UUID) -> Result<Recipe, RBError> {
+    static func parse(body contents: Data, folderId: UUID) -> Result<Recipe, BasilError> {
         guard let body = String(data: contents, encoding: .utf8) else {
-            return .failure(.failedToDecode)
+            return .failure(.decodeError)
         }
 
         var document: Document
         do {
             document = try SwiftSoup.parse(body)
         } catch {
-            return .failure(.failedToParseRecipe(error.localizedDescription))
+            return .failure(.recipeParseError(error.localizedDescription))
         }
 
         do {
@@ -169,7 +169,7 @@ enum NYTRecipeParser {
             let recipe = Recipe(folderId: folderId, title: title, ingredients: ingredients, instructions: instructions)
             return .success(recipe)
         } catch {
-            return .failure(.failedToParseRecipe(error.localizedDescription))
+            return .failure(.recipeParseError(error.localizedDescription))
         }
     }
 }

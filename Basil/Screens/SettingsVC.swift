@@ -123,7 +123,7 @@ class SettingsVC: UIViewController {
         self.tableView.setContentOffset(CGPoint(x: 0, y: -100), animated: true)
     }
 
-    private func userAdded(_ error: RBError?) {
+    private func userAdded(_ error: BasilError?) {
         DispatchQueue.main.async {
             if let error {
                 self.presentErrorAlert(error)
@@ -154,6 +154,8 @@ class SettingsVC: UIViewController {
         let message = "Logging out will remove any saved recipes until you log back in to your account. " +
         "Are you sure you want to continue?"
         let warning = WarningAlert(message) {
+            // clear the stored password from the keychain
+            PersistenceManager.shared.deletePassword(email: State.manager.userEmail)
             // clear all stored user state
             State.manager.clearUserInfo()
             State.manager.userChanged = true
@@ -172,23 +174,15 @@ class SettingsVC: UIViewController {
             confirmText: "Delete", destructive: true
         ) { [weak self](password) in
             self?.showLoadingView()
-            // hash the password before sending to the server
-            var hashedPassword: String
-            switch hashPassword(password) {
-            case .success(let hash):
-                hashedPassword = hash.base64EncodedString()
-            case .failure(let error):
-                self?.presentErrorAlert(error)
-                self?.dismissLoadingView()
-                return
-            }
-            API.deleteUser(password: hashedPassword) { (error) in
+            API.deleteUser(email: State.manager.userEmail, password: password) { (error) in
                 self?.dismissLoadingView()
                 if let error {
                     DispatchQueue.main.async {
                         self?.presentErrorAlert(error)
                     }
                 } else {
+                    // clear the stored password from the keychain
+                    PersistenceManager.shared.deletePassword(email: State.manager.userEmail)
                     // clear all stored user state
                     State.manager.clearUserInfo()
                     State.manager.userChanged = true

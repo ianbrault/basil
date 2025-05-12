@@ -9,32 +9,32 @@ import UIKit
 
 struct API {
 
-    typealias Handler = (RBError?) -> ()
-    typealias BodyHandler<T> = (Result<T, RBError>) -> ()
+    static let baseURL = "http://localhost:3030/basil/v2"
+    // static let baseURL = "https://brault.dev/basil/v2"
+
+    typealias Handler = (BasilError?) -> ()
+    typealias BodyHandler<T> = (Result<T, BasilError>) -> ()
+
+    // Web API definitions
 
     struct UserInfo: Codable {
         let id: String
         let email: String
-        let key: UUID?
         let root: UUID?
         let recipes: [Recipe]
         let folders: [RecipeFolder]
-    }
-
-    struct UserInfoBasic: Codable {
-        let id: String
-        let key: UUID?
+        let token: String
     }
 
     struct UserDeleteInfo: Codable {
-        let id: String
-        let key: UUID?
+        let email: String
         let password: String
     }
 
-    struct UserLoginInfo: Codable {
+    struct UserAuthInfo: Codable {
         let email: String
         let password: String
+        let device: UUID?
     }
 
     struct UserRegisterInfo: Codable {
@@ -43,62 +43,24 @@ struct API {
         let root: UUID?
         let recipes: [Recipe]
         let folders: [RecipeFolder]
+        let device: UUID?
     }
 
-    static func parseResponse<T: Decodable>(body contents: Data?) -> Result<T, RBError> {
-        guard let contents else {
-            return .failure(.missingHTTPData)
-        }
+    // Functions
 
+    static func url(_ path: String) -> URL {
+        return URL(string: "\(self.baseURL)/\(path)")!
+    }
+
+    static func parseResponse<T: Decodable>(body contents: Data?) -> Result<T, BasilError> {
+        guard let contents else {
+            return .failure(.httpError("Missing response data"))
+        }
         do {
             let userInfo = try JSONDecoder().decode(T.self, from: contents)
             return .success(userInfo)
         } catch {
-            return .failure(.failedToDecode)
-        }
-    }
-
-    static private func _call<T: Encodable>(_ address: Network.Address, body: T, async: Bool = false, handler: Handler? = nil) {
-        Network.post(address, body: body) { (response) in
-            guard let handler else { return }
-            switch response {
-            case .success(_):
-                handler(nil)
-            case .failure(let error):
-                handler(error)
-            }
-        }
-    }
-
-    static func call<T: Encodable>(_ address: Network.Address, body: T, async: Bool = false, handler: Handler? = nil) {
-        if async {
-            DispatchQueue.global(qos: .userInitiated).async {
-                self._call(address, body: body, async: async, handler: handler)
-            }
-        } else {
-            self._call(address, body: body, async: async, handler: handler)
-        }
-    }
-
-    static func pokeServer(handler: @escaping Handler) {
-        let body = UserInfoBasic(id: State.manager.userId, key: State.manager.userKey)
-        DispatchQueue.global(qos: .userInitiated).async {
-            Network.post(.poke, body: body) { (response) in
-                switch response {
-                case .success(_):
-                    handler(nil)
-                case .failure(let error):
-                    handler(error)
-                }
-            }
-        }
-    }
-
-    static func login(email: String, password: String, handler: @escaping BodyHandler<UserInfo>) {
-        let body = UserLoginInfo(email: email, password: password)
-        Network.post(.login, body: body) { (response) in
-            let result: Result<UserInfo, RBError> = response.flatMap(self.parseResponse)
-            handler(result)
+            return .failure(.decodeError)
         }
     }
 
@@ -106,23 +68,34 @@ struct API {
         email: String, password: String, root: UUID?, recipes: [Recipe], folders: [RecipeFolder],
         handler: @escaping BodyHandler<UserInfo>
     ) {
-        let body = UserRegisterInfo(email: email, password: password, root: root, recipes: recipes, folders: folders)
-        Network.post(.register, body: body) { (response) in
-            let result: Result<UserInfo, RBError> = response.flatMap(self.parseResponse)
+        let body = UserRegisterInfo(
+            email: email, password: password,
+            root: root, recipes: recipes, folders: folders,
+            device: State.manager.deviceToken
+        )
+        Network.post(url: self.url("user/create"), body: body) { (response) in
+            let result: Result<UserInfo, BasilError> = response.flatMap(self.parseResponse)
             handler(result)
         }
     }
 
-    static func updateUser(async: Bool = false, handler: Handler? = nil) {
-        let body = UserInfo(
-            id: State.manager.userId, email: State.manager.userEmail, key: State.manager.userKey,
-            root: State.manager.root, recipes: State.manager.recipes, folders: State.manager.folders
-        )
-        self.call(.update, body: body, async: async, handler: handler)
+    static func authenticate(email: String, password: String, handler: @escaping BodyHandler<UserInfo>) {
+        let body = UserAuthInfo(email: email, password: password, device: State.manager.deviceToken)
+        Network.post(url: self.url("user/authenticate"), body: body) { (response) in
+            let result: Result<UserInfo, BasilError> = response.flatMap(self.parseResponse)
+            handler(result)
+        }
     }
 
-    static func deleteUser(password: String, handler: @escaping Handler) {
-        let body = UserDeleteInfo(id: State.manager.userId, key: State.manager.userKey, password: password)
-        self.call(.deleteAccount, body: body, handler: handler)
+    static func deleteUser(email: String, password: String, handler: @escaping Handler) {
+        let body = UserDeleteInfo(email: email, password: password)
+        Network.post(url: self.url("user/delete"), body: body) { (response) in
+            switch response {
+            case .success(_):
+                handler(nil)
+            case .failure(let error):
+                handler(error)
+            }
+        }
     }
 }

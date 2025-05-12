@@ -25,7 +25,7 @@ class RecipeListVC: UIViewController {
 
     private var folderId: UUID
     private var isRoot: Bool
-    private var loadErrors: [RBError] = []
+    private var loadErrors: [BasilError] = []
     private var items: [RecipeItem] = []
     private var searchResults: [RecipeItem] = []
 
@@ -383,7 +383,7 @@ class RecipeListVC: UIViewController {
             confirmText: "Import"
         ) { [weak self] (text) in
             guard let self else { return }
-            Network.get(text) { (response) in
+            Network.get(string: text) { (response) in
                 let result = response.flatMap { (body) in
                     NYTRecipeParser.parse(body: body, folderId: self.folderId)
                 }
