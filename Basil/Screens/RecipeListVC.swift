@@ -383,7 +383,7 @@ class RecipeListVC: UIViewController {
             confirmText: "Import"
         ) { [weak self] (text) in
             guard let self else { return }
-            Network.get(string: text) { (response) in
+            NetworkManager.get(string: text) { (response) in
                 let result = response.flatMap { (body) in
                     NYTRecipeParser.parse(body: body, folderId: self.folderId)
                 }

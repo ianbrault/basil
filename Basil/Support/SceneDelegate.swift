@@ -108,7 +108,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Fetch the password from the keychain
         switch PersistenceManager.shared.fetchPassword(email: State.manager.userEmail) {
         case .success(let password):
-            API.authenticate(email: State.manager.userEmail, password: password) { (result) in
+            NetworkManager.authenticate(email: State.manager.userEmail, password: password) { (result) in
                 switch result {
                 case .success(let info):
                     // TODO: check if the stored data is outdated

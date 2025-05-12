@@ -9,15 +9,15 @@ import UIKit
 
 struct API {
 
-    static let baseURL = "http://localhost:3030/basil/v2"
-    // static let baseURL = "https://brault.dev/basil/v2"
+    // Network API definitions
 
-    typealias Handler = (BasilError?) -> ()
-    typealias BodyHandler<T> = (Result<T, BasilError>) -> ()
+    struct AuthenticationRequest: Codable {
+        let email: String
+        let password: String
+        let device: UUID?
+    }
 
-    // Web API definitions
-
-    struct UserInfo: Codable {
+    struct AuthenticationResponse: Codable {
         let id: String
         let email: String
         let root: UUID?
@@ -26,18 +26,7 @@ struct API {
         let token: String
     }
 
-    struct UserDeleteInfo: Codable {
-        let email: String
-        let password: String
-    }
-
-    struct UserAuthInfo: Codable {
-        let email: String
-        let password: String
-        let device: UUID?
-    }
-
-    struct UserRegisterInfo: Codable {
+    struct CreateUserRequest: Codable {
         let email: String
         let password: String
         let root: UUID?
@@ -46,56 +35,72 @@ struct API {
         let device: UUID?
     }
 
-    // Functions
+    // Socket API definitions
 
-    static func url(_ path: String) -> URL {
-        return URL(string: "\(self.baseURL)/\(path)")!
+    enum SocketMessageType: Int, Codable {
+        case Success               = 200
+        case AuthenticationRequest = 201
+        case AuthenticationError   = 401
     }
 
-    static func parseResponse<T: Decodable>(body contents: Data?) -> Result<T, BasilError> {
-        guard let contents else {
-            return .failure(.httpError("Missing response data"))
-        }
-        do {
-            let userInfo = try JSONDecoder().decode(T.self, from: contents)
-            return .success(userInfo)
-        } catch {
-            return .failure(.decodeError)
-        }
+    struct AuthenticationRequestBody: Codable {
+        let userId: String
+        let token: String
     }
 
-    static func register(
-        email: String, password: String, root: UUID?, recipes: [Recipe], folders: [RecipeFolder],
-        handler: @escaping BodyHandler<UserInfo>
-    ) {
-        let body = UserRegisterInfo(
-            email: email, password: password,
-            root: root, recipes: recipes, folders: folders,
-            device: State.manager.deviceToken
-        )
-        Network.post(url: self.url("user/create"), body: body) { (response) in
-            let result: Result<UserInfo, BasilError> = response.flatMap(self.parseResponse)
-            handler(result)
-        }
-    }
+    enum SocketMessage: Decodable, Encodable {
+        case Success
+        case AuthenticationRequest(AuthenticationRequestBody)
+        case AuthenticationError(String)
 
-    static func authenticate(email: String, password: String, handler: @escaping BodyHandler<UserInfo>) {
-        let body = UserAuthInfo(email: email, password: password, device: State.manager.deviceToken)
-        Network.post(url: self.url("user/authenticate"), body: body) { (response) in
-            let result: Result<UserInfo, BasilError> = response.flatMap(self.parseResponse)
-            handler(result)
+        enum CodingKeys: String, CodingKey {
+            case type
+            case body
         }
-    }
 
-    static func deleteUser(email: String, password: String, handler: @escaping Handler) {
-        let body = UserDeleteInfo(email: email, password: password)
-        Network.post(url: self.url("user/delete"), body: body) { (response) in
-            switch response {
-            case .success(_):
-                handler(nil)
-            case .failure(let error):
-                handler(error)
+        var messageType: SocketMessageType {
+            switch self {
+            case .Success:
+                return .Success
+            case .AuthenticationRequest(_):
+                return .AuthenticationRequest
+            case .AuthenticationError(_):
+                return .AuthenticationError
             }
+        }
+
+        init(from decoder: Decoder) throws {
+            let values = try decoder.container(keyedBy: CodingKeys.self)
+            let type = try values.decode(SocketMessageType.self, forKey: .type)
+            switch type {
+            case .Success:
+                self = .Success
+            case .AuthenticationRequest:
+                let body = try values.decode(AuthenticationRequestBody.self, forKey: .body)
+                self = .AuthenticationRequest(body)
+            case .AuthenticationError:
+                let body = try values.decode(String.self, forKey: .body)
+                self = .AuthenticationError(body)
+            }
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            switch self {
+            case .Success:
+                try container.encode(SocketMessageType.Success, forKey: .type)
+                try container.encodeNil(forKey: .body)
+            case .AuthenticationRequest(let body):
+                try container.encode(SocketMessageType.AuthenticationRequest, forKey: .type)
+                try container.encode(body, forKey: .body)
+            case .AuthenticationError(let body):
+                try container.encode(SocketMessageType.AuthenticationError, forKey: .type)
+                try container.encode(body, forKey: .body)
+            }
+        }
+
+        static func authenticationRequest(userId: String, token: String) -> SocketMessage {
+            return .AuthenticationRequest(AuthenticationRequestBody(userId: userId, token: token))
         }
     }
 }

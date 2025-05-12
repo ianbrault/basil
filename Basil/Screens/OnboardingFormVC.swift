@@ -176,7 +176,7 @@ class OnboardingFormVC: UIViewController {
         let password = self.cells[self.passwordIndex.row].text
 
         // common response handler for login/register endpoints
-        let handler: API.BodyHandler<API.UserInfo> = { [weak self] (result) in
+        let handler: NetworkManager.BodyHandler<API.AuthenticationResponse> = { [weak self] (result) in
             var error: BasilError? = nil
             switch result {
             case .success(let userInfo):
@@ -196,13 +196,13 @@ class OnboardingFormVC: UIViewController {
         self.showLoadingView()
         switch self.style {
         case .register:
-            API.register(
+            NetworkManager.createUser(
                 email: email, password: password,
                 root: State.manager.root, recipes: State.manager.recipes, folders: State.manager.folders,
                 handler: handler
             )
         case .login:
-            API.authenticate(email: email, password: password, handler: handler)
+            NetworkManager.authenticate(email: email, password: password, handler: handler)
         }
     }
 }

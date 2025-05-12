@@ -141,7 +141,7 @@ class State {
     // User
     //
 
-    func addUserInfo(info: API.UserInfo) {
+    func addUserInfo(info: API.AuthenticationResponse) {
         self.userId = info.id
         self.userEmail = info.email
         self.root = info.root

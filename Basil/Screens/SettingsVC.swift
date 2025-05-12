@@ -174,7 +174,7 @@ class SettingsVC: UIViewController {
             confirmText: "Delete", destructive: true
         ) { [weak self](password) in
             self?.showLoadingView()
-            API.deleteUser(email: State.manager.userEmail, password: password) { (error) in
+            NetworkManager.deleteUser(email: State.manager.userEmail, password: password) { (error) in
                 self?.dismissLoadingView()
                 if let error {
                     DispatchQueue.main.async {

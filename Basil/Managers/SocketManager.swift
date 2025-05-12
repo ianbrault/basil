@@ -7,79 +7,6 @@
 
 import Foundation
 
-// WebSocket API definitions
-
-enum SocketMessageType: Int, Codable {
-    case Success               = 200
-    case AuthenticationRequest = 201
-    case AuthenticationError   = 401
-}
-
-struct AuthenticationRequestBody: Codable {
-    let userId: String
-    let token: String
-}
-
-enum SocketMessage {
-    case Success
-    case AuthenticationRequest(AuthenticationRequestBody)
-    case AuthenticationError(String)
-
-    enum CodingKeys: String, CodingKey {
-        case type
-        case body
-    }
-
-    var messageType: SocketMessageType {
-        switch self {
-        case .Success:
-            return .Success
-        case .AuthenticationRequest(_):
-            return .AuthenticationRequest
-        case .AuthenticationError(_):
-            return .AuthenticationError
-        }
-    }
-
-    static func authenticationRequest(userId: String, token: String) -> SocketMessage {
-        return .AuthenticationRequest(AuthenticationRequestBody(userId: userId, token: token))
-    }
-}
-
-extension SocketMessage: Encodable {
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        switch self {
-        case .Success:
-            try container.encode(SocketMessageType.Success, forKey: .type)
-            try container.encodeNil(forKey: .body)
-        case .AuthenticationRequest(let body):
-            try container.encode(SocketMessageType.AuthenticationRequest, forKey: .type)
-            try container.encode(body, forKey: .body)
-        case .AuthenticationError(let body):
-            try container.encode(SocketMessageType.AuthenticationError, forKey: .type)
-            try container.encode(body, forKey: .body)
-        }
-    }
-}
-
-extension SocketMessage: Decodable {
-    init(from decoder: Decoder) throws {
-        let values = try decoder.container(keyedBy: CodingKeys.self)
-        let type = try values.decode(SocketMessageType.self, forKey: .type)
-        switch type {
-        case .Success:
-            self = .Success
-        case .AuthenticationRequest:
-            let body = try values.decode(AuthenticationRequestBody.self, forKey: .body)
-            self = .AuthenticationRequest(body)
-        case .AuthenticationError:
-            let body = try values.decode(String.self, forKey: .body)
-            self = .AuthenticationError(body)
-        }
-    }
-}
-
 //
 // Singleton class responsible for managing WebSocket networking
 //
@@ -91,10 +18,8 @@ class SocketManager: NSObject {
         func socketError(_: BasilError)
     }
 
-    typealias ConnectionHandler = (Result<Data, BasilError>) -> Void
-
     // Toggle for local development
-    let socketURL = URL(string: "ws://127.0.0.1:4040/basil")!
+    let socketURL = URL(string: "ws://localhost:4040/basil")!
     // let socketURL = URL(string: "wss://brault.dev/basil")!
 
     private var delegates: [Delegate] = []
@@ -118,20 +43,20 @@ class SocketManager: NSObject {
         self.socket?.resume()
     }
 
-    func send(_ message: SocketMessage, completionHandler: @escaping (Error?) -> Void) {
+    func send(_ message: API.SocketMessage, completionHandler: @escaping (Error?) -> Void) {
         guard let socket = self.socket,
               let encoded = try? JSONEncoder().encode(message) else { return }
         socket.send(.data(encoded), completionHandler: completionHandler)
     }
 
-    func receive(completionHandler: @escaping (Result<SocketMessage, BasilError>) -> Void) {
+    func receive(completionHandler: @escaping (Result<API.SocketMessage, BasilError>) -> Void) {
         guard let socket = self.socket else { return }
         socket.receive { (result) in
             switch result {
             case .success(let response):
                 switch response {
                 case .data(let data):
-                    if let message = try? JSONDecoder().decode(SocketMessage.self, from: data) {
+                    if let message = try? JSONDecoder().decode(API.SocketMessage.self, from: data) {
                         completionHandler(.success(message))
                     } else {
                         completionHandler(.failure(.socketReadError("Failed to decode message")))
@@ -158,7 +83,7 @@ extension SocketManager: URLSessionWebSocketDelegate {
         // Socket connection established
         guard let token = self.token else { return }
         // Send the user information and token to the server for validation
-        let message = SocketMessage.authenticationRequest(userId: State.manager.userId, token: token)
+        let message = API.SocketMessage.authenticationRequest(userId: State.manager.userId, token: token)
         self.send(message) { [weak self] (error) in
             if let error {
                 for delegate in self?.delegates ?? [] {

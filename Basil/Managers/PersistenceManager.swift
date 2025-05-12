@@ -109,7 +109,7 @@ class PersistenceManager {
         let query: [String: Any] = [
             kSecClass as String: kSecClassInternetPassword,
             kSecAttrAccount as String: email,
-            kSecAttrServer as String: API.baseURL,
+            kSecAttrServer as String: NetworkManager.baseURL.absoluteString,
             kSecValueData as String: password,
         ]
         let status = SecItemAdd(query as CFDictionary, nil)
@@ -117,7 +117,7 @@ class PersistenceManager {
             // a password already exists in the keychain, overwrite it
             let query: [String: Any] = [
                 kSecClass as String: kSecClassInternetPassword,
-                kSecAttrServer as String: API.baseURL,
+                kSecAttrServer as String: NetworkManager.baseURL.absoluteString,
             ]
             let attributes: [String: Any] = [
                 kSecAttrAccount as String: email,
@@ -133,7 +133,7 @@ class PersistenceManager {
     func fetchPassword(email: String) -> Result<String, BasilError> {
         let query: [String: Any] = [
             kSecClass as String: kSecClassInternetPassword,
-            kSecAttrServer as String: API.baseURL,
+            kSecAttrServer as String: NetworkManager.baseURL.absoluteString,
             kSecReturnAttributes as String: true,
             kSecReturnData as String: true
         ]
@@ -159,7 +159,7 @@ class PersistenceManager {
             let query: [String: Any] = [
                 kSecClass as String: kSecClassInternetPassword,
                 kSecAttrAccount as String: email,
-                kSecAttrServer as String: API.baseURL,
+                kSecAttrServer as String: NetworkManager.baseURL.absoluteString,
                 kSecValueData as String: password,
             ]
             let _ = SecItemDelete(query as CFDictionary)

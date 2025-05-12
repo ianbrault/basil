@@ -1,31 +1,39 @@
 //
-//  Network.swift
-//  RecipeBook
+//  NetworkManager.swift
+//  Basil
 //
-//  Created by Ian Brault on 9/3/23.
+//  Created by Ian Brault on 5/11/25.
 //
 
 import Foundation
 
 //
-// Wrapper struct containing networking functions as static members
+// Singleton class responsible for managing network requests and responses
 //
-struct Network {
+class NetworkManager: NSObject {
 
-    static func statusIsError(_ status: Int) -> Bool {
+    typealias Handler = (BasilError?) -> ()
+    typealias BodyHandler<T> = (Result<T, BasilError>) -> ()
+
+    // Toggle for local development
+    static let baseURL = URL(string: "http://localhost:3030/basil/v2")!
+    // static let baseURL = URL(string: "https://brault.dev/basil/v2")!
+
+    private override init() {}
+
+    private static func statusIsError(_ status: Int) -> Bool {
         return status < 200 || status >= 300
     }
 
-    static func encode<T: Encodable>(_ item: T) -> String? {
+    static func parseResponse<T: Decodable>(body contents: Data?) -> Result<T, BasilError> {
+        guard let contents else {
+            return .failure(.httpError("Missing response data"))
+        }
         do {
-            let data = try JSONEncoder().encode(item)
-            if let string = String(data: data, encoding: .utf8) {
-                return string
-            } else {
-                return nil
-            }
+            let userInfo = try JSONDecoder().decode(T.self, from: contents)
+            return .success(userInfo)
         } catch {
-            return nil
+            return .failure(.decodeError)
         }
     }
 
@@ -36,7 +44,7 @@ struct Network {
                 return
             }
             if let httpResponse = response as? HTTPURLResponse {
-                if Network.statusIsError(httpResponse.statusCode) {
+                if self.statusIsError(httpResponse.statusCode) {
                     var message = "Invalid response(\(httpResponse.statusCode))"
                     if let data {
                         if let errorMessage = String(data: data, encoding: .utf8) {
@@ -82,7 +90,7 @@ struct Network {
                 return
             }
             if let httpResponse = response as? HTTPURLResponse {
-                if Network.statusIsError(httpResponse.statusCode) {
+                if self.statusIsError(httpResponse.statusCode) {
                     var message = "Invalid response(\(httpResponse.statusCode))"
                     if let data {
                         if let errorMessage = String(data: data, encoding: .utf8) {
@@ -104,5 +112,45 @@ struct Network {
             return
         }
         self.post(url: url, body: body, handler: handler)
+    }
+
+    // API calls
+
+    static func createUser(
+        email: String, password: String, root: UUID?, recipes: [Recipe], folders: [RecipeFolder],
+        handler: @escaping BodyHandler<API.AuthenticationResponse>
+    ) {
+        let body = API.CreateUserRequest(
+            email: email, password: password,
+            root: root, recipes: recipes, folders: folders,
+            device: State.manager.deviceToken
+        )
+        self.post(url: self.baseURL.appending(path: "user/create"), body: body) { (response) in
+            let result: Result<API.AuthenticationResponse, BasilError> = response.flatMap(self.parseResponse)
+            handler(result)
+        }
+    }
+
+    static func authenticate(
+        email: String, password: String,
+        handler: @escaping BodyHandler<API.AuthenticationResponse>
+    ) {
+        let body = API.AuthenticationRequest(email: email, password: password, device: State.manager.deviceToken)
+        self.post(url: self.baseURL.appending(path: "user/authenticate"), body: body) { (response) in
+            let result: Result<API.AuthenticationResponse, BasilError> = response.flatMap(self.parseResponse)
+            handler(result)
+        }
+    }
+
+    static func deleteUser(email: String, password: String, handler: @escaping Handler) {
+        let body = API.AuthenticationRequest(email: email, password: password, device: nil)
+        self.post(url: self.baseURL.appending(path: "user/delete"), body: body) { (response) in
+            switch response {
+            case .success(_):
+                handler(nil)
+            case .failure(let error):
+                handler(error)
+            }
+        }
     }
 }
