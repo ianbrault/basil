@@ -125,6 +125,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             // TODO: failure to retrieve the password from the keychain should prompt the user
             // TODO: to re-enter their password or be logged out
             DispatchQueue.main.async {
+                let alert = GenericAlert(title: error.title, message: "\(error.message). ")
                 self.window?.rootViewController?.presentErrorAlert(error)
             }
         }
@@ -136,18 +137,15 @@ extension SceneDelegate: SocketManager.Delegate {
     func didConnectToServer() {
         // Server communication successfully established
         State.manager.readOnly = false
-
-        // FIXME: DEBUG
-        print("connected to WebSocket server")
-    }
-
-    func didDisconnectFromServer(error: BasilError?) {
-        // FIXME: DEBUG
-        print("disconnected from WebSocket server: \(error?.title ?? ""): \(error?.message ?? "")")
     }
 
     func socketError(_ error: BasilError) {
-        // FIXME: DEBUG
-        print("WebSocket server error: \(error.title): \(error.message)")
+        // Server communication error, set the offline read-only mode flag until server
+        // communication can be re-established
+        State.manager.readOnly = true
+
+        DispatchQueue.main.async {
+            self.window?.rootViewController?.presentErrorAlert(error)
+        }
     }
 }

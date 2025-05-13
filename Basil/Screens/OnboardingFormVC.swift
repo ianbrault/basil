@@ -179,13 +179,15 @@ class OnboardingFormVC: UIViewController {
         let handler: NetworkManager.BodyHandler<API.AuthenticationResponse> = { [weak self] (result) in
             var error: BasilError? = nil
             switch result {
-            case .success(let userInfo):
-                // add the password to the keychain
+            case .success(let info):
+                // Add the password to the keychain
                 if let e = PersistenceManager.shared.storePassword(email: email, password: password) {
                     error = e
                 }
-                // store the user info to the app state
-                State.manager.addUserInfo(info: userInfo)
+                // Store the user info to the app state
+                State.manager.addUserInfo(info: info)
+                // Open the WebSocket connection with the server
+                SocketManager.shared.connect(token: info.token)
             case .failure(let e):
                 error = e
             }

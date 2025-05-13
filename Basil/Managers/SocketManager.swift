@@ -14,7 +14,6 @@ class SocketManager: NSObject {
 
     protocol Delegate: AnyObject {
         func didConnectToServer()
-        func didDisconnectFromServer(error: BasilError?)
         func socketError(_: BasilError)
     }
 
@@ -26,6 +25,7 @@ class SocketManager: NSObject {
     private var socket: URLSessionWebSocketTask? = nil
     private var token: String? = nil
     private var connected: Bool = false
+    private var clientDisconnect: Bool = false
 
     static let shared = SocketManager()
 
@@ -38,9 +38,20 @@ class SocketManager: NSObject {
     func connect(token: String) {
         self.socket = URLSession.shared.webSocketTask(with: self.socketURL)
         self.token = token
+        self.clientDisconnect = false
 
         self.socket?.delegate = self
         self.socket?.resume()
+    }
+
+    func disconnect() {
+        // signal to the didCloseWith delegate method that we initiated this disconnect
+        self.clientDisconnect = true
+
+        self.socket?.cancel(with: .goingAway, reason: nil)
+        self.socket = nil
+        self.token = nil
+        self.connected = false
     }
 
     func send(_ message: API.SocketMessage, completionHandler: @escaping (Error?) -> Void) {
@@ -131,13 +142,15 @@ extension SocketManager: URLSessionWebSocketDelegate {
         self.token = nil
         self.connected = false
 
-        // Notify the delegates
-        var message = "Connection closed unexpectedly"
-        if let reason, let reasonString = String(data: reason, encoding: .utf8) {
-            message = reasonString
-        }
-        for delegate in self.delegates {
-            delegate.didDisconnectFromServer(error: .socketClosed(message))
+        // If this was a server-initiated disconnect, notify the delegates
+        if !self.clientDisconnect {
+            var message = "Connection closed unexpectedly"
+            if let reason, let reasonString = String(data: reason, encoding: .utf8) {
+                message = reasonString
+            }
+            for delegate in self.delegates {
+                delegate.socketError(.socketClosed(message))
+            }
         }
     }
 }

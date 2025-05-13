@@ -154,12 +154,14 @@ class SettingsVC: UIViewController {
         let message = "Logging out will remove any saved recipes until you log back in to your account. " +
         "Are you sure you want to continue?"
         let warning = WarningAlert(message) {
-            // clear the stored password from the keychain
+            // Disconnect from the server
+            SocketManager.shared.disconnect()
+            // Clear the stored password from the keychain
             PersistenceManager.shared.deletePassword(email: State.manager.userEmail)
-            // clear all stored user state
+            // Clear all stored user state
             State.manager.clearUserInfo()
             State.manager.userChanged = true
-            // then reload the settings view
+            // Then reload the settings view
             self.registerSections()
             self.tableView.reloadData()
         }
@@ -181,12 +183,14 @@ class SettingsVC: UIViewController {
                         self?.presentErrorAlert(error)
                     }
                 } else {
-                    // clear the stored password from the keychain
+                    // Disconnect from the server
+                    SocketManager.shared.disconnect()
+                    // Clear the stored password from the keychain
                     PersistenceManager.shared.deletePassword(email: State.manager.userEmail)
-                    // clear all stored user state
+                    // Clear all stored user state
                     State.manager.clearUserInfo()
                     State.manager.userChanged = true
-                    // then reload the settings view
+                    // Then reload the settings view
                     DispatchQueue.main.async {
                         self?.registerSections()
                         self?.tableView.reloadData()
