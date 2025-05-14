@@ -38,28 +38,7 @@ class SettingsVC: UIViewController {
     }
 
     private func registerSections() {
-        if State.manager.userId.isEmpty {
-            self.sections = [
-                [
-                    Section(
-                        cell: { (content: inout UIListContentConfiguration) in
-                            content.text = "Log in"
-                            content.textProperties.color = StyleGuide.colors.primaryText
-                            content.image = nil
-                        },
-                        action: self.loginAction
-                    ),
-                    Section(
-                        cell: { (content: inout UIListContentConfiguration) in
-                            content.text = "Create an account"
-                            content.textProperties.color = StyleGuide.colors.primaryText
-                            content.image = nil
-                        },
-                        action: self.registerAction
-                    )
-                ]
-            ]
-        } else {
+        if State.manager.userAuthenticated {
             self.sections = [
                 [
                     Section(
@@ -89,6 +68,27 @@ class SettingsVC: UIViewController {
                             content.imageProperties.tintColor = StyleGuide.colors.error
                         },
                         action: self.deleteAccountAction
+                    )
+                ]
+            ]
+        } else {
+            self.sections = [
+                [
+                    Section(
+                        cell: { (content: inout UIListContentConfiguration) in
+                            content.text = "Log in"
+                            content.textProperties.color = StyleGuide.colors.primaryText
+                            content.image = nil
+                        },
+                        action: self.loginAction
+                    ),
+                    Section(
+                        cell: { (content: inout UIListContentConfiguration) in
+                            content.text = "Create an account"
+                            content.textProperties.color = StyleGuide.colors.primaryText
+                            content.image = nil
+                        },
+                        action: self.registerAction
                     )
                 ]
             ]
@@ -135,12 +135,39 @@ class SettingsVC: UIViewController {
         }
     }
 
+    private func userRemoved(_ error: BasilError?) {
+        if let error {
+            DispatchQueue.main.async {
+                self.presentErrorAlert(error)
+            }
+        } else {
+            // Disconnect from the server
+            SocketManager.shared.disconnect()
+            // Clear the stored password from the keychain
+            do {
+                try KeychainManager.deleteCredentials()
+            } catch {
+                DispatchQueue.main.async {
+                    self.presentErrorAlert(error as! BasilError)
+                }
+            }
+            // Clear all stored user state
+            State.manager.clearUserInfo()
+            State.manager.userChanged = true
+            // Then reload the settings view
+            DispatchQueue.main.async {
+                self.registerSections()
+                self.tableView.reloadData()
+            }
+        }
+    }
+
     private func loginAction() {
         // NOTE: logging in will wipe away any recipes/folders that were created before logging in
         // TODO: add an option to import the recipes/folders into the account after logging in
-        let vc = OnboardingFormVC(.login) { (error) in
+        let vc = OnboardingFormVC(.login) { [weak self] (error) in
             State.manager.userChanged = error == nil
-            self.userAdded(error)
+            self?.userAdded(error)
         }
         self.navigationController?.pushViewController(vc, animated: true)
     }
@@ -153,17 +180,8 @@ class SettingsVC: UIViewController {
     private func logoutAction() {
         let message = "Logging out will remove any saved recipes until you log back in to your account. " +
         "Are you sure you want to continue?"
-        let warning = WarningAlert(message) {
-            // Disconnect from the server
-            SocketManager.shared.disconnect()
-            // Clear the stored password from the keychain
-            PersistenceManager.shared.deletePassword(email: State.manager.userEmail)
-            // Clear all stored user state
-            State.manager.clearUserInfo()
-            State.manager.userChanged = true
-            // Then reload the settings view
-            self.registerSections()
-            self.tableView.reloadData()
+        let warning = WarningAlert(message) { [weak self] () in
+            self?.userRemoved(nil)
         }
         self.present(warning, animated: true)
     }
@@ -178,24 +196,7 @@ class SettingsVC: UIViewController {
             self?.showLoadingView()
             NetworkManager.deleteUser(email: State.manager.userEmail, password: password) { (error) in
                 self?.dismissLoadingView()
-                if let error {
-                    DispatchQueue.main.async {
-                        self?.presentErrorAlert(error)
-                    }
-                } else {
-                    // Disconnect from the server
-                    SocketManager.shared.disconnect()
-                    // Clear the stored password from the keychain
-                    PersistenceManager.shared.deletePassword(email: State.manager.userEmail)
-                    // Clear all stored user state
-                    State.manager.clearUserInfo()
-                    State.manager.userChanged = true
-                    // Then reload the settings view
-                    DispatchQueue.main.async {
-                        self?.registerSections()
-                        self?.tableView.reloadData()
-                    }
-                }
+                self?.userRemoved(error)
             }
         }
         alert.isSecureTextEntry = true

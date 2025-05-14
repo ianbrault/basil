@@ -68,6 +68,8 @@
 		E3C6F51B2DD1D3170093AA55 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C6F5192DD1D3130093AA55 /* NetworkManager.swift */; };
 		E3C6F51F2DD1E7850093AA55 /* IngredientParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C6F51E2DD1E7850093AA55 /* IngredientParser.swift */; };
 		E3C6F5212DD1E78C0093AA55 /* NYTParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C6F5202DD1E78C0093AA55 /* NYTParser.swift */; };
+		E3C6F5232DD45CAC0093AA55 /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C6F5222DD45CAC0093AA55 /* KeychainManager.swift */; };
+		E3C6F5242DD45CAC0093AA55 /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C6F5222DD45CAC0093AA55 /* KeychainManager.swift */; };
 		E3D374D12B95604900A0EF70 /* ProcessingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D374D02B95604900A0EF70 /* ProcessingView.swift */; };
 		E3DE28FC2C4465E8007FBDC5 /* DeleteAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DE28FB2C4465E8007FBDC5 /* DeleteAlert.swift */; };
 		E3DE7EAD2C72D66900BDC0BF /* RecipeFormCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DE7EAC2C72D66900BDC0BF /* RecipeFormCell.swift */; };
@@ -164,6 +166,7 @@
 		E3C6F5192DD1D3130093AA55 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
 		E3C6F51E2DD1E7850093AA55 /* IngredientParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientParser.swift; sourceTree = "<group>"; };
 		E3C6F5202DD1E78C0093AA55 /* NYTParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NYTParser.swift; sourceTree = "<group>"; };
+		E3C6F5222DD45CAC0093AA55 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
 		E3D374D02B95604900A0EF70 /* ProcessingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingView.swift; sourceTree = "<group>"; };
 		E3DE28FB2C4465E8007FBDC5 /* DeleteAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteAlert.swift; sourceTree = "<group>"; };
 		E3DE7EAC2C72D66900BDC0BF /* RecipeFormCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeFormCell.swift; sourceTree = "<group>"; };
@@ -216,6 +219,7 @@
 				E349B13929DFDB2D0097A338 /* PersistenceManager.swift */,
 				E3C6F5142DC533C60093AA55 /* SocketManager.swift */,
 				E3C4660329FF4AE500791576 /* StateManager.swift */,
+				E3C6F5222DD45CAC0093AA55 /* KeychainManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -536,6 +540,7 @@
 				E323AB572C7A58B60028D6E3 /* SettingsVC.swift in Sources */,
 				E34B4D0529D154AF0063A9A2 /* RecipeFormVC.swift in Sources */,
 				E3DE7EAD2C72D66900BDC0BF /* RecipeFormCell.swift in Sources */,
+				E3C6F5242DD45CAC0093AA55 /* KeychainManager.swift in Sources */,
 				E39D32A92B1AC02100D7511B /* UIImage+Ext.swift in Sources */,
 				E3B1C73929CD205C00736C96 /* Recipe.swift in Sources */,
 				E34B4CEA29CEEA3E0063A9A2 /* TextFieldAlert.swift in Sources */,
@@ -587,6 +592,7 @@
 				E384B06F2D87CB8A0074BE85 /* NavigationController.swift in Sources */,
 				E3EAC2BA2BAF93A500B4B7B6 /* ErrorAlert.swift in Sources */,
 				E3EAC2BF2BB00E4900B4B7B6 /* Quantity.swift in Sources */,
+				E3C6F5232DD45CAC0093AA55 /* KeychainManager.swift in Sources */,
 				E3EAC2B32BAF933E00B4B7B6 /* RecipeFolder.swift in Sources */,
 				E3EAC2B92BAF939200B4B7B6 /* UIViewController+Ext.swift in Sources */,
 				E3839DDE2C61CFD500A4F6AF /* Int+Ext.swift in Sources */,

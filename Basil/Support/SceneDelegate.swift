@@ -22,10 +22,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
+        // Attempt to load stored credentials from the keychain
+        var credentials: KeychainManager.Credentials? = nil
+        do {
+            credentials = try KeychainManager.getCredentials()
+        } catch {
+            let alert = ErrorAlert(error: error as! BasilError)
+            self.preUIAlerts.append(alert)
+        }
+
         // Check if the stored state is outdated and synchronize accordingly
-        self.synchronizeStoredData()
+        self.synchronizeStoredData(credentials: credentials)
         // Then load application state from local storage
         State.manager.load()
+        State.manager.userEmail = credentials?.email ?? ""
 
         // Create the application window
         self.window = UIWindow(frame: windowScene.coordinateSpace.bounds)
@@ -42,10 +52,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         SocketManager.shared.addDelegate(self)
 
         // If an account is logged in, authenticate with the server
-        if !State.manager.userId.isEmpty {
+        if let credentials {
             // Set the offline read-only mode flag until authentication has completed successfully
             State.manager.readOnly = true
-            self.authenticate()
+            self.authenticate(credentials: credentials)
         }
     }
 
@@ -81,13 +91,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     // Helper functions
 
-    func synchronizeStoredData() {
+    func synchronizeStoredData(credentials: KeychainManager.Credentials?) {
         if PersistenceManager.shared.dataVersion < PersistenceManager.version {
             // V1->V2: password is stored in keychain, users must be logged out in order to synchronize
             if PersistenceManager.shared.dataVersion == 1 {
                 // Peek at the stored state to see if a user is logged in
-                let storage = PersistenceManager.shared.state
-                if !storage.userId.isEmpty {
+                if let _ = credentials {
                     let alert = GenericAlert(
                         title: "App updated",
                         message: "Important changes have been made behind the scenes, you must " +
@@ -95,8 +104,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                     )
                     self.preUIAlerts.append(alert)
                     // Clear out the stored state
-                    PersistenceManager.shared.deletePassword(email: storage.userEmail)
-                    PersistenceManager.shared.state = .empty()
+                    do {
+                        try KeychainManager.deleteCredentials()
+                        PersistenceManager.shared.state = .empty()
+                    } catch {
+                        let alert = ErrorAlert(error: error as! BasilError)
+                        self.preUIAlerts.append(alert)
+                    }
                 }
             }
         }
@@ -104,29 +118,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         PersistenceManager.shared.dataVersion = PersistenceManager.version
     }
 
-    func authenticate() {
-        // Fetch the password from the keychain
-        switch PersistenceManager.shared.fetchPassword(email: State.manager.userEmail) {
-        case .success(let password):
-            NetworkManager.authenticate(email: State.manager.userEmail, password: password) { (result) in
-                switch result {
-                case .success(let info):
-                    // TODO: check if the stored data is outdated
-                    // Open the WebSocket connection with the server
-                    SocketManager.shared.connect(token: info.token)
-                case .failure(let error):
-                    DispatchQueue.main.async {
-                        // Failed to ping server
-                        self.window?.rootViewController?.presentErrorAlert(error)
-                    }
+    func authenticate(credentials: KeychainManager.Credentials) {
+        NetworkManager.authenticate(email: credentials.email, password: credentials.password) { (result) in
+            switch result {
+            case .success(let info):
+                // TODO: check if the stored data is outdated
+                // Open the WebSocket connection with the server
+                SocketManager.shared.connect(userId: info.id, token: info.token)
+            case .failure(let error):
+                DispatchQueue.main.async {
+                    // Failed to ping server
+                    self.window?.rootViewController?.presentErrorAlert(error)
                 }
-            }
-        case .failure(let error):
-            // TODO: failure to retrieve the password from the keychain should prompt the user
-            // TODO: to re-enter their password or be logged out
-            DispatchQueue.main.async {
-                let alert = GenericAlert(title: error.title, message: "\(error.message). ")
-                self.window?.rootViewController?.presentErrorAlert(error)
             }
         }
     }

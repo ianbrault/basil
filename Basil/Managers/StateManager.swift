@@ -20,14 +20,12 @@ class State {
 
     // use a separate data type for encoding/decoding
     struct Storage: Codable {
-        let userId: String
-        let userEmail: String
         let root: UUID?
         let recipes: [Recipe]
         let folders: [RecipeFolder]
 
         static func empty() -> Storage {
-            return Storage(userId: "", userEmail: "", root: nil, recipes: [], folders: [])
+            return Storage(root: nil, recipes: [], folders: [])
         }
     }
 
@@ -37,8 +35,10 @@ class State {
     var deviceToken: UUID? = nil
 
     // user information
-    var userId: String = ""
     var userEmail: String = ""
+    var userAuthenticated: Bool {
+        return !self.userEmail.isEmpty
+    }
 
     // ID of the root folder
     var root: UUID? = nil
@@ -83,8 +83,6 @@ class State {
         self.deviceToken = UIDevice.current.identifierForVendor
 
         let data = PersistenceManager.shared.state
-        self.userId = data.userId
-        self.userEmail = data.userEmail
         // create a root folder if it does not already exist
         // this should be the case on the first launch
         if let root = data.root {
@@ -103,8 +101,6 @@ class State {
 
     func storeToLocal() {
         let data = Storage(
-            userId: self.userId,
-            userEmail: self.userEmail,
             root: self.root,
             recipes: self.recipes,
             folders: self.folders
@@ -114,7 +110,7 @@ class State {
 
     func storeToServer() {
         // only store to the server if the user is logged into an account
-        guard !self.userId.isEmpty else { return }
+        guard self.userAuthenticated else { return }
         assertionFailure()
         /*
         API.updateUser(async: true) { (error) in
@@ -142,10 +138,8 @@ class State {
     //
 
     func addUserInfo(info: API.AuthenticationResponse) {
-        self.userId = info.id
         self.userEmail = info.email
         self.root = info.root
-
         // clear out existing structures
         self.recipes.removeAll()
         self.folders.removeAll()
@@ -160,12 +154,10 @@ class State {
             self.folders.append(folder)
             self.folderMap[folder.uuid] = folder
         }
-
         self.storeToLocal()
     }
 
     func clearUserInfo() {
-        self.userId = ""
         self.userEmail = ""
         self.root = nil
         self.recipes.removeAll()
@@ -497,8 +489,6 @@ class State {
 
     func dump() -> String {
         let data = Storage(
-            userId: self.userId,
-            userEmail: self.userEmail,
             root: self.root,
             recipes: self.recipes,
             folders: self.folders
@@ -509,7 +499,6 @@ class State {
 
     func clear() {
         // NOTE: this should only be used for development debugging
-        self.userId = ""
         self.userEmail = ""
         self.root = nil
         self.recipes.removeAll()

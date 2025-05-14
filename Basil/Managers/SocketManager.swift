@@ -23,6 +23,7 @@ class SocketManager: NSObject {
 
     private var delegates: [Delegate] = []
     private var socket: URLSessionWebSocketTask? = nil
+    private var userId: String? = nil
     private var token: String? = nil
     private var connected: Bool = false
     private var clientDisconnect: Bool = false
@@ -35,8 +36,9 @@ class SocketManager: NSObject {
         self.delegates.append(delegate)
     }
 
-    func connect(token: String) {
+    func connect(userId: String, token: String) {
         self.socket = URLSession.shared.webSocketTask(with: self.socketURL)
+        self.userId = userId
         self.token = token
         self.clientDisconnect = false
 
@@ -50,6 +52,7 @@ class SocketManager: NSObject {
 
         self.socket?.cancel(with: .goingAway, reason: nil)
         self.socket = nil
+        self.userId = nil
         self.token = nil
         self.connected = false
     }
@@ -92,9 +95,9 @@ extension SocketManager: URLSessionWebSocketDelegate {
         didOpenWithProtocol taskProtocol: String?
     ) {
         // Socket connection established
-        guard let token = self.token else { return }
+        guard let userId = self.userId, let token = self.token else { return }
         // Send the user information and token to the server for validation
-        let message = API.SocketMessage.authenticationRequest(userId: State.manager.userId, token: token)
+        let message = API.SocketMessage.authenticationRequest(userId: userId, token: token)
         self.send(message) { [weak self] (error) in
             if let error {
                 for delegate in self?.delegates ?? [] {
@@ -139,6 +142,7 @@ extension SocketManager: URLSessionWebSocketDelegate {
         // Cancel any ongoing tasks and clear out the connection
         self.socket?.cancel()
         self.socket = nil
+        self.userId = nil
         self.token = nil
         self.connected = false
 
