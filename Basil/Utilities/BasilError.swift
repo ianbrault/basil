@@ -25,7 +25,7 @@ enum BasilError: Error {
     case socketClosed(String)
     case socketReadError(String)
     case socketWriteError(String)
-    case socketUnexpectedMessage(API.SocketMessageType)
+    case socketUnexpectedMessage(API.SocketMessageType, SocketManager.SocketState)
 
     var title: String {
         switch self {
@@ -61,7 +61,7 @@ enum BasilError: Error {
              .keychainError(_),
              .missingItem(_, _),
              .recipeParseError(_),
-             .socketUnexpectedMessage(_):
+             .socketUnexpectedMessage(_, _):
             return "Something went wrong"
         }
     }
@@ -105,8 +105,8 @@ enum BasilError: Error {
              .socketReadError(let message),
              .socketWriteError(let message):
             return message
-        case .socketUnexpectedMessage(let type):
-            return "Unexpected socket message of type \(type)"
+        case .socketUnexpectedMessage(let type, let state):
+            return "Unexpected socket message of type \(type) in state \(state)"
         }
     }
 }

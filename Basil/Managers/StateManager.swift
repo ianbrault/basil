@@ -111,15 +111,7 @@ class State {
     func storeToServer() {
         // only store to the server if the user is logged into an account
         guard self.userAuthenticated else { return }
-        assertionFailure()
-        /*
-        API.updateUser(async: true) { (error) in
-            if let error {
-                // present an alert on the main window and disable further communication with the server
-                UIApplication.shared.windowRootViewController?.presentErrorAlert(error)
-            }
-        }
-        */
+        SocketManager.shared.sendUpdate()
     }
 
     func storeGroceryList() {

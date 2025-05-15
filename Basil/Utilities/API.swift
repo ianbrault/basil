@@ -40,7 +40,9 @@ struct API {
     enum SocketMessageType: Int, Codable {
         case Success               = 200
         case AuthenticationRequest = 201
+        case UpdateRequest         = 202
         case AuthenticationError   = 401
+        case UpdateError           = 402
     }
 
     struct AuthenticationRequestBody: Codable {
@@ -48,10 +50,18 @@ struct API {
         let token: String
     }
 
+    struct UpdateRequestBody: Codable {
+        let root: UUID?
+        let recipes: [Recipe]
+        let folders: [RecipeFolder]
+    }
+
     enum SocketMessage: Decodable, Encodable {
         case Success
         case AuthenticationRequest(AuthenticationRequestBody)
+        case UpdateRequest(UpdateRequestBody)
         case AuthenticationError(String)
+        case UpdateError(String)
 
         enum CodingKeys: String, CodingKey {
             case type
@@ -64,8 +74,12 @@ struct API {
                 return .Success
             case .AuthenticationRequest(_):
                 return .AuthenticationRequest
+            case .UpdateRequest(_):
+                return .UpdateRequest
             case .AuthenticationError(_):
                 return .AuthenticationError
+            case .UpdateError(_):
+                return .UpdateError
             }
         }
 
@@ -78,9 +92,15 @@ struct API {
             case .AuthenticationRequest:
                 let body = try values.decode(AuthenticationRequestBody.self, forKey: .body)
                 self = .AuthenticationRequest(body)
+            case .UpdateRequest:
+                let body = try values.decode(UpdateRequestBody.self, forKey: .body)
+                self = .UpdateRequest(body)
             case .AuthenticationError:
                 let body = try values.decode(String.self, forKey: .body)
                 self = .AuthenticationError(body)
+            case .UpdateError:
+                let body = try values.decode(String.self, forKey: .body)
+                self = .UpdateError(body)
             }
         }
 
@@ -93,14 +113,24 @@ struct API {
             case .AuthenticationRequest(let body):
                 try container.encode(SocketMessageType.AuthenticationRequest, forKey: .type)
                 try container.encode(body, forKey: .body)
+            case .UpdateRequest(let body):
+                try container.encode(SocketMessageType.UpdateRequest, forKey: .type)
+                try container.encode(body, forKey: .body)
             case .AuthenticationError(let body):
                 try container.encode(SocketMessageType.AuthenticationError, forKey: .type)
+                try container.encode(body, forKey: .body)
+            case .UpdateError(let body):
+                try container.encode(SocketMessageType.UpdateError, forKey: .type)
                 try container.encode(body, forKey: .body)
             }
         }
 
-        static func authenticationRequest(userId: String, token: String) -> SocketMessage {
+        static func authenticationRequest(userId: String, token: String) -> Self {
             return .AuthenticationRequest(AuthenticationRequestBody(userId: userId, token: token))
+        }
+
+        static func updateRequest(root: UUID?, recipes: [Recipe], folders: [RecipeFolder]) -> Self {
+            return .UpdateRequest(UpdateRequestBody(root: root, recipes: recipes, folders: folders))
         }
     }
 }

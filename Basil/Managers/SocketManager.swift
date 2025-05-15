@@ -17,6 +17,13 @@ class SocketManager: NSObject {
         func socketError(_: BasilError)
     }
 
+    enum SocketState {
+        case Disconnected
+        case NeedsAuthentication
+        case Connected
+        case UpdateRequested
+    }
+
     // Toggle for local development
     let socketURL = URL(string: "ws://localhost:4040/basil")!
     // let socketURL = URL(string: "wss://brault.dev/basil")!
@@ -25,7 +32,7 @@ class SocketManager: NSObject {
     private var socket: URLSessionWebSocketTask? = nil
     private var userId: String? = nil
     private var token: String? = nil
-    private var connected: Bool = false
+    private var state: SocketState = .Disconnected
     private var clientDisconnect: Bool = false
 
     static let shared = SocketManager()
@@ -44,45 +51,119 @@ class SocketManager: NSObject {
 
         self.socket?.delegate = self
         self.socket?.resume()
+        self.setReceiveHandler()
+    }
+
+    private func closeSocket(with closeCode: URLSessionWebSocketTask.CloseCode, reason: String? = nil) {
+        let reasonData = reason?.data(using: .utf8)
+        self.socket?.cancel(with: closeCode, reason: reasonData)
+        self.socket = nil
+        self.userId = nil
+        self.token = nil
+        self.state = .Disconnected
     }
 
     func disconnect() {
         // signal to the didCloseWith delegate method that we initiated this disconnect
         self.clientDisconnect = true
-
-        self.socket?.cancel(with: .goingAway, reason: nil)
-        self.socket = nil
-        self.userId = nil
-        self.token = nil
-        self.connected = false
+        self.closeSocket(with: .goingAway)
     }
 
-    func send(_ message: API.SocketMessage, completionHandler: @escaping (Error?) -> Void) {
+    func sendUpdate() {
+        self.state = .UpdateRequested
+        // Send the user information and token to the server for validation
+        let message = API.SocketMessage.updateRequest(
+            root: State.manager.root,
+            recipes: State.manager.recipes,
+            folders: State.manager.folders,
+        )
+        self.send(message) { [weak self] (error) in
+            if let error {
+                self?.socketError(.socketWriteError(error.localizedDescription))
+            }
+        }
+    }
+
+    private func send(_ message: API.SocketMessage, completionHandler: @escaping (Error?) -> Void) {
         guard let socket = self.socket,
               let encoded = try? JSONEncoder().encode(message) else { return }
         socket.send(.data(encoded), completionHandler: completionHandler)
     }
 
-    func receive(completionHandler: @escaping (Result<API.SocketMessage, BasilError>) -> Void) {
-        guard let socket = self.socket else { return }
-        socket.receive { (result) in
+    private func socketError(_ error: BasilError) {
+        for delegate in self.delegates {
+            delegate.socketError(error)
+        }
+    }
+
+    private func setReceiveHandler() {
+        self.socket?.receive { [weak self] (result) in
+            defer {
+                if let self, self.state != .Disconnected {
+                    self.setReceiveHandler()
+                }
+            }
             switch result {
             case .success(let response):
                 switch response {
-                case .data(let data):
+                case let .data(data):
                     if let message = try? JSONDecoder().decode(API.SocketMessage.self, from: data) {
-                        completionHandler(.success(message))
+                        self?.messageReceived(message)
                     } else {
-                        completionHandler(.failure(.socketReadError("Failed to decode message")))
+                        self?.socketError(.socketReadError("Failed to decode message"))
                     }
-                case .string(let string):
-                    completionHandler(.failure(.socketReadError("Unexpected string data: \(string)")))
+                case let .string(string):
+                    self?.socketError(.socketReadError("Unexpected string data: \(string)"))
                 @unknown default:
-                    completionHandler(.failure(.socketReadError("Unexected data of unknown type")))
+                    self?.socketError(.socketReadError("Unexected data of unknown type"))
                 }
             case .failure(let error):
-                completionHandler(.failure(.socketReadError(error.localizedDescription)))
+                // POSIX error 57 indicates that the socket is no longer connected
+                let nsError = error as NSError
+                if nsError.domain == NSPOSIXErrorDomain && nsError.code == 57 {
+                    self?.closeSocket(with: .abnormalClosure)
+                    self?.socketError(.socketClosed("Connection closed unexpectedly"))
+                } else {
+                    self?.socketError(.socketReadError(error.localizedDescription))
+                }
             }
+        }
+    }
+
+    private func messageReceived(_ message: API.SocketMessage) {
+        switch message {
+        case .Success:
+            switch self.state {
+            case .NeedsAuthentication:
+                // User authentication successful
+                self.state = .Connected
+                for delegate in self.delegates {
+                    delegate.didConnectToServer()
+                }
+            case .UpdateRequested:
+                // User updates pushed to the server successfully
+                self.state = .Connected
+            default:
+                self.socketError(.socketUnexpectedMessage(message.messageType, self.state))
+            }
+        case .AuthenticationError(let errorMessage):
+            switch self.state {
+            case .NeedsAuthentication:
+                // An error occurred during user authentication
+                self.socketError(.socketReadError(errorMessage))
+            default:
+                self.socketError(.socketUnexpectedMessage(message.messageType, self.state))
+            }
+        case .UpdateError(let errorMessage):
+            switch self.state {
+            case .UpdateRequested:
+                // An error occurred pushing user updates to the server
+                self.socketError(.socketReadError(errorMessage))
+            default:
+                self.socketError(.socketUnexpectedMessage(message.messageType, self.state))
+            }
+        default:
+            self.socketError(.socketUnexpectedMessage(message.messageType, self.state))
         }
     }
 }
@@ -96,39 +177,12 @@ extension SocketManager: URLSessionWebSocketDelegate {
     ) {
         // Socket connection established
         guard let userId = self.userId, let token = self.token else { return }
+        self.state = .NeedsAuthentication
         // Send the user information and token to the server for validation
         let message = API.SocketMessage.authenticationRequest(userId: userId, token: token)
         self.send(message) { [weak self] (error) in
             if let error {
-                for delegate in self?.delegates ?? [] {
-                    delegate.socketError(.socketWriteError(error.localizedDescription))
-                }
-            } else {
-                // Wait for the response from the server
-                self?.receive { [weak self] (response) in
-                    switch response {
-                    case .success(let message):
-                        switch message {
-                        case .Success:
-                            self?.connected = true
-                            for delegate in self?.delegates ?? [] {
-                                delegate.didConnectToServer()
-                            }
-                        case .AuthenticationError(let errorMessage):
-                            for delegate in self?.delegates ?? [] {
-                                delegate.socketError(.socketReadError(errorMessage))
-                            }
-                        default:
-                            for delegate in self?.delegates ?? [] {
-                                delegate.socketError(.socketUnexpectedMessage(message.messageType))
-                            }
-                        }
-                    case .failure(let error):
-                        for delegate in self?.delegates ?? [] {
-                            delegate.socketError(error)
-                        }
-                    }
-                }
+                self?.socketError(.socketWriteError(error.localizedDescription))
             }
         }
     }
@@ -140,11 +194,7 @@ extension SocketManager: URLSessionWebSocketDelegate {
         reason: Data?
     ) {
         // Cancel any ongoing tasks and clear out the connection
-        self.socket?.cancel()
-        self.socket = nil
-        self.userId = nil
-        self.token = nil
-        self.connected = false
+        self.closeSocket(with: .goingAway)
 
         // If this was a server-initiated disconnect, notify the delegates
         if !self.clientDisconnect {

@@ -95,22 +95,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if PersistenceManager.shared.dataVersion < PersistenceManager.version {
             // V1->V2: password is stored in keychain, users must be logged out in order to synchronize
             if PersistenceManager.shared.dataVersion == 1 {
-                // Peek at the stored state to see if a user is logged in
-                if let _ = credentials {
-                    let alert = GenericAlert(
-                        title: "App updated",
-                        message: "Important changes have been made behind the scenes, you must " +
-                                 "log into your account again"
-                    )
+                let alert = GenericAlert(
+                    title: "App updated",
+                    message: "Important changes have been made behind the scenes, you must " +
+                             "log into your account again"
+                )
+                self.preUIAlerts.append(alert)
+                // Clear out the stored state
+                do {
+                    try KeychainManager.deleteCredentials()
+                    PersistenceManager.shared.state = .empty()
+                } catch {
+                    let alert = ErrorAlert(error: error as! BasilError)
                     self.preUIAlerts.append(alert)
-                    // Clear out the stored state
-                    do {
-                        try KeychainManager.deleteCredentials()
-                        PersistenceManager.shared.state = .empty()
-                    } catch {
-                        let alert = ErrorAlert(error: error as! BasilError)
-                        self.preUIAlerts.append(alert)
-                    }
                 }
             }
         }
