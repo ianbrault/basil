@@ -18,3 +18,9 @@ fix launch screen, modify icons and menu wording<br>
 [v0.1.0](https://github.com/ianbrault/basil/releases/tag/v0.1.0):
 initial release<br>
 
+## Roadmap
+
+- [ ] #1
+- [ ] #3
+- [ ] #2
+

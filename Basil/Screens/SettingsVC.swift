@@ -124,10 +124,10 @@ class SettingsVC: UIViewController {
     }
 
     private func userAdded(_ error: BasilError?) {
-        DispatchQueue.main.async {
-            if let error {
-                self.presentErrorAlert(error)
-            } else {
+        if let error {
+            self.presentErrorAlert(error)
+        } else {
+            DispatchQueue.main.async {
                 self.registerSections()
                 self.tableView.reloadData()
                 self.navigationController?.popViewController(animated: true)
@@ -137,9 +137,7 @@ class SettingsVC: UIViewController {
 
     private func userRemoved(_ error: BasilError?) {
         if let error {
-            DispatchQueue.main.async {
-                self.presentErrorAlert(error)
-            }
+            self.presentErrorAlert(error)
         } else {
             // Disconnect from the server
             SocketManager.shared.disconnect()
@@ -147,12 +145,11 @@ class SettingsVC: UIViewController {
             do {
                 try KeychainManager.deleteCredentials()
             } catch {
-                DispatchQueue.main.async {
-                    self.presentErrorAlert(error as! BasilError)
-                }
+                self.presentErrorAlert(error as! BasilError)
             }
             // Clear all stored user state
             State.manager.clearUserInfo()
+            State.manager.readOnly = false
             State.manager.userChanged = true
             // Then reload the settings view
             DispatchQueue.main.async {

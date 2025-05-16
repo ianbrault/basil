@@ -48,7 +48,7 @@ enum BasilError: Error {
             case .recipe:
                 return "Cannot \(action) recipe"
             case .folder:
-                return "Missing \(action) folder"
+                return "Cannot \(action) folder"
             }
         case .socketClosed(_):
             return "Lost connection to the server"

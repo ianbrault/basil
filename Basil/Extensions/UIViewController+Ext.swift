@@ -32,8 +32,10 @@ extension UIViewController {
     }
 
     func presentErrorAlert(_ error: BasilError) {
-        let alert = ErrorAlert(error: error)
-        self.present(alert, animated: true)
+        DispatchQueue.main.async {
+            let alert = ErrorAlert(error: error)
+            self.present(alert, animated: true)
+        }
     }
 
     func notImplementedAlert() {

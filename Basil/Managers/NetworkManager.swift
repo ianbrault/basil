@@ -15,9 +15,9 @@ class NetworkManager {
     typealias Handler = (BasilError?) -> ()
     typealias BodyHandler<T> = (Result<T, BasilError>) -> ()
 
-    // Toggle for local development
-    static let baseURL = URL(string: "http://localhost:3030/basil/v2")!
-    // static let baseURL = URL(string: "https://brault.dev/basil/v2")!
+    // static let baseURL = URL(string: "http://localhost:3030/basil/v2")!
+    // static let baseURL = URL(string: "http://brault.dev/nightly/basil/v2")!
+    static let baseURL = URL(string: "https://brault.dev/basil/v2")!
 
     private init() {}
 

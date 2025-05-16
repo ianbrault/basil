@@ -26,9 +26,9 @@ class SocketManager: NSObject {
         case UpdateRequested
     }
 
-    // Toggle for local development
-    let socketURL = URL(string: "ws://localhost:4040/basil")!
-    // let socketURL = URL(string: "wss://brault.dev/basil")!
+    // let socketURL = URL(string: "ws://localhost:4040")!
+    // let socketURL = URL(string: "wss://brault.dev/nightly/basil/socket")!
+    let socketURL = URL(string: "wss://brault.dev/basil/socket")!
 
     private var delegates: [Delegate] = []
     private var socket: URLSessionWebSocketTask? = nil
@@ -38,6 +38,7 @@ class SocketManager: NSObject {
     private var clientDisconnect: Bool = false
 
     static let shared = SocketManager()
+    static let pingInterval = 10.0
 
     private override init() {}
 
@@ -53,6 +54,7 @@ class SocketManager: NSObject {
 
         self.socket?.delegate = self
         self.socket?.resume()
+        self.setPingHandler()
         self.setReceiveHandler()
     }
 
@@ -66,7 +68,7 @@ class SocketManager: NSObject {
     }
 
     func disconnect() {
-        // signal to the didCloseWith delegate method that we initiated this disconnect
+        // signal to any methods handling disconnects that we initiated this
         self.clientDisconnect = true
         self.closeSocket(with: .goingAway)
     }
@@ -98,6 +100,22 @@ class SocketManager: NSObject {
         }
     }
 
+    private func setPingHandler() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.pingInterval) {
+            self.socket?.sendPing { [weak self] (error) in
+                if let _ = error {
+                    // only report the error if this is a non-user-initiated disconnect
+                    if !(self?.clientDisconnect ?? false) {
+                        self?.closeSocket(with: .abnormalClosure)
+                        self?.socketError(.socketClosed("Connection closed unexpectedly"))
+                    }
+                } else {
+                    self?.setPingHandler()
+                }
+            }
+        }
+    }
+
     private func setReceiveHandler() {
         self.socket?.receive { [weak self] (result) in
             defer {
@@ -123,8 +141,11 @@ class SocketManager: NSObject {
                 // POSIX error 57 indicates that the socket is no longer connected
                 let nsError = error as NSError
                 if nsError.domain == NSPOSIXErrorDomain && nsError.code == 57 {
-                    self?.closeSocket(with: .abnormalClosure)
-                    self?.socketError(.socketClosed("Connection closed unexpectedly"))
+                    // only report the error if this is a non-user-initiated disconnect
+                    if !(self?.clientDisconnect ?? false) {
+                        self?.closeSocket(with: .abnormalClosure)
+                        self?.socketError(.socketClosed("Connection closed unexpectedly"))
+                    }
                 } else {
                     self?.socketError(.socketReadError(error.localizedDescription))
                 }

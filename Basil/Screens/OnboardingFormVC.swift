@@ -188,6 +188,8 @@ class OnboardingFormVC: UIViewController {
                 }
                 // Store the user info to the app state
                 State.manager.addUserInfo(info: info)
+                // Set the offline read-only mode flag until authentication has completed successfully
+                State.manager.readOnly = true
                 // Open the WebSocket connection with the server
                 SocketManager.shared.connect(userId: info.id, token: info.token)
             case .failure(let error):
