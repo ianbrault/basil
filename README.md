@@ -13,6 +13,8 @@ data of any kind is collected, shared, or stored.
 
 ## Release History
 
+[v0.2.0](https://github.com/ianbrault/basil/releases/tag/v0.2.0):
+add support for synchronization of accounts across multiple devices<br>
 [v0.1.1](https://github.com/ianbrault/basil/releases/tag/v0.1.1):
 fix launch screen, modify icons and menu wording<br>
 [v0.1.0](https://github.com/ianbrault/basil/releases/tag/v0.1.0):
@@ -20,7 +22,7 @@ initial release<br>
 
 ## Roadmap
 
-- [ ] Feature: synchronization across multiple devices for accounts: https://github.com/ianbrault/basil/issues/1
+- [x] Feature: synchronization across multiple devices for accounts: https://github.com/ianbrault/basil/issues/1
 - [ ] Feature: import recipes from Apple Notes: https://github.com/ianbrault/basil/issues/3
 - [ ] Feature: enhanced cooking view: https://github.com/ianbrault/basil/issues/2
 

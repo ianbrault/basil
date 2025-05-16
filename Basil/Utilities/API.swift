@@ -9,7 +9,9 @@ import UIKit
 
 struct API {
 
+    //
     // Network API definitions
+    //
 
     struct AuthenticationRequest: Codable {
         let email: String
@@ -36,7 +38,9 @@ struct API {
         let device: UUID?
     }
 
+    //
     // Socket API definitions
+    //
 
     enum SocketMessageType: Int, Codable {
         case Success               = 200
