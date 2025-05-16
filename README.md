@@ -20,7 +20,7 @@ initial release<br>
 
 ## Roadmap
 
-- [ ] #1
-- [ ] #3
-- [ ] #2
+- [ ] Feature: synchronization across multiple devices for accounts: https://github.com/ianbrault/basil/issues/1
+- [ ] Feature: import recipes from Apple Notes: https://github.com/ianbrault/basil/issues/3
+- [ ] Feature: enhanced cooking view: https://github.com/ianbrault/basil/issues/2
 
