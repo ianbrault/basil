@@ -153,6 +153,16 @@ extension SceneDelegate: SocketManager.Delegate {
         State.manager.sequence += 1
     }
 
+    func didReceiveSyncRequest(_ info: API.SyncRequestBody) {
+        // Someone made changes on another device, resync stored state
+        State.manager.syncUserInfo(info: info)
+        // Signal to any recipe list views to reload their state
+        DispatchQueue.main.async {
+            let tabBarController = self.window?.rootViewController as! TabBarController
+            tabBarController.refreshRecipeLists()
+        }
+    }
+
     func socketError(_ error: BasilError) {
         // Server communication error, set the offline read-only mode flag until server
         // communication can be re-established

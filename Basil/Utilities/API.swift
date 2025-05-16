@@ -42,6 +42,7 @@ struct API {
         case Success               = 200
         case AuthenticationRequest = 201
         case UpdateRequest         = 202
+        case SyncRequest           = 203
         case AuthenticationError   = 401
         case UpdateError           = 402
     }
@@ -57,10 +58,18 @@ struct API {
         let folders: [RecipeFolder]
     }
 
+    struct SyncRequestBody: Codable {
+        let root: UUID?
+        let recipes: [Recipe]
+        let folders: [RecipeFolder]
+        let sequence: Int
+    }
+
     enum SocketMessage: Decodable, Encodable {
         case Success
         case AuthenticationRequest(AuthenticationRequestBody)
         case UpdateRequest(UpdateRequestBody)
+        case SyncRequest(SyncRequestBody)
         case AuthenticationError(String)
         case UpdateError(String)
 
@@ -77,6 +86,8 @@ struct API {
                 return .AuthenticationRequest
             case .UpdateRequest(_):
                 return .UpdateRequest
+            case .SyncRequest(_):
+                return .SyncRequest
             case .AuthenticationError(_):
                 return .AuthenticationError
             case .UpdateError(_):
@@ -96,6 +107,9 @@ struct API {
             case .UpdateRequest:
                 let body = try values.decode(UpdateRequestBody.self, forKey: .body)
                 self = .UpdateRequest(body)
+            case .SyncRequest:
+                let body = try values.decode(SyncRequestBody.self, forKey: .body)
+                self = .SyncRequest(body)
             case .AuthenticationError:
                 let body = try values.decode(String.self, forKey: .body)
                 self = .AuthenticationError(body)
@@ -116,6 +130,9 @@ struct API {
                 try container.encode(body, forKey: .body)
             case .UpdateRequest(let body):
                 try container.encode(SocketMessageType.UpdateRequest, forKey: .type)
+                try container.encode(body, forKey: .body)
+            case .SyncRequest(let body):
+                try container.encode(SocketMessageType.SyncRequest, forKey: .type)
                 try container.encode(body, forKey: .body)
             case .AuthenticationError(let body):
                 try container.encode(SocketMessageType.AuthenticationError, forKey: .type)

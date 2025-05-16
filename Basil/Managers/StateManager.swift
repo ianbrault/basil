@@ -152,6 +152,26 @@ class State {
         self.storeToLocal()
     }
 
+    func syncUserInfo(info: API.SyncRequestBody) {
+        self.root = info.root
+        // clear out existing structures
+        self.recipes.removeAll()
+        self.folders.removeAll()
+        self.recipeMap.removeAll()
+        self.folderMap.removeAll()
+        // then load recipes/folders from user info
+        for recipe in info.recipes {
+            self.recipes.append(recipe)
+            self.recipeMap[recipe.uuid] = recipe
+        }
+        for folder in info.folders {
+            self.folders.append(folder)
+            self.folderMap[folder.uuid] = folder
+        }
+        self.sequence = info.sequence
+        self.storeToLocal()
+    }
+
     func clearUserInfo() {
         self.userEmail = ""
         self.root = nil

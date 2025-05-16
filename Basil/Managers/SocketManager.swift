@@ -15,6 +15,7 @@ class SocketManager: NSObject {
     protocol Delegate: AnyObject {
         func didConnectToServer()
         func didPushToServer()
+        func didReceiveSyncRequest(_: API.SyncRequestBody)
         func socketError(_: BasilError)
     }
 
@@ -146,6 +147,16 @@ class SocketManager: NSObject {
                 self.state = .Connected
                 for delegate in self.delegates {
                     delegate.didPushToServer()
+                }
+            default:
+                self.socketError(.socketUnexpectedMessage(message.messageType, self.state))
+            }
+        case .SyncRequest(let body):
+            switch self.state {
+            case .Connected, .UpdateRequested:
+                // Someone made changes on another device
+                for delegate in self.delegates {
+                    delegate.didReceiveSyncRequest(body)
                 }
             default:
                 self.socketError(.socketUnexpectedMessage(message.messageType, self.state))
