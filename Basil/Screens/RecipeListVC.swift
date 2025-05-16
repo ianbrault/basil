@@ -125,6 +125,12 @@ class RecipeListVC: UIViewController {
         }
     }
 
+    func refresh(animatingDifferences: Bool = true) {
+        self.loadItems()
+        self.updateItemsForSearchText()
+        self.applySnapshot(animatingDifferences: animatingDifferences)
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configureViewController()
@@ -145,9 +151,7 @@ class RecipeListVC: UIViewController {
                 return
             }
         }
-        self.loadItems()
-        self.updateItemsForSearchText()
-        self.applySnapshot(animatingDifferences: false)
+        self.refresh(animatingDifferences: false)
     }
 
     override func viewDidAppear(_ animated: Bool) {

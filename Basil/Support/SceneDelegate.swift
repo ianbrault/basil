@@ -93,22 +93,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func synchronizeStoredData(credentials: KeychainManager.Credentials?) {
         if PersistenceManager.shared.dataVersion < PersistenceManager.version {
-            // V1->V2: password is stored in keychain, users must be logged out in order to synchronize
+            // V1->V2: removed `state` from PersistenceManager keys and split out into individual fields
             if PersistenceManager.shared.dataVersion == 1 {
+                let stored: State.Storage__V1 = PersistenceManager.shared.getObject(
+                    forKey: PersistenceManager.Keys.state, defaultValue: .empty()
+                )
+                PersistenceManager.shared.root = stored.root
+                PersistenceManager.shared.recipes = stored.recipes
+                PersistenceManager.shared.folders = stored.folders
+                // Clear out the keychain to log out the user
+                do { try KeychainManager.deleteCredentials() } catch {}
+                // and alert them to that fact
                 let alert = GenericAlert(
                     title: "App updated",
                     message: "Important changes have been made behind the scenes, you must " +
                              "log into your account again"
                 )
                 self.preUIAlerts.append(alert)
-                // Clear out the stored state
-                do {
-                    try KeychainManager.deleteCredentials()
-                    PersistenceManager.shared.state = .empty()
-                } catch {
-                    let alert = ErrorAlert(error: error as! BasilError)
-                    self.preUIAlerts.append(alert)
-                }
             }
         }
         // Set data version to the current
@@ -119,7 +120,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         NetworkManager.authenticate(email: credentials.email, password: credentials.password) { (result) in
             switch result {
             case .success(let info):
-                // TODO: check if the stored data is outdated
+                // Check if the local copy of the recipes is outdated
+                if info.sequence > State.manager.sequence {
+                    State.manager.addUserInfo(info: info)
+                    // Signal to any recipe list views to reload their state
+                    DispatchQueue.main.async {
+                        let tabBarController = self.window?.rootViewController as! TabBarController
+                        tabBarController.refreshRecipeLists()
+                    }
+                }
                 // Open the WebSocket connection with the server
                 SocketManager.shared.connect(userId: info.id, token: info.token)
             case .failure(let error):
@@ -137,6 +146,11 @@ extension SceneDelegate: SocketManager.Delegate {
     func didConnectToServer() {
         // Server communication successfully established
         State.manager.readOnly = false
+    }
+
+    func didPushToServer() {
+        // Server update successful, bump the sequence count
+        State.manager.sequence += 1
     }
 
     func socketError(_ error: BasilError) {

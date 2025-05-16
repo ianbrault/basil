@@ -14,6 +14,7 @@ class SocketManager: NSObject {
 
     protocol Delegate: AnyObject {
         func didConnectToServer()
+        func didPushToServer()
         func socketError(_: BasilError)
     }
 
@@ -143,6 +144,9 @@ class SocketManager: NSObject {
             case .UpdateRequested:
                 // User updates pushed to the server successfully
                 self.state = .Connected
+                for delegate in self.delegates {
+                    delegate.didPushToServer()
+                }
             default:
                 self.socketError(.socketUnexpectedMessage(message.messageType, self.state))
             }

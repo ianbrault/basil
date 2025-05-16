@@ -9,6 +9,12 @@ import UIKit
 
 class TabBarController: UITabBarController {
 
+    private enum Index: Int {
+        case GroceryList = 0
+        case RecipeList = 1
+        case Settings = 2
+    }
+
     var cookingView: UINavigationController? = nil
     private var tag: Int = 0
 
@@ -20,7 +26,7 @@ class TabBarController: UITabBarController {
             self.createRecipeListVC(),
             self.createSettingsVC(),
         ]
-        self.selectedIndex = 1
+        self.selectedIndex = Index.RecipeList.rawValue
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -61,6 +67,15 @@ class TabBarController: UITabBarController {
             self.present(alert, animated: true)
 
             PersistenceManager.shared.hasLaunched = true
+        }
+    }
+
+    func refreshRecipeLists() {
+        let recipeListNavController = self.viewControllers?[Index.RecipeList.rawValue] as! NavigationController
+        for vc in recipeListNavController.viewControllers {
+            if let recipeListVC = vc as? RecipeListVC {
+                recipeListVC.refresh()
+            }
         }
     }
 

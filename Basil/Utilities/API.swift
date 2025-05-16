@@ -23,6 +23,7 @@ struct API {
         let root: UUID?
         let recipes: [Recipe]
         let folders: [RecipeFolder]
+        let sequence: Int
         let token: String
     }
 

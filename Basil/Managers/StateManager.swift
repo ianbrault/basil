@@ -23,9 +23,10 @@ class State {
         let root: UUID?
         let recipes: [Recipe]
         let folders: [RecipeFolder]
+        let sequence: Int
 
-        static func empty() -> Storage {
-            return Storage(root: nil, recipes: [], folders: [])
+        static func empty() -> Self {
+            return Self(root: nil, recipes: [], folders: [], sequence: 0)
         }
     }
 
@@ -49,6 +50,9 @@ class State {
     // managed volatilely, not put in storage
     var recipeMap: [UUID: Recipe] = [:]
     var folderMap: [UUID: RecipeFolder] = [:]
+
+    // sequence count, used for data versioning
+    var sequence: Int = 0
 
     // grocery list
     var groceryList: GroceryList = GroceryList()
@@ -82,30 +86,28 @@ class State {
     func load() {
         self.deviceToken = UIDevice.current.identifierForVendor
 
-        let data = PersistenceManager.shared.state
         // create a root folder if it does not already exist
         // this should be the case on the first launch
-        if let root = data.root {
+        if let root = PersistenceManager.shared.root {
             self.root = root
-            self.loadRecipes(recipes: data.recipes)
-            self.loadFolders(folders: data.folders)
+            self.loadRecipes(recipes: PersistenceManager.shared.recipes)
+            self.loadFolders(folders: PersistenceManager.shared.folders)
         } else {
             let root = RecipeFolder(folderId: nil, name: "")
             self.root = root.uuid
             self.loadRecipes(recipes: [])
             self.loadFolders(folders: [root])
         }
+        self.sequence = PersistenceManager.shared.sequence
 
         self.groceryList = PersistenceManager.shared.groceryList
     }
 
     func storeToLocal() {
-        let data = Storage(
-            root: self.root,
-            recipes: self.recipes,
-            folders: self.folders
-        )
-        PersistenceManager.shared.state = data
+        PersistenceManager.shared.root = self.root
+        PersistenceManager.shared.recipes = self.recipes
+        PersistenceManager.shared.folders = self.folders
+        PersistenceManager.shared.sequence = self.sequence
     }
 
     func storeToServer() {
@@ -146,6 +148,7 @@ class State {
             self.folders.append(folder)
             self.folderMap[folder.uuid] = folder
         }
+        self.sequence = info.sequence
         self.storeToLocal()
     }
 
@@ -483,7 +486,8 @@ class State {
         let data = Storage(
             root: self.root,
             recipes: self.recipes,
-            folders: self.folders
+            folders: self.folders,
+            sequence: self.sequence,
         )
         let encoded = try? JSONEncoder().encode(data)
         return encoded?.prettyPrintedJSONString ?? ""
@@ -497,6 +501,21 @@ class State {
         self.folders.removeAll()
         self.recipeMap.removeAll()
         self.folderMap.removeAll()
+        self.sequence = 0
         self.storeToLocal()
+    }
+
+    //
+    // Deprecated Items
+    //
+
+    struct Storage__V1: Codable {
+        let root: UUID?
+        let recipes: [Recipe]
+        let folders: [RecipeFolder]
+
+        static func empty() -> Self {
+            return Self(root: nil, recipes: [], folders: [])
+        }
     }
 }
