@@ -65,8 +65,14 @@ class TextViewContentView: UIView, UIContentView {
         guard let configuration = self.configuration as? TextViewContentConfiguration else { return }
         self.onChange = configuration.onChange
 
-        self.addSubview(self.textView)
-        self.addSubview(self.placeholderLabel)
+        let placeholderInsets = UIEdgeInsets(
+            top: configuration.insets.top + (UIFont.preferredFont(forTextStyle: .body).pointSize / 2),
+            left: configuration.insets.left + 4,
+            bottom: 0,
+            right: configuration.insets.right + 4
+        )
+        self.addPinnedSubview(self.textView, insets: configuration.insets)
+        self.addPinnedSubview(self.placeholderLabel, insets: placeholderInsets)
 
         self.textView.attributedText = TextViewContentView.attributedText(configuration.text)
         self.textView.delegate = self
@@ -77,21 +83,6 @@ class TextViewContentView: UIView, UIContentView {
         self.placeholderLabel.text = configuration.placeholder
         self.placeholderLabel.textColor = StyleGuide.colors.secondaryText
         self.placeholderLabel.isHidden = !configuration.text.isEmpty
-
-        self.textView.pinToEdges(of: self, insets: configuration.insets)
-
-        self.placeholderLabel.leadingAnchor.constraint(
-            equalTo: self.leadingAnchor,
-            constant: configuration.insets.left + 4
-        ).isActive = true
-        self.placeholderLabel.trailingAnchor.constraint(
-            equalTo: self.trailingAnchor,
-            constant: -configuration.insets.right - 4
-        ).isActive = true
-        self.placeholderLabel.topAnchor.constraint(
-            equalTo: self.topAnchor,
-            constant: configuration.insets.top + (UIFont.preferredFont(forTextStyle: .body).pointSize / 2)
-        ).isActive = true
     }
 }
 
@@ -102,3 +93,4 @@ extension TextViewContentView: UITextViewDelegate {
         self.onChange?(textView.text, textView)
     }
 }
+

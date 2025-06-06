@@ -45,6 +45,10 @@ class TextFieldContentView: UIView, UIContentView {
     let image = UIImageView()
     let textField = UITextField()
 
+    override var intrinsicContentSize: CGSize {
+        CGSize(width: 0, height: StyleGuide.tableCellHeight)
+    }
+
     init(configuration: TextFieldContentConfiguration) {
         self.configuration = configuration
         super.init(frame: .zero)

@@ -43,7 +43,7 @@ class CookingItemVC: UIViewController {
     }
 
     private func configureTableView() {
-        self.view.addSubview(self.tableView)
+        self.view.addPinnedSubview(self.tableView, safeAreaTop: true)
 
         self.tableView.delegate = self
         self.tableView.dataSource = self
@@ -52,10 +52,6 @@ class CookingItemVC: UIViewController {
 
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: CookingItemVC.ingredientReuseID)
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: CookingItemVC.instructionReuseID)
-
-        self.tableView.pinToSides(of: self.view)
-        self.tableView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
-        self.tableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
     }
 }
 

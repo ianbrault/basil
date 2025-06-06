@@ -177,7 +177,7 @@ class RecipeFormVC: UIViewController {
     }
 
     private func configureTableView() {
-        self.view.addSubview(self.tableView)
+        self.view.addPinnedSubview(self.tableView, keyboardBottom: true)
 
         self.tableView.delegate = self
         self.tableView.contentInset.bottom = 16
@@ -186,10 +186,6 @@ class RecipeFormVC: UIViewController {
 
         self.tableView.register(RecipeFormCell.self, forCellReuseIdentifier: RecipeFormCell.textFieldReuseID)
         self.tableView.register(RecipeFormCell.self, forCellReuseIdentifier: RecipeFormCell.buttonReuseID)
-
-        self.tableView.pinToSides(of: self.view)
-        self.tableView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
-        self.tableView.bottomAnchor.constraint(equalTo: self.view.keyboardLayoutGuide.topAnchor).isActive = true
     }
 
     func set(recipe: Recipe) {

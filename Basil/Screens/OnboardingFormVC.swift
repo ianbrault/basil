@@ -127,15 +127,8 @@ class OnboardingFormVC: UIViewController {
     }
 
     private func configureButton() {
-        self.view.addSubview(self.button)
-
+        self.view.addPinnedSubview(self.button, height: self.buttonHeight, insets: self.insets, keyboardBottom: true, noTop: true)
         self.button.addTarget(self, action: #selector(self.onSubmit), for: .touchUpInside)
-
-        self.button.pinToSides(of: self.view, insets: self.insets)
-        self.button.bottomAnchor.constraint(
-            equalTo: self.view.keyboardLayoutGuide.topAnchor, constant: -self.insets.bottom
-        ).isActive = true
-        self.button.heightAnchor.constraint(equalToConstant: self.buttonHeight).isActive = true
     }
 
     func validateForm() -> Bool {
@@ -249,9 +242,5 @@ extension OnboardingFormVC: UITableViewDataSource, UITableViewDelegate {
         cell.separatorInset.left = content.contentInset + content.imageSize
 
         return cell
-    }
-
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return StyleGuide.tableCellHeight
     }
 }

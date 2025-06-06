@@ -11,7 +11,9 @@ import UIKit
 // Displays a recipe with its ingredients list and instructions
 //
 class RecipeVC: UIViewController {
-    static let reuseID = "RecipeCell"
+    static let titleReuseID = "RecipeCell__Title"
+    static let ingredientsReuseId = "RecipeCell__Ingredients"
+    static let instructionsReuseId = "RecipeCell__Instructions"
 
     protocol Delegate: AnyObject {
         func didDeleteRecipe(recipe: Recipe)
@@ -76,7 +78,9 @@ class RecipeVC: UIViewController {
         self.tableView.sectionHeaderTopPadding = 10
         self.tableView.removeExcessCells()
 
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: RecipeVC.reuseID)
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: RecipeVC.titleReuseID)
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: RecipeVC.ingredientsReuseId)
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: RecipeVC.instructionsReuseId)
     }
 
     func editRecipe(_ action: UIAction) {
@@ -140,19 +144,23 @@ extension RecipeVC: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let section = Section(rawValue: indexPath.section)!
-        let cell = tableView.dequeueReusableCell(withIdentifier: RecipeVC.reuseID)!
 
+        var cell: UITableViewCell
         switch section {
         case .title:
+            cell = tableView.dequeueReusableCell(withIdentifier: RecipeVC.titleReuseID)!
             var content = cell.defaultContentConfiguration()
             content.text = self.recipe.title
             content.textProperties.font = .systemFont(ofSize: 24, weight: .bold)
+            content.textProperties.lineBreakMode = .byWordWrapping
             cell.contentConfiguration = content
         case .ingredients:
+            cell = tableView.dequeueReusableCell(withIdentifier: RecipeVC.ingredientsReuseId)!
             var content = ListContentConfiguration(style: .unordered)
             content.text = self.recipe.ingredients[indexPath.row].toString()
             cell.contentConfiguration = content
         case .instructions:
+            cell = tableView.dequeueReusableCell(withIdentifier: RecipeVC.instructionsReuseId)!
             var content = ListContentConfiguration(style: .ordered)
             content.text = self.recipe.instructions[indexPath.row]
             content.row = indexPath.row + 1
