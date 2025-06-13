@@ -202,6 +202,8 @@ class RecipeListVC: UIViewController {
         self.searchController.obscuresBackgroundDuringPresentation = false
 
         self.navigationItem.searchController = self.searchController
+        // prevent the search bar from showing by default
+        self.tableView.setContentOffset(CGPoint(x: 0, y: 0), animated: false)
     }
 
     private func createMenuButtonContextMenu() -> UIMenu {

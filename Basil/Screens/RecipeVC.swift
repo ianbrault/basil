@@ -10,7 +10,7 @@ import UIKit
 //
 // Displays a recipe with its ingredients list and instructions
 //
-class RecipeVC: UIViewController {
+class RecipeVC: UITableViewController {
     static let titleReuseID = "RecipeCell__Title"
     static let ingredientsReuseId = "RecipeCell__Ingredients"
     static let instructionsReuseId = "RecipeCell__Instructions"
@@ -24,8 +24,6 @@ class RecipeVC: UIViewController {
         case ingredients
         case instructions
     }
-
-    private let tableView = UITableView()
 
     private var recipe: Recipe
     weak var delegate: Delegate?
@@ -66,16 +64,11 @@ class RecipeVC: UIViewController {
     }
 
     private func configureTableView() {
-        self.view.addSubview(self.tableView)
-
-        self.tableView.frame = self.view.bounds
-        self.tableView.delegate = self
-        self.tableView.dataSource = self
-        self.tableView.contentInset.bottom = 16
         self.tableView.allowsSelection = false
+        self.tableView.contentInset.bottom = 16
         self.tableView.keyboardDismissMode = .onDrag
-        self.tableView.separatorStyle = .none
         self.tableView.sectionHeaderTopPadding = 10
+        self.tableView.separatorStyle = .none
         self.tableView.removeExcessCells()
 
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: RecipeVC.titleReuseID)
@@ -110,15 +103,12 @@ class RecipeVC: UIViewController {
             tabBar.addRecipeToCookingView(recipe: self.recipe)
         }
     }
-}
 
-extension RecipeVC: UITableViewDataSource, UITableViewDelegate {
-
-    func numberOfSections(in tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return Section.allCases.count
     }
 
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard let section = Section(rawValue: section) else { return 0 }
         switch section {
         case .title:
@@ -130,7 +120,7 @@ extension RecipeVC: UITableViewDataSource, UITableViewDelegate {
         }
     }
 
-    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         guard let section = Section(rawValue: section) else { return nil }
         switch section {
         case .title:
@@ -142,7 +132,7 @@ extension RecipeVC: UITableViewDataSource, UITableViewDelegate {
         }
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let section = Section(rawValue: indexPath.section)!
 
         var cell: UITableViewCell

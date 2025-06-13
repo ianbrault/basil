@@ -10,7 +10,7 @@ import UIKit
 //
 // Displays a form to create/edit a recipe
 //
-class RecipeFormVC: UIViewController {
+class RecipeFormVC: UITableViewController {
 
     protocol Delegate: AnyObject {
         func didSaveRecipe(style: RecipeFormVC.Style, recipe: Recipe)
@@ -96,7 +96,6 @@ class RecipeFormVC: UIViewController {
     private var doneButton: UIBarButtonItem!
     private var saveButton: UIBarButtonItem!
 
-    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private var cells: [[Cell]] = [
         [Cell(.textField)],
         [Cell(.textField), Cell(.button)],
@@ -126,7 +125,7 @@ class RecipeFormVC: UIViewController {
 
     init(style: Style) {
         self.style = style
-        super.init(nibName: nil, bundle: nil)
+        super.init(style: .insetGrouped)
     }
 
     required init?(coder: NSCoder) {
@@ -167,7 +166,7 @@ class RecipeFormVC: UIViewController {
         self.view.backgroundColor = StyleGuide.colors.groupedBackground
 
         // create the bar button items
-        self.cancelButton = self.createBarButton(systemItem: .cancel, action: #selector(self.dismissVC))
+        self.cancelButton = self.createBarButton(systemItem: .cancel, action: #selector(self.dismissSelf))
         self.editButton = self.createBarButton(image: SFSymbols.reorder, action: #selector(self.enableEditMode))
         self.doneButton = self.createBarButton(systemItem: .done, action: #selector(self.disableEditMode))
         self.saveButton = self.createBarButton(title: "Save", style: .done, action: #selector(self.saveRecipe))
@@ -177,9 +176,6 @@ class RecipeFormVC: UIViewController {
     }
 
     private func configureTableView() {
-        self.view.addPinnedSubview(self.tableView, keyboardBottom: true)
-
-        self.tableView.delegate = self
         self.tableView.contentInset.bottom = 16
         self.tableView.keyboardDismissMode = .onDrag
         self.tableView.removeExcessCells()
@@ -209,10 +205,6 @@ class RecipeFormVC: UIViewController {
             self.cells[Section.instructions.rawValue].append(Cell(.textField, text: instruction))
         }
         self.cells[Section.instructions.rawValue].append(Cell(.button))
-    }
-
-    @objc func dismissVC() {
-        self.dismiss(animated: true)
     }
 
     @objc func enableEditMode(_ action: UIAction? = nil) {
@@ -258,21 +250,18 @@ class RecipeFormVC: UIViewController {
             ingredients: ingredients,
             instructions: instructions)
         self.delegate?.didSaveRecipe(style: self.style, recipe: recipe)
-        self.dismissVC()
+        self.dismissSelf()
     }
-}
 
-extension RecipeFormVC: UITableViewDelegate {
-
-    func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
+    override func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
         return .none
     }
 
-    func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
+    override func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
         return false
     }
 
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // filter for button cells
         if indexPath.row < self.cells[indexPath.section].count - 1 {
             return
@@ -291,7 +280,7 @@ extension RecipeFormVC: UITableViewDelegate {
         }
     }
 
-    func tableView(
+    override func tableView(
         _ tableView: UITableView,
         trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
     ) -> UISwipeActionsConfiguration? {
@@ -311,7 +300,7 @@ extension RecipeFormVC: UITableViewDelegate {
         }
     }
 
-    func tableView(
+    override func tableView(
         _ tableView: UITableView,
         targetIndexPathForMoveFromRowAt sourceIndexPath: IndexPath,
         toProposedIndexPath proposedDestinationIndexPath: IndexPath

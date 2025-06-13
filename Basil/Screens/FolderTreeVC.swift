@@ -10,15 +10,13 @@ import UIKit
 //
 // Displays a tree visualizing the recipe folder hierarchy, used to select a folder
 //
-class FolderTreeVC: UIViewController {
+class FolderTreeVC: UITableViewController {
     static let reuseID = "FolderTreeCell"
 
     struct Item {
         let folder: RecipeFolder
         let indentLevel: Int
     }
-
-    private let tableView = UITableView()
 
     private var items: [Item] = []
     private var currentFolder: UUID
@@ -60,42 +58,21 @@ class FolderTreeVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.configureViewController()
-        self.configureTableView()
-    }
 
-    private func configureViewController() {
         self.title = "Move to folder"
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(self.dismissSelf))
 
-        // dismiss the view when the cancel button is tapped
-        let cancelButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(self.dismissVC))
-        self.navigationItem.rightBarButtonItem = cancelButton
-    }
-
-    private func configureTableView() {
-        self.view.addSubview(self.tableView)
-
-        self.tableView.frame = self.view.bounds
-        self.tableView.delegate = self
-        self.tableView.dataSource = self
         self.tableView.keyboardDismissMode = .onDrag
         self.tableView.removeExcessCells()
 
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: FolderTreeVC.reuseID)
     }
 
-    @objc func dismissVC() {
-        self.dismiss(animated: true)
-    }
-}
-
-extension FolderTreeVC: UITableViewDataSource, UITableViewDelegate {
-
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.items.count
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: FolderTreeVC.reuseID)!
         let item = self.items[indexPath.row]
         let isEnabled = item.folder.uuid != self.currentFolder
@@ -112,9 +89,9 @@ extension FolderTreeVC: UITableViewDataSource, UITableViewDelegate {
         return cell
     }
 
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let item = self.items[indexPath.row]
-        self.dismissVC()
+        self.dismissSelf()
         self.completionHander(item.folder)
     }
 }

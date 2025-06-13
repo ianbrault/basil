@@ -15,7 +15,7 @@ struct TextViewContentConfiguration: UIContentConfiguration {
 
     var onChange: ((String?, UIView) -> Void)?
 
-    var insets: UIEdgeInsets = UIEdgeInsets(top: 2, left: 12, bottom: 2, right: 12)
+    var insets: UIEdgeInsets = UIEdgeInsets(top: 4, left: 12, bottom: 0, right: 12)
 
     func makeContentView() -> UIView & UIContentView {
         return TextViewContentView(configuration: self)
@@ -66,10 +66,8 @@ class TextViewContentView: UIView, UIContentView {
         self.onChange = configuration.onChange
 
         let placeholderInsets = UIEdgeInsets(
-            top: configuration.insets.top + (UIFont.preferredFont(forTextStyle: .body).pointSize / 2),
-            left: configuration.insets.left + 4,
-            bottom: 0,
-            right: configuration.insets.right + 4
+            top: 0, left: configuration.insets.left + 5,
+            bottom: 0, right: configuration.insets.right + 5,
         )
         self.addPinnedSubview(self.textView, insets: configuration.insets)
         self.addPinnedSubview(self.placeholderLabel, insets: placeholderInsets)

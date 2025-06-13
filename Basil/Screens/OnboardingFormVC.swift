@@ -12,7 +12,7 @@ import UIKit
 // Presents a form to allow the user to register or login, depending on the provided style
 // Uses the scene delegate to transfer control back to the main flow once the user info has been validated
 //
-class OnboardingFormVC: UIViewController {
+class OnboardingFormVC: UITableViewController {
     static let reuseID = "OnboardingFormCell"
 
     enum FormStyle {
@@ -49,7 +49,6 @@ class OnboardingFormVC: UIViewController {
     private var style: FormStyle
     private var onCompletion: ((BasilError?) -> Void)?
 
-    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private var button: Button!
     private var cells: [Cell]!
 
@@ -78,7 +77,7 @@ class OnboardingFormVC: UIViewController {
                 Cell(image: SFSymbols.password, placeholder: "Password", contentType: .password, isSecure: true),
             ]
         }
-        super.init(nibName: nil, bundle: nil)
+        super.init(style: .insetGrouped)
     }
 
     required init?(coder: NSCoder) {
@@ -113,11 +112,6 @@ class OnboardingFormVC: UIViewController {
     }
 
     private func configureTableView() {
-        self.view.addSubview(self.tableView)
-
-        self.tableView.frame = self.view.bounds
-        self.tableView.dataSource = self
-        self.tableView.delegate = self
         self.tableView.contentInset.top = 16
         self.tableView.keyboardDismissMode = .onDrag
         self.tableView.separatorInsetReference = .fromAutomaticInsets
@@ -204,11 +198,8 @@ class OnboardingFormVC: UIViewController {
             NetworkManager.authenticate(email: email, password: password, handler: handler)
         }
     }
-}
 
-extension OnboardingFormVC: UITableViewDataSource, UITableViewDelegate {
-
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch self.style {
         case .register:
             return 3
@@ -217,7 +208,7 @@ extension OnboardingFormVC: UITableViewDataSource, UITableViewDelegate {
         }
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: OnboardingFormVC.reuseID)!
         let info = self.cells[indexPath.row]
 

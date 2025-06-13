@@ -11,13 +11,12 @@ import UIKit
 // Displays a list of groceries
 // Allows users to add/delete groceries and check/reorder items
 //
-class GroceryListVC: UIViewController {
+class GroceryListVC: UITableViewController {
     static let reuseID = "GroceryCell"
 
     typealias DataSource = UITableViewDiffableDataSource<Int, Ingredient>
     typealias Snapshot = NSDiffableDataSourceSnapshot<Int, Ingredient>
 
-    private let tableView = UITableView()
     private let feedback = UISelectionFeedbackGenerator()
 
     private lazy var dataSource = DataSource(tableView: self.tableView) { (tableView, indexPath, grocery) -> UITableViewCell? in
@@ -72,10 +71,6 @@ class GroceryListVC: UIViewController {
     }
 
     private func configureTableView() {
-        self.view.addSubview(self.tableView)
-
-        self.tableView.frame = self.view.bounds
-        self.tableView.delegate = self
         self.tableView.separatorStyle = .none
         self.tableView.keyboardDismissMode = .onDrag
         self.tableView.removeExcessCells()
@@ -142,12 +137,8 @@ class GroceryListVC: UIViewController {
         }
         self.present(alert, animated: true)
     }
-}
 
-
-extension GroceryListVC: UITableViewDelegate {
-
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let newIndexPath = State.manager.groceryList.toggleComplete(at: indexPath)
         State.manager.storeGroceryList()
 
@@ -156,7 +147,7 @@ extension GroceryListVC: UITableViewDelegate {
         self.feedback.selectionChanged()
     }
 
-    func tableView(
+    override func tableView(
         _ tableView: UITableView,
         contextMenuConfigurationForRowAt indexPath: IndexPath,
         point: CGPoint

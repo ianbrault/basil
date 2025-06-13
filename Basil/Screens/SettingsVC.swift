@@ -15,7 +15,7 @@ import UIKit
 // change email
 // change password
 //
-class SettingsVC: UIViewController {
+class SettingsVC: UITableViewController {
     static let reuseID = "SettingsCell"
 
     struct Section {
@@ -23,8 +23,15 @@ class SettingsVC: UIViewController {
         let action: (() -> Void)?
     }
 
-    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private var sections: [[Section]] = []
+
+    init() {
+        super.init(style: .insetGrouped)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -109,11 +116,6 @@ class SettingsVC: UIViewController {
     }
 
     private func configureTableView() {
-        self.view.addSubview(self.tableView)
-
-        self.tableView.frame = self.view.bounds
-        self.tableView.dataSource = self
-        self.tableView.delegate = self
         self.tableView.contentInset.top = 16
         self.tableView.keyboardDismissMode = .onDrag
         self.tableView.separatorInsetReference = .fromAutomaticInsets
@@ -199,23 +201,20 @@ class SettingsVC: UIViewController {
         alert.isSecureTextEntry = true
         self.present(alert, animated: true)
     }
-}
 
-extension SettingsVC: UITableViewDataSource, UITableViewDelegate {
-
-    func numberOfSections(in tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return self.sections.count
     }
 
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return StyleGuide.tableCellHeight
     }
 
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.sections[section].count
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: SettingsVC.reuseID)!
         var content = cell.defaultContentConfiguration()
         self.sections[indexPath.section][indexPath.row].cell(&content)
@@ -223,7 +222,7 @@ extension SettingsVC: UITableViewDataSource, UITableViewDelegate {
         return cell
     }
 
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.sections[indexPath.section][indexPath.row].action?()
     }
 }

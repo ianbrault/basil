@@ -11,6 +11,10 @@ fileprivate var containerView: UIView!
 
 extension UIViewController {
 
+    @objc func dismissSelf() {
+        self.dismiss(animated: true)
+    }
+
     func addNotificationObserver(name: NSNotification.Name?, selector: Selector) {
         NotificationCenter.default.addObserver(self, selector: selector, name: name, object: nil)
     }
