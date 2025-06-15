@@ -18,6 +18,7 @@ struct StyleGuide {
 
         let primaryText = UIColor.label
         let secondaryText = UIColor.secondaryLabel
+        let tertiaryText = UIColor.tertiaryLabel
 
         let error = UIColor.systemRed
     }

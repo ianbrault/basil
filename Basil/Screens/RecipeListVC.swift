@@ -79,7 +79,7 @@ class RecipeListVC: UIViewController {
             // this should never happen but including as a fail-safe
             self.title = "Recipes"
             self.items.removeAll()
-            self.showEmptyStateView(.recipes, in: self.view)
+            self.tableView.backgroundView = EmptyStateView(.recipes)
             return
         }
         self.title = folder.name.isEmpty ? "Recipes" : folder.name
@@ -119,9 +119,9 @@ class RecipeListVC: UIViewController {
         self.dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
 
         if self.items.isEmpty {
-            self.showEmptyStateView(.recipes, in: self.view)
+            self.tableView.backgroundView = EmptyStateView(.recipes)
         } else {
-            self.removeEmptyStateView(in: self.view)
+            self.tableView.backgroundView = nil
         }
     }
 
@@ -188,8 +188,9 @@ class RecipeListVC: UIViewController {
         self.tableView.delegate = self
         self.tableView.allowsMultipleSelection = true
         self.tableView.allowsMultipleSelectionDuringEditing = true
-        self.tableView.tintColor = StyleGuide.colors.primary
         self.tableView.keyboardDismissMode = .onDrag
+        self.tableView.tintColor = StyleGuide.colors.primary
+        self.tableView.tableHeaderView = UIView()
         self.tableView.removeExcessCells()
 
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: RecipeListVC.reuseID)

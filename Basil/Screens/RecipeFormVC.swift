@@ -113,7 +113,12 @@ class RecipeFormVC: UITableViewController {
             reuseID = RecipeFormCell.buttonReuseID
         }
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseID, for: indexPath) as? RecipeFormCell
-        cell?.delegate = self
+        cell?.onChange = { [weak self] (text) in
+            self?.cells[indexPath.section][indexPath.row].text = text
+            // allow text fields to expand or shrink lines
+            self?.tableView.beginUpdates()
+            self?.tableView.endUpdates()
+        }
         cell?.set(info, for: indexPath)
         return cell
     }
@@ -275,9 +280,7 @@ class RecipeFormVC: UITableViewController {
         // then apply the snapshot to append the new input row
         self.applySnapshot()
         // and finally focus the new input row
-        DispatchQueue.main.async {
-            tableView.cellForRow(at: indexPath)?.becomeFirstResponder()
-        }
+        tableView.cellForRow(at: indexPath)?.contentView.becomeFirstResponder()
     }
 
     override func tableView(
@@ -287,9 +290,9 @@ class RecipeFormVC: UITableViewController {
         // do not allow the title to be deleted
         guard let section = Section(rawValue: indexPath.section), section != .title else { return nil }
 
-        let contextItem = UIContextualAction(style: .destructive, title: "Delete") {  (action, view, actionPerformed) in
-            self.cells[indexPath.section].remove(at: indexPath.row)
-            self.applySnapshot()
+        let contextItem = UIContextualAction(style: .destructive, title: "Delete") { [weak self] (action, view, actionPerformed) in
+            self?.cells[indexPath.section].remove(at: indexPath.row)
+            self?.applySnapshot()
             actionPerformed(true)
         }
         // do not allow buttons to be deleted
@@ -314,19 +317,5 @@ class RecipeFormVC: UITableViewController {
             return sourceIndexPath
         }
         return proposedDestinationIndexPath
-    }
-}
-
-extension RecipeFormVC: RecipeFormCell.Delegate {
-
-    func textFieldDidChange(text: String, sender: UIResponder) {
-        if let cell = sender.next(ofType: RecipeFormCell.self) {
-            if let indexPath = tableView.indexPath(for: cell) {
-                self.cells[indexPath.section][indexPath.row].text = text
-                // allow text fields to expand or shrink lines
-                self.tableView.beginUpdates()
-                self.tableView.endUpdates()
-            }
-        }
     }
 }

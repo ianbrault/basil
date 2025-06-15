@@ -13,31 +13,26 @@ import Foundation
 //
 class GroceryList: Codable {
 
-    private var incomplete: [Ingredient] = []
-    private var complete: [Ingredient] = []
+    private var groceries: [Ingredient] = []
 
     var count: Int {
-        return self.incomplete.count + self.complete.count
+        return self.groceries.count
     }
 
     var isEmpty: Bool {
-        return self.incomplete.isEmpty && self.complete.isEmpty
+        return self.groceries.isEmpty
     }
 
-    var items: [Ingredient] {
-        return self.incomplete + self.complete
+    var last: Ingredient? {
+        return self.groceries.last
     }
 
     func grocery(at indexPath: IndexPath) -> Ingredient {
-        if indexPath.row < self.incomplete.count {
-            return self.incomplete[indexPath.row]
-        } else {
-            return self.complete[indexPath.row - self.incomplete.count]
-        }
+        return self.groceries[indexPath.row]
     }
 
     func addIngredient(_ ingredient: Ingredient) {
-        let _ = self.incomplete.add(ingredient)
+        let _ = self.groceries.add(ingredient)
     }
 
     func addIngredients(from recipe: Recipe) {
@@ -47,55 +42,26 @@ class GroceryList: Codable {
     }
 
     func remove(at indexPath: IndexPath) {
-        if indexPath.row < self.incomplete.count {
-            self.incomplete.remove(at: indexPath.row)
-        } else {
-            self.complete.remove(at: indexPath.row - self.incomplete.count)
-        }
+        self.groceries.remove(at: indexPath.row)
     }
 
     func replace(at indexPath: IndexPath, with grocery: Ingredient) -> IndexPath {
-        if indexPath.row < self.incomplete.count {
-            // first check if the new grocery can be merged with any others in its list
-            if let row = self.incomplete.tryMerge(grocery, excluding: indexPath.row) {
-                self.remove(at: indexPath)
-                return IndexPath(row: row, section: 0)
-            } else {
-                self.incomplete[indexPath.row] = grocery
-                return indexPath
-            }
+        // first check if the new grocery can be merged with any others in its list
+        if let row = self.groceries.tryMerge(grocery, excluding: indexPath.row) {
+            self.remove(at: indexPath)
+            return IndexPath(row: row, section: 0)
         } else {
-            // first check if the new grocery can be merged with any others in its list
-            if let row = self.complete.tryMerge(grocery, excluding: indexPath.row - self.incomplete.count) {
-                self.remove(at: indexPath)
-                return IndexPath(row: row + self.incomplete.count, section: 0)
-            } else {
-                self.complete[indexPath.row - self.incomplete.count] = grocery
-                return indexPath
-            }
+            self.groceries[indexPath.row] = grocery
+            return indexPath
         }
     }
 
-    func toggleComplete(at indexPath: IndexPath) -> IndexPath {
-        let grocery = self.grocery(at: indexPath)
-        grocery.toggleComplete()
-
-        var row: Int
-        if grocery.complete {
-            // move from the incomplete list to head of the complete list
-            self.remove(at: indexPath)
-            row = self.complete.add(grocery, at: 0) + self.incomplete.count
-        } else {
-            // move from the complete list to the tail of the incomplete list
-            self.remove(at: indexPath)
-            row = self.incomplete.add(grocery)
-        }
-        return IndexPath(row: row, section: 0)
+    func toggleComplete(at indexPath: IndexPath) {
+        self.grocery(at: indexPath).toggleComplete()
     }
 
     func clear() {
-        self.incomplete.removeAll()
-        self.complete.removeAll()
+        self.groceries.removeAll()
     }
 }
 

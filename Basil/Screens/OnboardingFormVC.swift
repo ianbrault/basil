@@ -12,7 +12,7 @@ import UIKit
 // Presents a form to allow the user to register or login, depending on the provided style
 // Uses the scene delegate to transfer control back to the main flow once the user info has been validated
 //
-class OnboardingFormVC: UITableViewController {
+class OnboardingFormVC: UIViewController {
     static let reuseID = "OnboardingFormCell"
 
     enum FormStyle {
@@ -56,6 +56,7 @@ class OnboardingFormVC: UITableViewController {
     private let passwordIndex = IndexPath(row: 1, section: 0)
     private let confirmPasswordIndex = IndexPath(row: 2, section: 0)
 
+    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private let buttonHeight: CGFloat = 54
     private let insets = UIEdgeInsets(top: 0, left: 40, bottom: 16, right: 40)
 
@@ -77,7 +78,7 @@ class OnboardingFormVC: UITableViewController {
                 Cell(image: SFSymbols.password, placeholder: "Password", contentType: .password, isSecure: true),
             ]
         }
-        super.init(style: .insetGrouped)
+        super.init(nibName: nil, bundle: nil)
     }
 
     required init?(coder: NSCoder) {
@@ -112,6 +113,11 @@ class OnboardingFormVC: UITableViewController {
     }
 
     private func configureTableView() {
+        self.view.addSubview(self.tableView)
+
+        self.tableView.frame = self.view.bounds
+        self.tableView.dataSource = self
+        self.tableView.delegate = self
         self.tableView.contentInset.top = 16
         self.tableView.keyboardDismissMode = .onDrag
         self.tableView.separatorInsetReference = .fromAutomaticInsets
@@ -198,8 +204,11 @@ class OnboardingFormVC: UITableViewController {
             NetworkManager.authenticate(email: email, password: password, handler: handler)
         }
     }
+}
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+extension OnboardingFormVC: UITableViewDataSource, UITableViewDelegate {
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch self.style {
         case .register:
             return 3
@@ -208,7 +217,7 @@ class OnboardingFormVC: UITableViewController {
         }
     }
 
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: OnboardingFormVC.reuseID)!
         let info = self.cells[indexPath.row]
 
@@ -220,13 +229,8 @@ class OnboardingFormVC: UITableViewController {
         content.contentType = (self.style == .register && info.contentType == .password) ? .newPassword : info.contentType
         content.isSecureTextEntry = info.isSecure
 
-        content.onChange =  { [weak self] (text, sender) in
-            guard let text else { return }
-            if let cell = sender.next(ofType: UITableViewCell.self) {
-                if let i = tableView.indexPath(for: cell) {
-                    self?.cells[i.row].text = text
-                }
-            }
+        content.onChange =  { [weak self] (text) in
+            self?.cells[indexPath.row].text = text
         }
 
         cell.contentConfiguration = content

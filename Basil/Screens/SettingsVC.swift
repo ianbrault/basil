@@ -206,10 +206,6 @@ class SettingsVC: UITableViewController {
         return self.sections.count
     }
 
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return StyleGuide.tableCellHeight
-    }
-
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.sections[section].count
     }

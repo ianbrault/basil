@@ -14,11 +14,7 @@ class RecipeFormCell: UITableViewCell {
     typealias Info = RecipeFormVC.Cell
     typealias Section = RecipeFormVC.Section
 
-    protocol Delegate: AnyObject {
-        func textFieldDidChange(text: String, sender: UIResponder)
-    }
-
-    weak var delegate: Delegate?
+    var onChange: ((String) -> Void)?
 
     private func setTextField(with text: String?, for indexPath: IndexPath) {
         guard let text, let section = Section(rawValue: indexPath.section) else { return }
@@ -26,9 +22,8 @@ class RecipeFormCell: UITableViewCell {
 
         content.text = text
         content.placeholder = RecipeFormCell.textFieldPlaceholder(for: section)
-        content.onChange =  { [weak self] (text, sender) in
-            guard let text else { return }
-            self?.delegate?.textFieldDidChange(text: text, sender: sender)
+        content.onChange =  { [weak self] (text) in
+            self?.onChange?(text)
         }
 
         switch section {
@@ -62,13 +57,6 @@ class RecipeFormCell: UITableViewCell {
         case .button:
             self.setButton(for: indexPath)
         }
-    }
-
-    override func becomeFirstResponder() -> Bool {
-        if let textFieldView = self.contentView as? TextFieldContentView {
-            textFieldView.textField.becomeFirstResponder()
-        }
-        return false
     }
 
     static func buttonText(for section: Section) -> String {

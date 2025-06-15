@@ -46,21 +46,6 @@ extension UIViewController {
         self.presentErrorAlert(.notImplemented)
     }
 
-    func showEmptyStateView(_ style: EmptyStateView.Style, in view: UIView) {
-        self.removeEmptyStateView(in: view)
-
-        let emptyStateView = EmptyStateView(style, frame: view.bounds)
-        view.addSubview(emptyStateView)
-    }
-
-    func removeEmptyStateView(in view: UIView) {
-        view.subviews.forEach { (subview) in
-            if subview is EmptyStateView {
-                subview.removeFromSuperview()
-            }
-        }
-    }
-
     func showLoadingView() {
         containerView = UIView(frame: view.bounds)
         self.view.addSubview(containerView)

@@ -13,7 +13,7 @@ struct TextViewContentConfiguration: UIContentConfiguration {
     var placeholder: String = ""
     var autocapitalizationType: UITextAutocapitalizationType = .none
 
-    var onChange: ((String?, UIView) -> Void)?
+    var onChange: ((String) -> Void)?
 
     var insets: UIEdgeInsets = UIEdgeInsets(top: 4, left: 12, bottom: 0, right: 12)
 
@@ -21,7 +21,7 @@ struct TextViewContentConfiguration: UIContentConfiguration {
         return TextViewContentView(configuration: self)
     }
 
-    func updated(for state: UIConfigurationState) -> TextViewContentConfiguration {
+    func updated(for state: UIConfigurationState) -> Self {
         return self
     }
 }
@@ -36,7 +36,7 @@ class TextViewContentView: UIView, UIContentView {
 
     private let textView = UITextView()
     private let placeholderLabel = BodyLabel()
-    private var onChange: ((String?, UIView) -> Void)?
+    private var onChange: ((String) -> Void)?
 
     static func attributedText(_ text: String, color: UIColor = .label) -> NSAttributedString {
         let font = UIFont.preferredFont(forTextStyle: .body)
@@ -82,13 +82,16 @@ class TextViewContentView: UIView, UIContentView {
         self.placeholderLabel.textColor = StyleGuide.colors.secondaryText
         self.placeholderLabel.isHidden = !configuration.text.isEmpty
     }
+
+    override func becomeFirstResponder() -> Bool {
+        self.textView.becomeFirstResponder()
+    }
 }
 
 extension TextViewContentView: UITextViewDelegate {
 
     func textViewDidChange(_ textView: UITextView) {
         self.placeholderLabel.isHidden = !textView.text.isEmpty
-        self.onChange?(textView.text, textView)
+        self.onChange?(textView.text ?? "")
     }
 }
-

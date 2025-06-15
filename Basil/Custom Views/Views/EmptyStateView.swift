@@ -31,8 +31,8 @@ class EmptyStateView: UIView {
     let imageSize: CGFloat = 72
     let lineSpacing: CGFloat = 4
 
-    init(_ style: Style, frame: CGRect) {
-        super.init(frame: frame)
+    init(_ style: Style) {
+        super.init(frame: .zero)
         self.configure(style: style)
     }
 

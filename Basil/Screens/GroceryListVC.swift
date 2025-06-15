@@ -14,46 +14,16 @@ import UIKit
 class GroceryListVC: UITableViewController {
     static let reuseID = "GroceryCell"
 
-    typealias DataSource = UITableViewDiffableDataSource<Int, Ingredient>
-    typealias Snapshot = NSDiffableDataSourceSnapshot<Int, Ingredient>
-
     private let feedback = UISelectionFeedbackGenerator()
-
-    private lazy var dataSource = DataSource(tableView: self.tableView) { (tableView, indexPath, grocery) -> UITableViewCell? in
-        var cell = tableView.dequeueReusableCell(withIdentifier: GroceryListVC.reuseID, for: indexPath)
-
-        var configuration = cell.defaultContentConfiguration()
-        configuration.text = grocery.toString()
-        if grocery.complete {
-            configuration.image = SFSymbols.checkmarkCircleFill
-            configuration.imageProperties.tintColor = StyleGuide.colors.primary
-        } else {
-            configuration.image = SFSymbols.circle
-            configuration.imageProperties.tintColor = StyleGuide.colors.secondaryText
-        }
-        cell.contentConfiguration = configuration
-
-        return cell
-    }
-
-    func applySnapshot(reload identifiers: [Ingredient] = [], animatingDifferences: Bool = true) {
-        var snapshot = Snapshot()
-        snapshot.appendSections([0])
-        snapshot.appendItems(State.manager.groceryList.items, toSection: 0)
-        snapshot.reloadItems(identifiers)
-        self.dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
-
-        if State.manager.groceryList.isEmpty {
-            self.showEmptyStateView(.groceries, in: self.view)
-        } else {
-            self.removeEmptyStateView(in: self.view)
-        }
-    }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.title = "Groceries"
-        self.applySnapshot(animatingDifferences: false)
+        self.tableView.reloadData()
+        if State.manager.groceryList.isEmpty {
+            self.tableView.backgroundView = EmptyStateView(.groceries)
+        } else {
+            self.tableView.backgroundView = nil
+        }
     }
 
     override func viewDidLoad() {
@@ -63,7 +33,8 @@ class GroceryListVC: UITableViewController {
     }
 
     private func configureViewController() {
-        self.view.backgroundColor = .systemBackground
+        self.title = "Groceries"
+        self.view.backgroundColor = StyleGuide.colors.background
 
         let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(self.addGrocery))
         let deleteButton = UIBarButtonItem(title: nil, image: SFSymbols.trash, target: self, action: #selector(self.deleteGroceries))
@@ -71,60 +42,65 @@ class GroceryListVC: UITableViewController {
     }
 
     private func configureTableView() {
-        self.tableView.separatorStyle = .none
+        self.tableView.allowsSelection = false
         self.tableView.keyboardDismissMode = .onDrag
+        self.tableView.tableHeaderView = UIView()
         self.tableView.removeExcessCells()
 
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: GroceryListVC.reuseID)
     }
 
+    private func deleteGrocery(at indexPath: IndexPath) {
+        State.manager.removeGrocery(at: indexPath)
+        self.tableView.deleteRows(at: [indexPath], with: .automatic)
+    }
+
+    private func modifyGrocery(_ text: String, at indexPath: IndexPath) {
+        // if the grocery is empty, remove it
+        if text.isEmpty {
+            self.deleteGrocery(at: indexPath)
+            return
+        }
+
+        let grocery = IngredientParser.shared.parse(string: text)
+        guard grocery != State.manager.groceryList.grocery(at: indexPath) else { return }
+
+        let newIndexPath = State.manager.replaceGrocery(at: indexPath, with: grocery)
+        if newIndexPath != indexPath {
+            self.tableView.performBatchUpdates({
+                self.tableView.deleteRows(at: [indexPath], with: .automatic)
+            }, completion: { (_) in
+                self.tableView.reloadRows(at: [newIndexPath], with: .automatic)
+            })
+        } else {
+            self.tableView.reloadRows(at: [indexPath], with: .automatic)
+        }
+    }
+
+    private func toggleGrocery(at indexPath: IndexPath) {
+        State.manager.groceryList.toggleComplete(at: indexPath)
+        self.feedback.selectionChanged()
+        self.tableView.reloadRows(at: [indexPath], with: .none)
+        // TODO: move complete to end of list (based on setting)
+    }
+
     @objc func addGrocery(_ action: UIAction) {
-        let alert = TextFieldAlert(
-            title: "New Ingredient",
-            message: "Enter the ingredient for the grocery list",
-            placeholder: "ex. ½ red onion",
-            confirmText: "Save"
-        ) { [weak self] (text) in
-            guard let self else { return }
-
-            let ingredient = IngredientParser.shared.parse(string: text)
-            State.manager.addToGroceryList(ingredient)
-            self.applySnapshot(reload: [ingredient])
+        // if the final grocery is empty, simply re-focus the final empty grocery
+        // this can happen if the add button is pressed twice without entering any text in between
+        if State.manager.groceryList.last?.isEmpty ?? false {
+            let indexPath = IndexPath(row: State.manager.groceryList.count - 1, section: 0)
+            self.tableView.cellForRow(at: indexPath)?.contentView.becomeFirstResponder()
+            return
         }
-        alert.autocapitalizationType = UITextAutocapitalizationType.none
-        self.present(alert, animated: true)
-    }
 
-    @objc func editGrocery(_ action: UIAction, at indexPath: IndexPath) {
-        let grocery = State.manager.groceryList.grocery(at: indexPath)
-
-        let alert = TextFieldAlert(
-            title: "Edit Ingredient",
-            message: "Enter the ingredient for the grocery list",
-            placeholder: "ex. ½ red onion",
-            confirmText: "Save"
-        ) { [weak self] (text) in
-            guard let self else { return }
-
-            let grocery = IngredientParser.shared.parse(string: text)
-            let newIndexPath = State.manager.replaceGrocery(at: indexPath, with: grocery)
-            let newGrocery = State.manager.groceryList.grocery(at: newIndexPath)
-            self.applySnapshot(reload: [newGrocery])
-        }
-        alert.text = grocery.toString()
-        alert.autocapitalizationType = UITextAutocapitalizationType.none
-        self.present(alert, animated: true)
-    }
-
-    @objc func deleteGrocery(_ action: UIAction, at indexPath: IndexPath) {
-        let title = "Are you sure you want to delete this grocery?"
-        let alert = DeleteAlert(title: title) { [weak self] () in
-            guard let self = self else { return }
-
-            State.manager.removeGrocery(at: indexPath)
-            self.applySnapshot()
-        }
-        self.present(alert, animated: true)
+        let indexPath = IndexPath(row: State.manager.groceryList.count, section: 0)
+        State.manager.addToGroceryList(.empty())
+        // add and focus the new input row
+        self.tableView.performBatchUpdates({ [weak self] () in
+            self?.tableView.insertRows(at: [indexPath], with: .automatic)
+        }, completion: { [weak self] (_) in
+            self?.tableView.cellForRow(at: indexPath)?.contentView.becomeFirstResponder()
+        })
     }
 
     @objc func deleteGroceries(_ action: UIAction) {
@@ -133,34 +109,54 @@ class GroceryListVC: UITableViewController {
             guard let self = self else { return }
 
             State.manager.removeAllGroceries()
-            self.applySnapshot()
+            self.tableView.backgroundView = EmptyStateView(.groceries)
+            self.tableView.reloadData()
         }
         self.present(alert, animated: true)
     }
 
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let newIndexPath = State.manager.groceryList.toggleComplete(at: indexPath)
-        State.manager.storeGroceryList()
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return State.manager.groceryList.count
+    }
 
-        let grocery = State.manager.groceryList.grocery(at: newIndexPath)
-        self.applySnapshot(reload: [grocery])
-        self.feedback.selectionChanged()
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: GroceryListVC.reuseID, for: indexPath)
+        let grocery = State.manager.groceryList.grocery(at: indexPath)
+
+        var configuration = TextFieldContentConfiguration()
+        configuration.text = grocery.toString()
+        configuration.imageSize = 28
+        configuration.imageToTextPadding = 12
+        if grocery.complete {
+            configuration.image = SFSymbols.checkmarkCircleFill
+            configuration.tintColor = StyleGuide.colors.primary
+        } else {
+            configuration.image = SFSymbols.circle
+            configuration.tintColor = StyleGuide.colors.tertiaryText
+        }
+        configuration.onEndEditing = { [weak self] (text) in
+            guard let index = self?.tableView.indexPath(for: cell) else { return }
+            self?.modifyGrocery(text, at: index)
+        }
+        configuration.onImageTap = { [weak self] () in
+            guard let index = self?.tableView.indexPath(for: cell) else { return }
+            self?.toggleGrocery(at: index)
+        }
+
+        cell.contentConfiguration = configuration
+        cell.separatorInset.left = configuration.contentInset + configuration.imageSize + configuration.imageToTextPadding
+
+        return cell
     }
 
     override func tableView(
         _ tableView: UITableView,
-        contextMenuConfigurationForRowAt indexPath: IndexPath,
-        point: CGPoint
-    ) -> UIContextMenuConfiguration? {
-        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] (_) in
-            guard let self = self else { return UIMenu() }
-            let editAction = UIAction(title: "Edit grocery", image: SFSymbols.editRecipe) { (action) in
-                self.editGrocery(action, at: indexPath)
-            }
-            let deleteAction = UIAction(title: "Delete grocery", image: SFSymbols.trash, attributes: .destructive) { (action) in
-                self.deleteGrocery(action, at: indexPath)
-            }
-            return UIMenu(title: "", children: [editAction, deleteAction])
+        trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
+    ) -> UISwipeActionsConfiguration? {
+        let contextItem = UIContextualAction(style: .destructive, title: "Delete") { [weak self] (action, view, actionPerformed) in
+            self?.deleteGrocery(at: indexPath)
+            actionPerformed(true)
         }
+        return UISwipeActionsConfiguration(actions: [contextItem])
     }
 }

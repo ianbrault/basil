@@ -19,7 +19,9 @@ struct TextFieldContentConfiguration: UIContentConfiguration {
     var isSecureTextEntry: Bool = false
     var autocapitalizationType: UITextAutocapitalizationType = .none
 
-    var onChange: ((String?, UIView) -> Void)?
+    var onChange: ((String) -> Void)?
+    var onEndEditing: ((String) -> Void)?
+    var onImageTap: (() -> Void)?
 
     var imageSize: CGFloat = 24
     var contentInset: CGFloat = 16
@@ -29,7 +31,7 @@ struct TextFieldContentConfiguration: UIContentConfiguration {
         return TextFieldContentView(configuration: self)
     }
 
-    func updated(for state: UIConfigurationState) -> TextFieldContentConfiguration {
+    func updated(for state: UIConfigurationState) -> Self {
         return self
     }
 }
@@ -44,6 +46,10 @@ class TextFieldContentView: UIView, UIContentView {
 
     let image = UIImageView()
     let textField = UITextField()
+
+    var onChange: ((String) -> Void)?
+    var onEndEditing: ((String) -> Void)?
+    var onImageTap: (() -> Void)?
 
     override var intrinsicContentSize: CGSize {
         CGSize(width: 0, height: StyleGuide.tableCellHeight)
@@ -60,13 +66,21 @@ class TextFieldContentView: UIView, UIContentView {
 
     private func configure() {
         guard let configuration = self.configuration as? TextFieldContentConfiguration else { return }
+        self.onChange = configuration.onChange
+        self.onEndEditing = configuration.onEndEditing
+        self.onImageTap = configuration.onImageTap
 
         self.addSubview(self.image)
         self.addSubview(self.textField)
 
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.imageTapped))
+        tapGesture.delegate = self
+        self.addGestureRecognizer(tapGesture)
+
         self.image.image = configuration.image
         self.image.tintColor = configuration.tintColor
         self.image.contentMode = .scaleAspectFill
+        self.image.isUserInteractionEnabled = true
         self.image.translatesAutoresizingMaskIntoConstraints = false
 
         self.textField.text = configuration.text
@@ -77,12 +91,8 @@ class TextFieldContentView: UIView, UIContentView {
         self.textField.autocapitalizationType = configuration.autocapitalizationType
         self.textField.clearButtonMode = .whileEditing
         self.textField.translatesAutoresizingMaskIntoConstraints = false
-
-        self.textField.addAction(UIAction { (action) in
-            if let sender = action.sender as? UITextField {
-                configuration.onChange?(sender.text, sender)
-            }
-        }, for: .editingChanged)
+        self.textField.addTarget(self, action: #selector(self.textChanged), for: .editingChanged)
+        self.textField.addTarget(self, action: #selector(self.editingEnded), for: .editingDidEnd)
 
         self.image.heightAnchor.constraint(equalToConstant: configuration.imageSize).isActive = true
         self.image.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
@@ -105,5 +115,33 @@ class TextFieldContentView: UIView, UIContentView {
         ).isActive = true
         self.textField.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
         self.textField.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
+    }
+
+    override func becomeFirstResponder() -> Bool {
+        self.textField.becomeFirstResponder()
+    }
+
+    @objc func textChanged(_ sender: UITextField) {
+        guard let configuration = self.configuration as? TextFieldContentConfiguration else { return }
+        configuration.onChange?(self.textField.text ?? "")
+    }
+
+    @objc func editingEnded(_ sender: UITextField) {
+        guard let configuration = self.configuration as? TextFieldContentConfiguration else { return }
+        configuration.onEndEditing?(self.textField.text ?? "")
+    }
+
+    @objc func imageTapped() {
+        self.onImageTap?()
+    }
+}
+
+extension TextFieldContentView: UIGestureRecognizerDelegate {
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        guard let configuration = self.configuration as? TextFieldContentConfiguration else { return false }
+
+        let taploc = touch.location(in: self)
+        return taploc.x < configuration.contentInset + configuration.imageSize + configuration.imageToTextPadding
     }
 }
