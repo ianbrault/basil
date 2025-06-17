@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E30A56362DFE633800A35827 /* SwitchContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E30A56352DFE633800A35827 /* SwitchContentView.swift */; };
 		E3138BD52C6C6A4000F8E05E /* OnboardingFormVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3138BD42C6C6A4000F8E05E /* OnboardingFormVC.swift */; };
 		E316DF1B2C630A9C009550B1 /* QuantityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E316DF1A2C630A9C009550B1 /* QuantityTests.swift */; };
 		E320DE3D2C708FB500C9D6DA /* ListContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E320DE3C2C708FB500C9D6DA /* ListContentView.swift */; };
@@ -109,6 +110,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E30A56352DFE633800A35827 /* SwitchContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchContentView.swift; sourceTree = "<group>"; };
 		E3138BD42C6C6A4000F8E05E /* OnboardingFormVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFormVC.swift; sourceTree = "<group>"; };
 		E316DF1A2C630A9C009550B1 /* QuantityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuantityTests.swift; sourceTree = "<group>"; };
 		E320DE3C2C708FB500C9D6DA /* ListContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListContentView.swift; sourceTree = "<group>"; };
@@ -206,6 +208,7 @@
 			children = (
 				E39605182D8FA90800222CE6 /* CookingContentView.swift */,
 				E320DE3C2C708FB500C9D6DA /* ListContentView.swift */,
+				E30A56352DFE633800A35827 /* SwitchContentView.swift */,
 				E3316C0F2C6B5E9A00F90117 /* TextFieldContentView.swift */,
 				E3738C4F2C8D2D58001D58F5 /* TextViewContentView.swift */,
 			);
@@ -463,7 +466,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1530;
-				LastUpgradeCheck = 1540;
+				LastUpgradeCheck = 1640;
 				TargetAttributes = {
 					E3573E4829CC14B3000F7877 = {
 						CreatedOnToolsVersion = 14.2;
@@ -578,6 +581,7 @@
 				E34B4CEE29CF77CC0063A9A2 /* UIViewController+Ext.swift in Sources */,
 				E3C6F51F2DD1E7850093AA55 /* IngredientParser.swift in Sources */,
 				E320DE3D2C708FB500C9D6DA /* ListContentView.swift in Sources */,
+				E30A56362DFE633800A35827 /* SwitchContentView.swift in Sources */,
 				E323AB592C7A5CEB0028D6E3 /* StyleGuide.swift in Sources */,
 				E39605172D8E2B2E00222CE6 /* CookingItemVC.swift in Sources */,
 				E3573E6C29CC185A000F7877 /* Constants.swift in Sources */,
@@ -673,6 +677,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = ANZXS48535;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -734,6 +739,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = ANZXS48535;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -762,7 +768,6 @@
 				CODE_SIGN_ENTITLEMENTS = Basil/Support/Basil.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ANZXS48535;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Basil/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Basil;
@@ -798,7 +803,6 @@
 				CODE_SIGN_ENTITLEMENTS = Basil/Support/Basil.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ANZXS48535;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Basil/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Basil;
@@ -833,7 +837,6 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ANZXS48535;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -857,7 +860,6 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = ANZXS48535;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
