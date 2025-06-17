@@ -185,6 +185,10 @@ class RecipeFormVC: UITableViewController {
         self.tableView.keyboardDismissMode = .onDrag
         self.tableView.removeExcessCells()
 
+        // tap to dismiss keyboard
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissKeyboard))
+        self.tableView.addGestureRecognizer(gesture)
+
         self.tableView.register(RecipeFormCell.self, forCellReuseIdentifier: RecipeFormCell.textFieldReuseID)
         self.tableView.register(RecipeFormCell.self, forCellReuseIdentifier: RecipeFormCell.buttonReuseID)
     }
@@ -210,6 +214,10 @@ class RecipeFormVC: UITableViewController {
             self.cells[Section.instructions.rawValue].append(Cell(.textField, text: instruction))
         }
         self.cells[Section.instructions.rawValue].append(Cell(.button))
+    }
+
+    @objc func dismissKeyboard(_ action: UIAction) {
+        self.tableView.endEditing(true)
     }
 
     @objc func enableEditMode(_ action: UIAction? = nil) {

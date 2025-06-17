@@ -31,6 +31,10 @@ class GroceryList: Codable {
         return self.groceries[indexPath.row]
     }
 
+    func indexOf(grocery: Ingredient) -> IndexPath? {
+        return self.groceries.firstIndex { $0 == grocery }.map { IndexPath(row: $0, section: 0) }
+    }
+
     func addIngredient(_ ingredient: Ingredient) {
         let _ = self.groceries.add(ingredient)
     }
@@ -39,6 +43,10 @@ class GroceryList: Codable {
         for ingredient in recipe.ingredients {
             self.addIngredient(ingredient)
         }
+    }
+
+    func modify(at indexPath: IndexPath, with grocery: Ingredient) {
+        self.groceries[indexPath.row] = grocery
     }
 
     func remove(at indexPath: IndexPath) {
@@ -58,6 +66,20 @@ class GroceryList: Codable {
 
     func toggleComplete(at indexPath: IndexPath) {
         self.grocery(at: indexPath).toggleComplete()
+    }
+
+    func sortCheckedGroceries() {
+        let incomplete = self.groceries.filter { !$0.complete }
+        let complete = self.groceries.filter { $0.complete }
+        self.groceries = incomplete + complete
+    }
+
+    func mergeGroceries() {
+        var new: [Ingredient] = []
+        for grocery in self.groceries {
+            let _ = new.add(grocery)
+        }
+        self.groceries = new
     }
 
     func clear() {

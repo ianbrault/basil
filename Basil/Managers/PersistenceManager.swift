@@ -29,9 +29,19 @@ class PersistenceManager {
         static let folders = "folders"
         static let sequence = "sequence"
         static let groceryList = "groceryList"
+        // settings
+        static let sortCheckedGroceries = "sortCheckedGroceries"
         // deprecated but key is retained for use in migrations
         static let state = "state"
     }
+
+    private init() {
+        // set "non-default defaults" here
+        self.defaults.register(defaults: [
+            Keys.sortCheckedGroceries: true
+        ])
+    }
+
 
     var dataVersion: Int {
         get {
@@ -96,6 +106,15 @@ class PersistenceManager {
         }
         set {
             self.setObject(newValue, forKey: Keys.groceryList)
+        }
+    }
+
+    var sortCheckedGroceries: Bool {
+        get {
+            return self.defaults.bool(forKey: Keys.sortCheckedGroceries)
+        }
+        set {
+            self.defaults.set(newValue, forKey: Keys.sortCheckedGroceries)
         }
     }
 

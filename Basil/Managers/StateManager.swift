@@ -482,6 +482,11 @@ class State {
         self.storeGroceryList()
     }
 
+    func modifyGrocery(at indexPath: IndexPath, with grocery: Ingredient) {
+        self.groceryList.modify(at: indexPath, with: grocery)
+        self.storeGroceryList()
+    }
+
     func replaceGrocery(at indexPath: IndexPath, with grocery: Ingredient) -> IndexPath {
         let indexPath = self.groceryList.replace(at: indexPath, with: grocery)
         self.storeGroceryList()

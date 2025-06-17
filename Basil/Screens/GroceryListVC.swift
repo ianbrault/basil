@@ -18,6 +18,13 @@ class GroceryListVC: UITableViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+
+        State.manager.groceryList.mergeGroceries()
+        if PersistenceManager.shared.sortCheckedGroceries {
+            State.manager.groceryList.sortCheckedGroceries()
+        }
+        State.manager.storeGroceryList()
+
         self.tableView.reloadData()
         if State.manager.groceryList.isEmpty {
             self.tableView.backgroundView = EmptyStateView(.groceries)
@@ -47,6 +54,10 @@ class GroceryListVC: UITableViewController {
         self.tableView.tableHeaderView = UIView()
         self.tableView.removeExcessCells()
 
+        // tap to dismiss keyboard
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissKeyboard))
+        self.tableView.addGestureRecognizer(gesture)
+
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: GroceryListVC.reuseID)
     }
 
@@ -56,32 +67,29 @@ class GroceryListVC: UITableViewController {
     }
 
     private func modifyGrocery(_ text: String, at indexPath: IndexPath) {
-        // if the grocery is empty, remove it
-        if text.isEmpty {
-            self.deleteGrocery(at: indexPath)
-            return
-        }
-
         let grocery = IngredientParser.shared.parse(string: text)
-        guard grocery != State.manager.groceryList.grocery(at: indexPath) else { return }
-
-        let newIndexPath = State.manager.replaceGrocery(at: indexPath, with: grocery)
-        if newIndexPath != indexPath {
-            self.tableView.performBatchUpdates({
-                self.tableView.deleteRows(at: [indexPath], with: .automatic)
-            }, completion: { (_) in
-                self.tableView.reloadRows(at: [newIndexPath], with: .automatic)
-            })
-        } else {
-            self.tableView.reloadRows(at: [indexPath], with: .automatic)
-        }
+        State.manager.modifyGrocery(at: indexPath, with: grocery)
     }
 
     private func toggleGrocery(at indexPath: IndexPath) {
+        let grocery = State.manager.groceryList.grocery(at: indexPath)
         State.manager.groceryList.toggleComplete(at: indexPath)
+
         self.feedback.selectionChanged()
         self.tableView.reloadRows(at: [indexPath], with: .none)
-        // TODO: move complete to end of list (based on setting)
+
+        if PersistenceManager.shared.sortCheckedGroceries {
+            State.manager.groceryList.sortCheckedGroceries()
+            if let newIndexPath = State.manager.groceryList.indexOf(grocery: grocery) {
+                self.tableView.moveRow(at: indexPath, to: newIndexPath)
+            }
+        }
+
+        State.manager.storeGroceryList()
+    }
+
+    @objc func dismissKeyboard(_ action: UIAction) {
+        self.tableView.endEditing(true)
     }
 
     @objc func addGrocery(_ action: UIAction) {
@@ -134,9 +142,16 @@ class GroceryListVC: UITableViewController {
             configuration.image = SFSymbols.circle
             configuration.tintColor = StyleGuide.colors.tertiaryText
         }
-        configuration.onEndEditing = { [weak self] (text) in
+        configuration.onChange = { [weak self] (text) in
             guard let index = self?.tableView.indexPath(for: cell) else { return }
             self?.modifyGrocery(text, at: index)
+        }
+        configuration.onEndEditing = { [weak self] (text) in
+            // remove if done editing and the grocery is empty
+            guard let index = self?.tableView.indexPath(for: cell) else { return }
+            if text.isEmpty {
+                self?.deleteGrocery(at: index)
+            }
         }
         configuration.onImageTap = { [weak self] () in
             guard let index = self?.tableView.indexPath(for: cell) else { return }
