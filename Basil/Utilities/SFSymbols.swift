@@ -1,5 +1,5 @@
 //
-//  Constants.swift
+//  SFSymbols.swift
 //  RecipeBook
 //
 //  Created by Ian Brault on 3/22/23.
@@ -27,6 +27,7 @@ enum SFSymbols {
     static let importRecipe = UIImage(systemName: "tray.and.arrow.down")
     static let link = UIImage(systemName: "link")
     static let logout = UIImage(systemName: "person.crop.circle.badge.xmark")
+    static let paragraph = UIImage(systemName: "paragraphsign")
     static let recipeBook = UIImage(systemName: "text.book.closed")
     static let settings = UIImage(systemName: "gearshape")
     static let password = UIImage(systemName: "lock")

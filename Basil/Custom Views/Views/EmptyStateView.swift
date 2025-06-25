@@ -13,26 +13,27 @@ class EmptyStateView: UIView {
         case recipes
         case groceries
 
-        var systemName: String {
+        var image: UIImage? {
             switch self {
             case .recipes:
-                return "text.book.closed"
+                return SFSymbols.recipeBook
             case .groceries:
-                return "cart"
+                return SFSymbols.groceries
             }
         }
     }
 
-    let imageView = UIImageView()
-    let label = BodyLabel(textAlignment: .center)
+    private let stackView = UIStackView()
+    private let imageView = UIImageView()
+    private let label = UILabel()
 
-    let padding: CGFloat = 60
-    let spacing: CGFloat = 20
-    let imageSize: CGFloat = 72
-    let lineSpacing: CGFloat = 4
+    private let padding: CGFloat = 40
+    private let spacing: CGFloat = 20
+    private let imageSize: CGFloat = 72
+    private let lineSpacing: CGFloat = 4
 
-    init(_ style: Style, frame: CGRect) {
-        super.init(frame: frame)
+    init(_ style: Style) {
+        super.init(frame: .zero)
         self.configure(style: style)
     }
 
@@ -41,11 +42,35 @@ class EmptyStateView: UIView {
     }
 
     private func configure(style: Style) {
-        self.configureLogoImageView(style: style)
-        self.configureMessageLabel(style: style)
+        self.imageView.image = style.image
+        self.imageView.tintColor = StyleGuide.colors.tertiaryText
+        self.imageView.contentMode = .scaleAspectFit
+        self.imageView.widthAnchor.constraint(equalToConstant: self.imageSize).isActive = true
+        self.imageView.heightAnchor.constraint(equalToConstant: self.imageSize).isActive = true
+
+        self.label.attributedText = self.getMessageAttributedText(style: style)
+        self.label.font = StyleGuide.fonts.body
+        self.label.numberOfLines = 0
+        self.label.textAlignment = .center
+        self.label.textColor = StyleGuide.colors.secondaryText
+
+        self.stackView.translatesAutoresizingMaskIntoConstraints = false
+        self.stackView.axis = .vertical
+        self.stackView.alignment = .center
+        self.stackView.spacing = self.spacing
+        self.stackView.isLayoutMarginsRelativeArrangement = true
+        self.stackView.layoutMargins = UIEdgeInsets(top: 0, left: self.padding, bottom: 0, right: self.padding)
+
+        self.stackView.addArrangedSubview(self.imageView)
+        self.stackView.addArrangedSubview(self.label)
+
+        self.addSubview(self.stackView)
+        self.stackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: self.padding).isActive = true
+        self.stackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -self.padding).isActive = true
+        self.stackView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
     }
 
-    func getMessageAttributedText(style: Style) -> NSAttributedString {
+    private func getMessageAttributedText(style: Style) -> NSAttributedString {
         let imageAttachment = NSTextAttachment()
         imageAttachment.image = SFSymbols.add?.withTintColor(.secondaryLabel)
 
@@ -69,38 +94,5 @@ class EmptyStateView: UIView {
         string.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSMakeRange(0, string.length))
 
         return string
-    }
-
-    private func configureLogoImageView(style: Style) {
-        self.addSubview(self.imageView)
-
-        let symbol = UIImage(
-            systemName: style.systemName,
-            withConfiguration: UIImage.SymbolConfiguration(pointSize: self.imageSize, weight: .light))
-        let image = symbol?.withTintColor(.tertiaryLabel, renderingMode: .alwaysOriginal)
-
-        self.imageView.image = image
-        self.imageView.translatesAutoresizingMaskIntoConstraints = false
-
-        NSLayoutConstraint.activate([
-            self.imageView.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            self.imageView.bottomAnchor.constraint(equalTo: self.centerYAnchor),
-            self.imageView.widthAnchor.constraint(equalToConstant: self.imageSize),
-            self.imageView.heightAnchor.constraint(equalToConstant: self.imageSize),
-        ])
-    }
-
-    private func configureMessageLabel(style: Style) {
-        self.addSubview(self.label)
-
-        self.label.attributedText = self.getMessageAttributedText(style: style)
-        self.label.numberOfLines = 3
-        self.label.textColor = .secondaryLabel
-
-        NSLayoutConstraint.activate([
-            self.label.topAnchor.constraint(equalTo: self.imageView.bottomAnchor, constant: self.spacing),
-            self.label.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: self.padding),
-            self.label.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -self.padding),
-        ])
     }
 }

@@ -18,11 +18,19 @@ struct StyleGuide {
 
         let primaryText = UIColor.label
         let secondaryText = UIColor.secondaryLabel
+        let tertiaryText = UIColor.tertiaryLabel
 
         let error = UIColor.systemRed
     }
 
+    struct Font {
+        let body = UIFont.preferredFont(forTextStyle: .body)
+        let sectionHeader = UIFont.systemFont(ofSize: UIFont.preferredFont(forTextStyle: .subheadline).pointSize, weight: .semibold)
+    }
+
     static let colors = Color()
-    static let standardFontSize: CGFloat = 17
-    static let tableCellHeight: CGFloat = 46
+    static let fonts = Font()
+
+    static let tableCellHeight: CGFloat = 44
+    static let tableCellHeightInteractive: CGFloat = 46
 }

@@ -11,7 +11,7 @@ import UIKit
 // Individual page view for CookingVC
 // Contains ingredients and instructions for a recipe that is being cooked
 //
-class CookingItemVC: UIViewController {
+class CookingItemVC: UITableViewController {
     static let ingredientReuseID = "CookingIngredientCell"
     static let instructionReuseID = "CookingInstructionCell"
 
@@ -22,8 +22,6 @@ class CookingItemVC: UIViewController {
 
     var recipe: Recipe
     private var instructionState: [Bool]
-
-    private let tableView = UITableView()
     private let feedback = UISelectionFeedbackGenerator()
 
     init(recipe: Recipe) {
@@ -38,34 +36,19 @@ class CookingItemVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.backgroundColor = StyleGuide.colors.background
-        self.configureTableView()
-    }
 
-    private func configureTableView() {
-        self.view.addSubview(self.tableView)
-
-        self.tableView.delegate = self
-        self.tableView.dataSource = self
         self.tableView.separatorStyle = .none
         self.tableView.removeExcessCells()
 
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: CookingItemVC.ingredientReuseID)
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: CookingItemVC.instructionReuseID)
-
-        self.tableView.pinToSides(of: self.view)
-        self.tableView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
-        self.tableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
     }
-}
 
-extension CookingItemVC: UITableViewDataSource, UITableViewDelegate {
-
-    func numberOfSections(in tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return Section.allCases.count
     }
 
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard let section = Section(rawValue: section) else { return 0 }
         switch section {
         case .ingredients:
@@ -75,7 +58,7 @@ extension CookingItemVC: UITableViewDataSource, UITableViewDelegate {
         }
     }
 
-    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         guard let section = Section(rawValue: section) else { return nil }
         switch section {
         case .ingredients:
@@ -85,7 +68,7 @@ extension CookingItemVC: UITableViewDataSource, UITableViewDelegate {
         }
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let section = Section(rawValue: indexPath.section) else { return UITableViewCell() }
         switch section {
         case .ingredients:
@@ -104,12 +87,12 @@ extension CookingItemVC: UITableViewDataSource, UITableViewDelegate {
         }
     }
 
-    func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+    override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
         guard indexPath.section == Section.instructions.rawValue else { return nil }
         return indexPath
     }
 
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard indexPath.section == Section.instructions.rawValue else { return }
         self.instructionState[indexPath.row] = !self.instructionState[indexPath.row]
         self.feedback.selectionChanged()

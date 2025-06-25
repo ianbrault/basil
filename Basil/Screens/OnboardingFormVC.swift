@@ -49,7 +49,6 @@ class OnboardingFormVC: UIViewController {
     private var style: FormStyle
     private var onCompletion: ((BasilError?) -> Void)?
 
-    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private var button: Button!
     private var cells: [Cell]!
 
@@ -57,6 +56,7 @@ class OnboardingFormVC: UIViewController {
     private let passwordIndex = IndexPath(row: 1, section: 0)
     private let confirmPasswordIndex = IndexPath(row: 2, section: 0)
 
+    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private let buttonHeight: CGFloat = 54
     private let insets = UIEdgeInsets(top: 0, left: 40, bottom: 16, right: 40)
 
@@ -124,18 +124,15 @@ class OnboardingFormVC: UIViewController {
         self.tableView.removeExcessCells()
 
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: OnboardingFormVC.reuseID)
+
+        // tap to dismiss keyboard
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissKeyboard))
+        self.tableView.addGestureRecognizer(gesture)
     }
 
     private func configureButton() {
-        self.view.addSubview(self.button)
-
+        self.view.addPinnedSubview(self.button, height: self.buttonHeight, insets: self.insets, keyboardBottom: true, noTop: true)
         self.button.addTarget(self, action: #selector(self.onSubmit), for: .touchUpInside)
-
-        self.button.pinToSides(of: self.view, insets: self.insets)
-        self.button.bottomAnchor.constraint(
-            equalTo: self.view.keyboardLayoutGuide.topAnchor, constant: -self.insets.bottom
-        ).isActive = true
-        self.button.heightAnchor.constraint(equalToConstant: self.buttonHeight).isActive = true
     }
 
     func validateForm() -> Bool {
@@ -168,6 +165,10 @@ class OnboardingFormVC: UIViewController {
 
         self.tableView.reloadSections(IndexSet([0]), with: .automatic)
         return valid
+    }
+
+    @objc func dismissKeyboard(_ action: UIAction) {
+        self.tableView.endEditing(true)
     }
 
     @objc func onSubmit(_ action: UIAction) {
@@ -236,22 +237,13 @@ extension OnboardingFormVC: UITableViewDataSource, UITableViewDelegate {
         content.contentType = (self.style == .register && info.contentType == .password) ? .newPassword : info.contentType
         content.isSecureTextEntry = info.isSecure
 
-        content.onChange =  { [weak self] (text, sender) in
-            guard let text else { return }
-            if let cell = sender.next(ofType: UITableViewCell.self) {
-                if let i = tableView.indexPath(for: cell) {
-                    self?.cells[i.row].text = text
-                }
-            }
+        content.onChange =  { [weak self] (text) in
+            self?.cells[indexPath.row].text = text
         }
 
         cell.contentConfiguration = content
         cell.separatorInset.left = content.contentInset + content.imageSize
 
         return cell
-    }
-
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return StyleGuide.tableCellHeight
     }
 }

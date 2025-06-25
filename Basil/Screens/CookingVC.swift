@@ -72,11 +72,11 @@ class CookingVC: UIPageViewController {
         // remove the swipe-to-dismiss gesture
         self.isModalInPresentation = true
 
-        // create the bar button items
-        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(self.dismissVC))
-        self.navigationItem.rightBarButtonItem = doneButton
-
         self.navigationItem.largeTitleDisplayMode = .never
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(self.dismissVC))
+
+        self.navigationController?.navigationBar.isTranslucent = false
+        self.navigationController?.view.backgroundColor = StyleGuide.colors.background
     }
 
     private func configureSheetPresentationController() {

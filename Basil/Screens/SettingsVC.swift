@@ -15,16 +15,39 @@ import UIKit
 // change email
 // change password
 //
-class SettingsVC: UIViewController {
+class SettingsVC: UITableViewController {
     static let reuseID = "SettingsCell"
+    static let switchReuseID = "SettingsCell__Switch"
+
+    typealias CellFactory = (UITableViewCell) -> UIContentConfiguration
+    typealias CellAction = () -> Void
 
     struct Section {
-        let cell: (inout UIListContentConfiguration) -> Void
-        let action: (() -> Void)?
+        let header: String?
+        let cells: [Cell]
     }
 
-    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
-    private var sections: [[Section]] = []
+    struct Cell {
+        let factory: CellFactory
+        let action: CellAction?
+        let reuseId: String
+
+        init(factory: @escaping CellFactory, action: CellAction? = nil, reuseId: String = SettingsVC.reuseID) {
+            self.factory = factory
+            self.action = action
+            self.reuseId = reuseId
+        }
+    }
+
+    private var sections: [Section] = []
+
+    init() {
+        super.init(style: .insetGrouped)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,61 +61,80 @@ class SettingsVC: UIViewController {
     }
 
     private func registerSections() {
-        if State.manager.userAuthenticated {
-            self.sections = [
-                [
-                    Section(
-                        cell: { (content: inout UIListContentConfiguration) in
-                            content.text = State.manager.userEmail
-                            content.textProperties.color = StyleGuide.colors.primaryText
-                            content.image = nil
-                        },
-                        action: nil
-                    )
-                ],
-                [
-                    Section(
-                        cell: { (content: inout UIListContentConfiguration) in
-                            content.text = "Sign out"
-                            content.textProperties.color = StyleGuide.colors.error
-                            content.image = SFSymbols.logout
-                            content.imageProperties.tintColor = StyleGuide.colors.error
-                        },
-                        action: self.logoutAction
-                    ),
-                    Section(
-                        cell: { (content: inout UIListContentConfiguration) in
-                            content.text = "Delete account"
-                            content.textProperties.color = StyleGuide.colors.error
-                            content.image = SFSymbols.trash
-                            content.imageProperties.tintColor = StyleGuide.colors.error
-                        },
-                        action: self.deleteAccountAction
-                    )
+        self.sections = State.manager.userAuthenticated ? self.authorizedSections() : self.unauthorizedSections()
+    }
+
+    static func defaultCell(
+        _ cell: UITableViewCell,
+        text: String, textColor: UIColor = StyleGuide.colors.primaryText,
+        image: UIImage? = nil, imageColor: UIColor = StyleGuide.colors.primary,
+    ) -> UIContentConfiguration {
+        var content = cell.defaultContentConfiguration()
+        content.text = text
+        content.textProperties.color = textColor
+        content.image = image
+        content.imageProperties.tintColor = imageColor
+        return content
+    }
+
+    static func destructiveCell(_ cell: UITableViewCell, text: String, image: UIImage? = nil) -> UIContentConfiguration {
+        var content = cell.defaultContentConfiguration()
+        content.text = text
+        content.textProperties.color = StyleGuide.colors.error
+        content.image = image
+        content.imageProperties.tintColor = StyleGuide.colors.error
+        return content
+    }
+
+    private func unauthorizedSections() -> [Section] {
+        return [
+            Section(
+                header: nil,
+                cells: [
+                    Cell(factory: { Self.defaultCell($0, text: "Log In") }, action: self.loginAction),
+                    Cell(factory: { Self.defaultCell($0, text: "Create an Account") }, action: self.registerAction),
                 ]
-            ]
-        } else {
-            self.sections = [
-                [
-                    Section(
-                        cell: { (content: inout UIListContentConfiguration) in
-                            content.text = "Log in"
-                            content.textProperties.color = StyleGuide.colors.primaryText
-                            content.image = nil
-                        },
-                        action: self.loginAction
-                    ),
-                    Section(
-                        cell: { (content: inout UIListContentConfiguration) in
-                            content.text = "Create an account"
-                            content.textProperties.color = StyleGuide.colors.primaryText
-                            content.image = nil
-                        },
-                        action: self.registerAction
-                    )
+            ),
+        ]
+    }
+
+    private func authorizedSections() -> [Section] {
+        return [
+            Section(
+                header: nil,
+                cells: [
+                    Cell(factory: { Self.defaultCell($0, text: State.manager.userEmail) }),
                 ]
-            ]
-        }
+            ),
+            Section(
+                header: "Groceries",
+                cells: [
+                    Cell(
+                        factory: { (cell) in
+                            var content = SwitchContentConfiguration()
+                            content.text = "Sort Checked Items"
+                            content.isOn = PersistenceManager.shared.sortCheckedGroceries
+                            content.onChange = { (toggled) in
+                                PersistenceManager.shared.sortCheckedGroceries = toggled
+                                if toggled {
+                                    State.manager.groceryList.sortCheckedGroceries()
+                                    State.manager.storeGroceryList()
+                                }
+                            }
+                            return content
+                        },
+                        reuseId: Self.switchReuseID
+                    ),
+                ]
+            ),
+            Section(
+                header: "Account",
+                cells: [
+                    Cell(factory: { Self.destructiveCell($0, text: "Sign Out", image: SFSymbols.logout) }, action: self.logoutAction),
+                    Cell(factory: { Self.destructiveCell($0, text: "Delete Account", image: SFSymbols.trash) }, action: self.deleteAccountAction),
+                ]
+            ),
+        ]
     }
 
     private func configureNavigationController() {
@@ -109,17 +151,14 @@ class SettingsVC: UIViewController {
     }
 
     private func configureTableView() {
-        self.view.addSubview(self.tableView)
-
-        self.tableView.frame = self.view.bounds
-        self.tableView.dataSource = self
-        self.tableView.delegate = self
         self.tableView.contentInset.top = 16
         self.tableView.keyboardDismissMode = .onDrag
         self.tableView.separatorInsetReference = .fromAutomaticInsets
         self.tableView.removeExcessCells()
 
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: SettingsVC.reuseID)
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: Self.reuseID)
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: Self.switchReuseID)
+
         self.tableView.setContentOffset(CGPoint(x: 0, y: -100), animated: true)
     }
 
@@ -199,31 +238,28 @@ class SettingsVC: UIViewController {
         alert.isSecureTextEntry = true
         self.present(alert, animated: true)
     }
-}
 
-extension SettingsVC: UITableViewDataSource, UITableViewDelegate {
-
-    func numberOfSections(in tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return self.sections.count
     }
 
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return StyleGuide.tableCellHeight
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return self.sections[section].cells.count
     }
 
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.sections[section].count
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return self.sections[section].header
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: SettingsVC.reuseID)!
-        var content = cell.defaultContentConfiguration()
-        self.sections[indexPath.section][indexPath.row].cell(&content)
-        cell.contentConfiguration = content
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cellConfig = self.sections[indexPath.section].cells[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellConfig.reuseId)!
+        cell.contentConfiguration = cellConfig.factory(cell)
+        cell.selectionStyle = cellConfig.action == nil ? .none : .default
         return cell
     }
 
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.sections[indexPath.section][indexPath.row].action?()
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        self.sections[indexPath.section].cells[indexPath.row].action?()
     }
 }

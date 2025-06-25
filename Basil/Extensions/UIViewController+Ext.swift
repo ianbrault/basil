@@ -11,6 +11,10 @@ fileprivate var containerView: UIView!
 
 extension UIViewController {
 
+    @objc func dismissSelf() {
+        self.dismiss(animated: true)
+    }
+
     func addNotificationObserver(name: NSNotification.Name?, selector: Selector) {
         NotificationCenter.default.addObserver(self, selector: selector, name: name, object: nil)
     }
@@ -40,21 +44,6 @@ extension UIViewController {
 
     func notImplementedAlert() {
         self.presentErrorAlert(.notImplemented)
-    }
-
-    func showEmptyStateView(_ style: EmptyStateView.Style, in view: UIView) {
-        self.removeEmptyStateView(in: view)
-
-        let emptyStateView = EmptyStateView(style, frame: view.bounds)
-        view.addSubview(emptyStateView)
-    }
-
-    func removeEmptyStateView(in view: UIView) {
-        view.subviews.forEach { (subview) in
-            if subview is EmptyStateView {
-                subview.removeFromSuperview()
-            }
-        }
     }
 
     func showLoadingView() {

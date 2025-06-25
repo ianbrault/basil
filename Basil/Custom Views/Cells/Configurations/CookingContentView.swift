@@ -36,6 +36,13 @@ class CookingContentView: UIView, UIContentView {
     private let image = UIImageView()
     private let label = UILabel()
 
+    private var paragraphStyle: NSParagraphStyle {
+        let style = NSMutableParagraphStyle()
+        style.lineSpacing = 4
+        style.paragraphSpacing = 10
+        return style
+    }
+
     init(configuration: CookingContentConfiguration) {
         self.configuration = configuration
         super.init(frame: .zero)
@@ -56,12 +63,9 @@ class CookingContentView: UIView, UIContentView {
         self.image.contentMode = .scaleAspectFill
         self.image.translatesAutoresizingMaskIntoConstraints = false
 
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineSpacing = 4
-        paragraphStyle.paragraphSpacing = 10
         self.label.attributedText = NSAttributedString(
             string: configuration.text,
-            attributes: [.paragraphStyle: paragraphStyle]
+            attributes: [.paragraphStyle: self.paragraphStyle]
         )
         self.label.numberOfLines = 0
         self.label.translatesAutoresizingMaskIntoConstraints = false

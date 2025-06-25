@@ -55,6 +55,10 @@ class IngredientParser {
     }
 
     private func parseUnit() {
+        guard self.index < self.parts.count else {
+            self.unit = nil
+            return
+        }
         let part = self.parts[self.index]
         if let unit = Unit.from(string: part) {
             self.unit = unit

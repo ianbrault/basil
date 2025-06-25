@@ -14,6 +14,10 @@ class Ingredient: Decodable {
     var item: String
     var complete: Bool
 
+    var isEmpty: Bool {
+        return self.quantity == .none && self.unit == nil && self.item.isEmpty
+    }
+
     init(quantity: Quantity, unit: Unit?, item: String) {
         self.quantity = quantity
         self.unit = unit
@@ -52,6 +56,10 @@ class Ingredient: Decodable {
 
     func add(quantity: Quantity) {
         self.quantity = self.quantity + quantity
+    }
+
+    static func empty() -> Ingredient {
+        return Ingredient(item: "")
     }
 
     static func == (lhs: Ingredient, rhs: Ingredient) -> Bool {
