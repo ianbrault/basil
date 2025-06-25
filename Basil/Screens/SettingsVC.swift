@@ -17,6 +17,7 @@ import UIKit
 //
 class SettingsVC: UITableViewController {
     static let reuseID = "SettingsCell"
+    static let switchReuseID = "SettingsCell__Switch"
 
     typealias CellFactory = (UITableViewCell) -> UIContentConfiguration
     typealias CellAction = () -> Void
@@ -29,10 +30,12 @@ class SettingsVC: UITableViewController {
     struct Cell {
         let factory: CellFactory
         let action: CellAction?
+        let reuseId: String
 
-        init(factory: @escaping CellFactory, action: CellAction? = nil) {
+        init(factory: @escaping CellFactory, action: CellAction? = nil, reuseId: String = SettingsVC.reuseID) {
             self.factory = factory
             self.action = action
+            self.reuseId = reuseId
         }
     }
 
@@ -106,19 +109,22 @@ class SettingsVC: UITableViewController {
             Section(
                 header: "Groceries",
                 cells: [
-                    Cell(factory: { (cell) in
-                        var content = SwitchContentConfiguration()
-                        content.text = "Sort Checked Items"
-                        content.isOn = PersistenceManager.shared.sortCheckedGroceries
-                        content.onChange = { (toggled) in
-                            PersistenceManager.shared.sortCheckedGroceries = toggled
-                            if toggled {
-                                State.manager.groceryList.sortCheckedGroceries()
-                                State.manager.storeGroceryList()
+                    Cell(
+                        factory: { (cell) in
+                            var content = SwitchContentConfiguration()
+                            content.text = "Sort Checked Items"
+                            content.isOn = PersistenceManager.shared.sortCheckedGroceries
+                            content.onChange = { (toggled) in
+                                PersistenceManager.shared.sortCheckedGroceries = toggled
+                                if toggled {
+                                    State.manager.groceryList.sortCheckedGroceries()
+                                    State.manager.storeGroceryList()
+                                }
                             }
-                        }
-                        return content
-                    }),
+                            return content
+                        },
+                        reuseId: Self.switchReuseID
+                    ),
                 ]
             ),
             Section(
@@ -150,7 +156,9 @@ class SettingsVC: UITableViewController {
         self.tableView.separatorInsetReference = .fromAutomaticInsets
         self.tableView.removeExcessCells()
 
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: SettingsVC.reuseID)
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: Self.reuseID)
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: Self.switchReuseID)
+
         self.tableView.setContentOffset(CGPoint(x: 0, y: -100), animated: true)
     }
 
@@ -245,7 +253,7 @@ class SettingsVC: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cellConfig = self.sections[indexPath.section].cells[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: SettingsVC.reuseID)!
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellConfig.reuseId)!
         cell.contentConfiguration = cellConfig.factory(cell)
         cell.selectionStyle = cellConfig.action == nil ? .none : .default
         return cell

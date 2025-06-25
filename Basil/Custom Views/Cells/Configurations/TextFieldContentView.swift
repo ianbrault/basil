@@ -19,13 +19,13 @@ struct TextFieldContentConfiguration: UIContentConfiguration {
     var isSecureTextEntry: Bool = false
     var autocapitalizationType: UITextAutocapitalizationType = .none
 
+    var contentInset: CGFloat = 16
+    var imageSize: CGFloat = 24
+    var imageToTextPadding: CGFloat = 16
+
     var onChange: ((String) -> Void)?
     var onEndEditing: ((String) -> Void)?
     var onImageTap: (() -> Void)?
-
-    var imageSize: CGFloat = 24
-    var contentInset: CGFloat = 16
-    var imageToTextPadding: CGFloat = 16
 
     func makeContentView() -> UIView & UIContentView {
         return TextFieldContentView(configuration: self)
@@ -44,18 +44,20 @@ class TextFieldContentView: UIView, UIContentView {
         }
     }
 
-    let image = UIImageView()
-    let textField = UITextField()
+    private let stackView = UIStackView()
+    private let image = UIImageView()
+    private let textField = UITextField()
 
-    var onChange: ((String) -> Void)?
-    var onEndEditing: ((String) -> Void)?
-    var onImageTap: (() -> Void)?
+    private let imageWidthAnchor: NSLayoutConstraint
+    private let imageHeightAnchor: NSLayoutConstraint
 
     override var intrinsicContentSize: CGSize {
-        CGSize(width: 0, height: StyleGuide.tableCellHeight)
+        CGSize(width: 0, height: StyleGuide.tableCellHeightInteractive)
     }
 
     init(configuration: TextFieldContentConfiguration) {
+        self.imageWidthAnchor = self.image.widthAnchor.constraint(equalToConstant: configuration.imageSize)
+        self.imageHeightAnchor = self.image.heightAnchor.constraint(equalToConstant: configuration.imageSize)
         self.configuration = configuration
         super.init(frame: .zero)
     }
@@ -66,12 +68,6 @@ class TextFieldContentView: UIView, UIContentView {
 
     private func configure() {
         guard let configuration = self.configuration as? TextFieldContentConfiguration else { return }
-        self.onChange = configuration.onChange
-        self.onEndEditing = configuration.onEndEditing
-        self.onImageTap = configuration.onImageTap
-
-        self.addSubview(self.image)
-        self.addSubview(self.textField)
 
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.imageTapped))
         tapGesture.delegate = self
@@ -79,9 +75,9 @@ class TextFieldContentView: UIView, UIContentView {
 
         self.image.image = configuration.image
         self.image.tintColor = configuration.tintColor
-        self.image.contentMode = .scaleAspectFill
+        self.image.contentMode = .scaleAspectFit
+        self.image.clipsToBounds = true
         self.image.isUserInteractionEnabled = true
-        self.image.translatesAutoresizingMaskIntoConstraints = false
 
         self.textField.text = configuration.text
         self.textField.placeholder = configuration.placeholder
@@ -90,31 +86,27 @@ class TextFieldContentView: UIView, UIContentView {
         self.textField.isSecureTextEntry = configuration.isSecureTextEntry
         self.textField.autocapitalizationType = configuration.autocapitalizationType
         self.textField.clearButtonMode = .whileEditing
-        self.textField.translatesAutoresizingMaskIntoConstraints = false
         self.textField.addTarget(self, action: #selector(self.textChanged), for: .editingChanged)
         self.textField.addTarget(self, action: #selector(self.editingEnded), for: .editingDidEnd)
 
-        self.image.heightAnchor.constraint(equalToConstant: configuration.imageSize).isActive = true
-        self.image.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        self.image.centerXAnchor.constraint(
-            equalTo: self.leadingAnchor, constant: (configuration.imageSize / 2) + configuration.contentInset
-        ).isActive = true
+        self.stackView.axis = .horizontal
+        self.stackView.alignment = .center
+        self.stackView.spacing = configuration.imageToTextPadding
+        self.stackView.isLayoutMarginsRelativeArrangement = true
+        self.stackView.layoutMargins = UIEdgeInsets(top: 0, left: configuration.contentInset, bottom: 0, right: configuration.contentInset)
+        self.stackView.removeAllArrangedSubviews()
 
-        // pin the text field directly to the leading anchor if there is not an image
         if let _ = configuration.image {
-            self.textField.leadingAnchor.constraint(
-                equalTo: self.image.centerXAnchor, constant: (configuration.imageSize / 2) + configuration.imageToTextPadding
-            ).isActive = true
-        } else {
-            self.textField.leadingAnchor.constraint(
-                equalTo: self.leadingAnchor, constant: configuration.imageToTextPadding
-            ).isActive = true
+            self.stackView.addArrangedSubview(self.image)
+            self.imageWidthAnchor.constant = configuration.imageSize
+            self.imageHeightAnchor.constant = configuration.imageSize
+            self.imageWidthAnchor.isActive = true
+            self.imageHeightAnchor.isActive = true
         }
-        self.textField.trailingAnchor.constraint(
-            equalTo: self.trailingAnchor, constant: -configuration.contentInset
-        ).isActive = true
-        self.textField.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        self.textField.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
+
+        self.stackView.addArrangedSubview(self.textField)
+
+        self.addPinnedSubview(self.stackView)
     }
 
     override func becomeFirstResponder() -> Bool {
@@ -132,7 +124,8 @@ class TextFieldContentView: UIView, UIContentView {
     }
 
     @objc func imageTapped() {
-        self.onImageTap?()
+        guard let configuration = self.configuration as? TextFieldContentConfiguration else { return }
+        configuration.onImageTap?()
     }
 }
 

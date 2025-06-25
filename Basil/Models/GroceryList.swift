@@ -41,7 +41,9 @@ class GroceryList: Codable {
 
     func addIngredients(from recipe: Recipe) {
         for ingredient in recipe.ingredients {
-            self.addIngredient(ingredient)
+            if !ingredient.toString().starts(with: Recipe.sectionHeader) {
+                self.addIngredient(ingredient)
+            }
         }
     }
 

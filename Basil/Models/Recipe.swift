@@ -9,6 +9,8 @@ import Foundation
 
 final class Recipe {
 
+    static let sectionHeader = "__SECTION__"
+
     var uuid: UUID
     var folderId: UUID
     var title: String

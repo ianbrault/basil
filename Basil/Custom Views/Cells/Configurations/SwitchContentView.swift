@@ -32,13 +32,14 @@ class SwitchContentView: UIView, UIContentView {
         }
     }
 
-    let label = BodyLabel()
-    let toggle = UISwitch()
+    private let stackView = UIStackView()
+    private let label = UILabel()
+    private let toggle = UISwitch()
 
     var onChange: ((Bool) -> Void)?
 
     override var intrinsicContentSize: CGSize {
-        CGSize(width: 0, height: StyleGuide.tableCellHeight)
+        CGSize(width: 0, height: StyleGuide.tableCellHeightInteractive)
     }
 
     init(configuration: SwitchContentConfiguration) {
@@ -54,24 +55,24 @@ class SwitchContentView: UIView, UIContentView {
         guard let configuration = self.configuration as? SwitchContentConfiguration else { return }
         self.onChange = configuration.onChange
 
-        self.addSubview(self.label)
-        self.addSubview(self.toggle)
-
         self.label.text = configuration.text
+        self.label.font = StyleGuide.fonts.body
 
-        self.toggle.translatesAutoresizingMaskIntoConstraints = false
         self.toggle.isOn = configuration.isOn
         self.toggle.tintColor = StyleGuide.colors.primary
         self.toggle.addTarget(self, action: #selector(self.switchToggled), for: .valueChanged)
 
-        self.label.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: configuration.contentInset).isActive = true
-        self.label.trailingAnchor.constraint(equalTo: self.toggle.leadingAnchor).isActive = true
-        self.label.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        self.label.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
+        self.stackView.axis = .horizontal
+        self.stackView.alignment = .center
+        self.stackView.distribution = .equalSpacing
+        self.stackView.isLayoutMarginsRelativeArrangement = true
+        self.stackView.layoutMargins = UIEdgeInsets(top: 0, left: configuration.contentInset, bottom: 0, right: configuration.contentInset)
 
-        self.toggle.leadingAnchor.constraint(equalTo: self.label.trailingAnchor).isActive = true
-        self.toggle.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -configuration.contentInset).isActive = true
-        self.toggle.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+        self.stackView.removeAllArrangedSubviews()
+        self.stackView.addArrangedSubview(self.label)
+        self.stackView.addArrangedSubview(self.toggle)
+
+        self.addPinnedSubview(self.stackView)
     }
 
     @objc func switchToggled(_ sender: UITextField) {

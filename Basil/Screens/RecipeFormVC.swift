@@ -10,7 +10,7 @@ import UIKit
 //
 // Displays a form to create/edit a recipe
 //
-class RecipeFormVC: UITableViewController {
+class RecipeFormVC: UIViewController {
 
     protocol Delegate: AnyObject {
         func didSaveRecipe(style: RecipeFormVC.Style, recipe: Recipe)
@@ -31,6 +31,15 @@ class RecipeFormVC: UITableViewController {
         enum Style {
             case textField
             case button
+
+            var reuseID: String {
+                switch self {
+                case .textField:
+                    return RecipeFormCell.textFieldReuseID
+                case .button:
+                    return RecipeFormCell.buttonReuseID
+                }
+            }
         }
 
         let id: UUID
@@ -112,25 +121,32 @@ class RecipeFormVC: UITableViewController {
         case .button:
             reuseID = RecipeFormCell.buttonReuseID
         }
-        let cell = tableView.dequeueReusableCell(withIdentifier: reuseID, for: indexPath) as? RecipeFormCell
-        cell?.onChange = { [weak self] (text) in
-            self?.cells[indexPath.section][indexPath.row].text = text
+        let cell = tableView.dequeueReusableCell(withIdentifier: reuseID, for: indexPath) as! RecipeFormCell
+        cell.onChange = { [weak self] (text) in
+            guard let index = self?.tableView.indexPath(for: cell) else { return }
+            self?.cells[index.section][index.row].text = text
             // allow text fields to expand or shrink lines
             self?.tableView.beginUpdates()
             self?.tableView.endUpdates()
         }
-        cell?.set(info, for: indexPath)
+        cell.onEndEditing = { [weak self] (_) in
+            self?.applySnapshot(animatingDifferences: false)
+        }
+        cell.onButtonTap = self.onButtonTap
+        cell.set(info, for: indexPath)
         return cell
     }
 
+    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private var style: Style
+
     var uuid: UUID?
     var folderId: UUID?
     weak var delegate: Delegate?
 
     init(style: Style) {
         self.style = style
-        super.init(style: .insetGrouped)
+        super.init(nibName: nil, bundle: nil)
     }
 
     required init?(coder: NSCoder) {
@@ -181,16 +197,19 @@ class RecipeFormVC: UITableViewController {
     }
 
     private func configureTableView() {
+        self.tableView.delegate = self
         self.tableView.contentInset.bottom = 16
         self.tableView.keyboardDismissMode = .onDrag
         self.tableView.removeExcessCells()
 
+        self.tableView.register(RecipeFormCell.self, forCellReuseIdentifier: RecipeFormCell.textFieldReuseID)
+        self.tableView.register(RecipeFormCell.self, forCellReuseIdentifier: RecipeFormCell.buttonReuseID)
+
+        self.view.addPinnedSubview(self.tableView, keyboardBottom: true)
+
         // tap to dismiss keyboard
         let gesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissKeyboard))
         self.tableView.addGestureRecognizer(gesture)
-
-        self.tableView.register(RecipeFormCell.self, forCellReuseIdentifier: RecipeFormCell.textFieldReuseID)
-        self.tableView.register(RecipeFormCell.self, forCellReuseIdentifier: RecipeFormCell.buttonReuseID)
     }
 
     func set(recipe: Recipe) {
@@ -214,6 +233,16 @@ class RecipeFormVC: UITableViewController {
             self.cells[Section.instructions.rawValue].append(Cell(.textField, text: instruction))
         }
         self.cells[Section.instructions.rawValue].append(Cell(.button))
+    }
+
+    private func onButtonTap(_ sender: UITableViewCell, _ location: RecipeFormCell.TapLocation) {
+        guard let indexPath = self.tableView.indexPath(for: sender) else { return }
+        // add a new input cell when pressed
+        let text = location == .section ? Recipe.sectionHeader : ""
+        self.cells[indexPath.section].insert(Cell(.textField, text: text), at: self.cells[indexPath.section].count - 1)
+        self.applySnapshot()
+        // then focus the new input row
+        self.tableView.cellForRow(at: indexPath)?.becomeFirstResponder()
     }
 
     @objc func dismissKeyboard(_ action: UIAction) {
@@ -265,33 +294,19 @@ class RecipeFormVC: UITableViewController {
         self.delegate?.didSaveRecipe(style: self.style, recipe: recipe)
         self.dismissSelf()
     }
+}
 
-    override func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
+extension RecipeFormVC: UITableViewDelegate {
+
+    func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
         return .none
     }
 
-    override func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
+    func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
         return false
     }
 
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // filter for button cells
-        if indexPath.row < self.cells[indexPath.section].count - 1 {
-            return
-        }
-        // add a new input cell when pressed
-        self.cells[indexPath.section].insert(Cell(.textField), at: self.cells[indexPath.section].count - 1)
-
-        // apply UI updates
-        // first deselect the button row
-        tableView.deselectRow(at: indexPath, animated: true)
-        // then apply the snapshot to append the new input row
-        self.applySnapshot()
-        // and finally focus the new input row
-        tableView.cellForRow(at: indexPath)?.contentView.becomeFirstResponder()
-    }
-
-    override func tableView(
+    func tableView(
         _ tableView: UITableView,
         trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
     ) -> UISwipeActionsConfiguration? {
@@ -311,7 +326,7 @@ class RecipeFormVC: UITableViewController {
         }
     }
 
-    override func tableView(
+    func tableView(
         _ tableView: UITableView,
         targetIndexPathForMoveFromRowAt sourceIndexPath: IndexPath,
         toProposedIndexPath proposedDestinationIndexPath: IndexPath

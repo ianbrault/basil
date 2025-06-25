@@ -17,6 +17,8 @@ struct ListContentConfiguration: UIContentConfiguration {
     var style: Style
     var text: String = ""
     var row: Int = 0
+    var lineSpacing: CGFloat = 5
+    var paragraphSpacing: CGFloat = 10
 
     var contentInset = UIEdgeInsets(top: 4, left: 20, bottom: 4, right: 20)
 
@@ -49,6 +51,8 @@ class ListContentView: UIView, UIContentView {
     }
 
     private func orderedString(_ text: String, row: Int) -> NSAttributedString {
+        guard let configuration = self.configuration as? ListContentConfiguration else { return NSAttributedString() }
+
         let string = "\(row).\t\(text)"
         let bulletSize = NSAttributedString(
             string: "88.",
@@ -62,8 +66,8 @@ class ListContentView: UIView, UIContentView {
             NSTextTab(textAlignment: .right, location: 0),
             NSTextTab(textAlignment: .left, location: itemStart),
         ]
-        paragraphStyle.lineSpacing = 4
-        paragraphStyle.paragraphSpacing = 10
+        paragraphStyle.lineSpacing = configuration.lineSpacing
+        paragraphStyle.paragraphSpacing = configuration.paragraphSpacing
 
         return NSAttributedString(
             string: string,
@@ -72,6 +76,8 @@ class ListContentView: UIView, UIContentView {
     }
 
     private func unorderedString(_ text: String) -> NSAttributedString {
+        guard let configuration = self.configuration as? ListContentConfiguration else { return NSAttributedString() }
+
         let string = "•\t\(text)"
         let bulletSize = NSAttributedString(
             string: "•",
@@ -82,8 +88,8 @@ class ListContentView: UIView, UIContentView {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.headIndent = itemStart
         paragraphStyle.tabStops = [NSTextTab(textAlignment: .left, location: itemStart)]
-        paragraphStyle.lineSpacing = 4
-        paragraphStyle.paragraphSpacing = 10
+        paragraphStyle.lineSpacing = configuration.lineSpacing
+        paragraphStyle.paragraphSpacing = configuration.paragraphSpacing
 
         return NSAttributedString(
             string: string,

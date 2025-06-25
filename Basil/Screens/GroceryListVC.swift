@@ -11,9 +11,10 @@ import UIKit
 // Displays a list of groceries
 // Allows users to add/delete groceries and check/reorder items
 //
-class GroceryListVC: UITableViewController {
+class GroceryListVC: UIViewController {
     static let reuseID = "GroceryCell"
 
+    private let tableView = UITableView()
     private let feedback = UISelectionFeedbackGenerator()
 
     override func viewWillAppear(_ animated: Bool) {
@@ -43,22 +44,26 @@ class GroceryListVC: UITableViewController {
         self.title = "Groceries"
         self.view.backgroundColor = StyleGuide.colors.background
 
-        let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(self.addGrocery))
-        let deleteButton = UIBarButtonItem(title: nil, image: SFSymbols.trash, target: self, action: #selector(self.deleteGroceries))
+        let addButton = self.createBarButton(systemItem: .add, action: #selector(self.addGrocery))
+        let deleteButton = self.createBarButton(image: SFSymbols.trash, action: #selector(self.deleteGroceries))
         self.navigationItem.rightBarButtonItems = [deleteButton, addButton]
     }
 
     private func configureTableView() {
+        self.tableView.dataSource = self
+        self.tableView.dataSource = self
         self.tableView.allowsSelection = false
         self.tableView.keyboardDismissMode = .onDrag
         self.tableView.tableHeaderView = UIView()
         self.tableView.removeExcessCells()
 
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: GroceryListVC.reuseID)
+
+        self.view.addPinnedSubview(self.tableView, keyboardBottom: true)
+
         // tap to dismiss keyboard
         let gesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissKeyboard))
         self.tableView.addGestureRecognizer(gesture)
-
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: GroceryListVC.reuseID)
     }
 
     private func deleteGrocery(at indexPath: IndexPath) {
@@ -122,19 +127,22 @@ class GroceryListVC: UITableViewController {
         }
         self.present(alert, animated: true)
     }
+}
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+extension GroceryListVC: UITableViewDataSource, UITableViewDelegate {
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return State.manager.groceryList.count
     }
 
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: GroceryListVC.reuseID, for: indexPath)
         let grocery = State.manager.groceryList.grocery(at: indexPath)
 
-        var configuration = TextFieldContentConfiguration()
+        var configuration = TextViewContentConfiguration()
         configuration.text = grocery.toString()
         configuration.imageSize = 28
-        configuration.imageToTextPadding = 12
+        configuration.imageToTextPadding = 8
         if grocery.complete {
             configuration.image = SFSymbols.checkmarkCircleFill
             configuration.tintColor = StyleGuide.colors.primary
@@ -164,7 +172,7 @@ class GroceryListVC: UITableViewController {
         return cell
     }
 
-    override func tableView(
+    func tableView(
         _ tableView: UITableView,
         trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
     ) -> UISwipeActionsConfiguration? {

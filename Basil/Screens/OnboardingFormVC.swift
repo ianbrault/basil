@@ -124,6 +124,10 @@ class OnboardingFormVC: UIViewController {
         self.tableView.removeExcessCells()
 
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: OnboardingFormVC.reuseID)
+
+        // tap to dismiss keyboard
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissKeyboard))
+        self.tableView.addGestureRecognizer(gesture)
     }
 
     private func configureButton() {
@@ -161,6 +165,10 @@ class OnboardingFormVC: UIViewController {
 
         self.tableView.reloadSections(IndexSet([0]), with: .automatic)
         return valid
+    }
+
+    @objc func dismissKeyboard(_ action: UIAction) {
+        self.tableView.endEditing(true)
     }
 
     @objc func onSubmit(_ action: UIAction) {
