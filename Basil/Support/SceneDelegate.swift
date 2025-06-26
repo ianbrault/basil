@@ -12,6 +12,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow? = nil
     // use this to register any alerts that are generated before the UI is presented
     var preUIAlerts: [UIAlertController] = []
+    // mark after the app has booted, use to determine when to re-cconnect to the server
+    var hasBooted = false
 
     // Scene functions
 
@@ -80,13 +82,27 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneWillEnterForeground(_ scene: UIScene) {
         // Called as the scene transitions from the background to the foreground.
         // Use this method to undo the changes made on entering the background.
+        if !self.hasBooted {
+            self.hasBooted = true
+            return
+        }
+
+        // Re-connect to the WebSocket server, if authenticated
+        if let credentials = try? KeychainManager.getCredentials() {
+            self.authenticate(credentials: credentials)
+        }
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
+
+        // Synchronize changes made to PersistenceManager with the backing storage
         UserDefaults.standard.synchronize()
+
+        // Disconnect from the WebSocket server
+        SocketManager.shared.disconnect()
     }
 
     // Helper functions
