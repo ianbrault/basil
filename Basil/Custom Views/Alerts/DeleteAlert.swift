@@ -12,8 +12,8 @@ import UIKit
 //
 class DeleteAlert: UIAlertController {
 
-    convenience init(title: String, deleteAction: @escaping () -> Void) {
-        self.init(title: title, message: nil, preferredStyle: .actionSheet)
+    convenience init(title: String, message: String? = nil, deleteAction: @escaping () -> Void) {
+        self.init(title: title, message: message, preferredStyle: .actionSheet)
         self.view.tintColor = StyleGuide.colors.primary
         self.addActions(actionHandler: deleteAction)
     }

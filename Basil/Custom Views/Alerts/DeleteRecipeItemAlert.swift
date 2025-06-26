@@ -10,16 +10,30 @@ import UIKit
 //
 // Alert when the user is deleting a recipe/folder
 //
-class DeleteRecipeItemAlert: DeleteAlert {
+class DeleteRecipeItemAlert: UIAlertController {
 
     convenience init(item: RecipeItem, deleteAction: @escaping () -> Void) {
-        var title: String!
+        self.init(title: "Delete \"\(item.text)\"", message: Self.message(item: item), preferredStyle: .actionSheet)
+        self.view.tintColor = StyleGuide.colors.primary
+        self.addActions(actionHandler: deleteAction)
+    }
+
+    func addActions(actionHandler: @escaping () -> Void) {
+        let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { (_) in
+            actionHandler()
+        }
+        self.addAction(deleteAction)
+
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+        self.addAction(cancelAction)
+    }
+
+    static func message(item: RecipeItem) -> String {
         switch item {
         case .recipe(_):
-            title = "Are you sure you want to delete this recipe?"
+            return "Are you sure you want to delete this recipe?"
         case .folder(_):
-            title = "Are you sure you want to delete this folder and all of its recipes?"
+            return "Are you sure you want to delete this folder and all of its recipes?"
         }
-        self.init(title: title, deleteAction: deleteAction)
     }
 }
