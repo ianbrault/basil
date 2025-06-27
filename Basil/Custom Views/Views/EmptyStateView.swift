@@ -27,13 +27,13 @@ class EmptyStateView: UIView {
     private let imageView = UIImageView()
     private let label = UILabel()
 
-    private let padding: CGFloat = 40
+    private let padding: CGFloat = 60
     private let spacing: CGFloat = 20
     private let imageSize: CGFloat = 72
     private let lineSpacing: CGFloat = 4
 
-    init(_ style: Style) {
-        super.init(frame: .zero)
+    init(_ style: Style, frame: CGRect = .zero) {
+        super.init(frame: frame)
         self.configure(style: style)
     }
 
@@ -54,19 +54,19 @@ class EmptyStateView: UIView {
         self.label.textAlignment = .center
         self.label.textColor = StyleGuide.colors.secondaryText
 
-        self.stackView.translatesAutoresizingMaskIntoConstraints = false
         self.stackView.axis = .vertical
         self.stackView.alignment = .center
         self.stackView.spacing = self.spacing
         self.stackView.isLayoutMarginsRelativeArrangement = true
         self.stackView.layoutMargins = UIEdgeInsets(top: 0, left: self.padding, bottom: 0, right: self.padding)
+        self.stackView.translatesAutoresizingMaskIntoConstraints = false
 
         self.stackView.addArrangedSubview(self.imageView)
         self.stackView.addArrangedSubview(self.label)
 
         self.addSubview(self.stackView)
-        self.stackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: self.padding).isActive = true
-        self.stackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -self.padding).isActive = true
+        self.stackView.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
+        self.stackView.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
         self.stackView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
     }
 
