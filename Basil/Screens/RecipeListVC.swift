@@ -46,7 +46,7 @@ class RecipeListVC: UIViewController {
         var content = cell.defaultContentConfiguration()
         content.imageProperties.tintColor = StyleGuide.colors.primary
         content.textProperties.lineBreakMode = .byTruncatingTail
-        content.textProperties.numberOfLines = 1
+        content.textProperties.numberOfLines = 0
 
         switch item {
         case .recipe(let recipe):
