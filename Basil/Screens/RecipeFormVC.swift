@@ -159,7 +159,9 @@ class RecipeFormVC: UIViewController {
         for section in Section.allCases {
             snapshot.appendItems(self.cells[section.rawValue], toSection: section)
         }
-        self.dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
+        DispatchQueue.main.async {
+            self.dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
+        }
     }
 
     override func viewDidLoad() {

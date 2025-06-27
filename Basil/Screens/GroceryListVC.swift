@@ -51,7 +51,7 @@ class GroceryListVC: UIViewController {
 
     private func configureTableView() {
         self.tableView.dataSource = self
-        self.tableView.dataSource = self
+        self.tableView.delegate = self
         self.tableView.allowsSelection = false
         self.tableView.keyboardDismissMode = .onDrag
         self.tableView.tableHeaderView = UIView()

@@ -116,7 +116,9 @@ class RecipeListVC: UIViewController {
         snapshot.appendSections([0])
         snapshot.appendItems(self.searchResults)
         snapshot.reloadItems(identifiers)
-        self.dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
+        DispatchQueue.main.async {
+            self.dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
+        }
 
         if self.items.isEmpty {
             self.tableView.backgroundView = EmptyStateView(.recipes)
