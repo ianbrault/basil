@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		E30A56362DFE633800A35827 /* SwitchContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E30A56352DFE633800A35827 /* SwitchContentView.swift */; };
 		E30A56382E078CA000A35827 /* UIStackView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E30A56372E078C9700A35827 /* UIStackView+Ext.swift */; };
+		E30A563A2E0E63EF00A35827 /* UIImageView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E30A56392E0E63EB00A35827 /* UIImageView+Ext.swift */; };
 		E3138BD52C6C6A4000F8E05E /* OnboardingFormVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3138BD42C6C6A4000F8E05E /* OnboardingFormVC.swift */; };
 		E316DF1B2C630A9C009550B1 /* QuantityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E316DF1A2C630A9C009550B1 /* QuantityTests.swift */; };
 		E320DE3D2C708FB500C9D6DA /* ListContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E320DE3C2C708FB500C9D6DA /* ListContentView.swift */; };
@@ -104,6 +105,7 @@
 /* Begin PBXFileReference section */
 		E30A56352DFE633800A35827 /* SwitchContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchContentView.swift; sourceTree = "<group>"; };
 		E30A56372E078C9700A35827 /* UIStackView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIStackView+Ext.swift"; sourceTree = "<group>"; };
+		E30A56392E0E63EB00A35827 /* UIImageView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+Ext.swift"; sourceTree = "<group>"; };
 		E3138BD42C6C6A4000F8E05E /* OnboardingFormVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFormVC.swift; sourceTree = "<group>"; };
 		E316DF1A2C630A9C009550B1 /* QuantityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuantityTests.swift; sourceTree = "<group>"; };
 		E320DE3C2C708FB500C9D6DA /* ListContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListContentView.swift; sourceTree = "<group>"; };
@@ -355,6 +357,7 @@
 		E3B1C73A29CE1CE200736C96 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				E30A56392E0E63EB00A35827 /* UIImageView+Ext.swift */,
 				E323AB542C79BA310028D6E3 /* Data+Ext.swift */,
 				E3E542312C5CB5FE0018C5AE /* Int+Ext.swift */,
 				E3EAC2AB2BAE8D3400B4B7B6 /* String+Ext.swift */,
@@ -505,6 +508,7 @@
 				E3738C502C8D2D58001D58F5 /* TextViewContentView.swift in Sources */,
 				E3EAC2AC2BAE8D3400B4B7B6 /* String+Ext.swift in Sources */,
 				E3DE28FC2C4465E8007FBDC5 /* DeleteAlert.swift in Sources */,
+				E30A563A2E0E63EF00A35827 /* UIImageView+Ext.swift in Sources */,
 				E3931E542B9D46C70015A127 /* Ingredient.swift in Sources */,
 				E323AB552C79BA310028D6E3 /* Data+Ext.swift in Sources */,
 				E349B14229E002100097A338 /* DeleteRecipeItemAlert.swift in Sources */,

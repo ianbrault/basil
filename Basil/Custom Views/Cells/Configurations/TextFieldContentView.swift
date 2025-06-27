@@ -69,15 +69,12 @@ class TextFieldContentView: UIView, UIContentView {
     private func configure() {
         guard let configuration = self.configuration as? TextFieldContentConfiguration else { return }
 
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.imageTapped))
-        tapGesture.delegate = self
-        self.addGestureRecognizer(tapGesture)
-
         self.image.image = configuration.image
         self.image.tintColor = configuration.tintColor
         self.image.contentMode = .scaleAspectFit
         self.image.clipsToBounds = true
         self.image.isUserInteractionEnabled = true
+        self.image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.imageTapped)))
 
         self.textField.text = configuration.text
         self.textField.placeholder = configuration.placeholder
@@ -126,15 +123,5 @@ class TextFieldContentView: UIView, UIContentView {
     @objc func imageTapped() {
         guard let configuration = self.configuration as? TextFieldContentConfiguration else { return }
         configuration.onImageTap?()
-    }
-}
-
-extension TextFieldContentView: UIGestureRecognizerDelegate {
-
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-        guard let configuration = self.configuration as? TextFieldContentConfiguration else { return false }
-
-        let taploc = touch.location(in: self)
-        return taploc.x < configuration.contentInset + configuration.imageSize + configuration.imageToTextPadding
     }
 }
