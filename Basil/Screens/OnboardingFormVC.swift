@@ -57,7 +57,6 @@ class OnboardingFormVC: UIViewController {
     private let confirmPasswordIndex = IndexPath(row: 2, section: 0)
 
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
-    private let buttonHeight: CGFloat = 54
     private let insets = UIEdgeInsets(top: 0, left: 40, bottom: 16, right: 40)
 
     init(_ style: FormStyle, onCompletion: @escaping (BasilError?) -> Void) {
@@ -131,7 +130,7 @@ class OnboardingFormVC: UIViewController {
     }
 
     private func configureButton() {
-        self.view.addPinnedSubview(self.button, height: self.buttonHeight, insets: self.insets, keyboardBottom: true, noTop: true)
+        self.view.addPinnedSubview(self.button, height: StyleGuide.buttonHeight, insets: self.insets, keyboardBottom: true, noTop: true)
         self.button.addTarget(self, action: #selector(self.onSubmit), for: .touchUpInside)
     }
 

@@ -116,6 +116,17 @@ class NetworkManager {
 
     // API calls
 
+    static func authenticate(
+        email: String, password: String,
+        handler: @escaping BodyHandler<API.AuthenticationResponse>
+    ) {
+        let body = API.AuthenticationRequest(email: email, password: password, device: State.manager.deviceToken)
+        self.post(url: self.baseURL.appending(path: "user/authenticate"), body: body) { (response) in
+            let result: Result<API.AuthenticationResponse, BasilError> = response.flatMap(self.parseResponse)
+            handler(result)
+        }
+    }
+
     static func createUser(
         email: String, password: String, root: UUID?, recipes: [Recipe], folders: [RecipeFolder],
         handler: @escaping BodyHandler<API.AuthenticationResponse>
@@ -131,20 +142,24 @@ class NetworkManager {
         }
     }
 
-    static func authenticate(
-        email: String, password: String,
-        handler: @escaping BodyHandler<API.AuthenticationResponse>
-    ) {
-        let body = API.AuthenticationRequest(email: email, password: password, device: State.manager.deviceToken)
-        self.post(url: self.baseURL.appending(path: "user/authenticate"), body: body) { (response) in
-            let result: Result<API.AuthenticationResponse, BasilError> = response.flatMap(self.parseResponse)
-            handler(result)
-        }
-    }
-
     static func deleteUser(email: String, password: String, handler: @escaping Handler) {
         let body = API.AuthenticationRequest(email: email, password: password, device: nil)
         self.post(url: self.baseURL.appending(path: "user/delete"), body: body) { (response) in
+            switch response {
+            case .success(_):
+                handler(nil)
+            case .failure(let error):
+                handler(error)
+            }
+        }
+    }
+
+    static func pushUpdate(
+        userId: String, token: String, root: UUID?, recipes: [Recipe], folders: [RecipeFolder],
+        handler: @escaping Handler
+    ) {
+        let body = API.PushUpdateRequest(userId: userId, token: token, root: root, recipes: recipes, folders: folders)
+        self.post(url: self.baseURL.appending(path: "user/update"), body: body) { (response) in
             switch response {
             case .success(_):
                 handler(nil)

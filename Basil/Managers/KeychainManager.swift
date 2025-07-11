@@ -9,14 +9,11 @@ import Foundation
 
 struct KeychainManager {
 
+    static let accessGroup = "group.com.isft.Basil"
+
     struct Credentials {
         let email: String
         let password: String
-    }
-
-    private static func keychainError(_ status: OSStatus) -> BasilError {
-        let message = SecCopyErrorMessageString(status, nil) as? String ?? ""
-        return BasilError.keychainError(message)
     }
 
     static func getCredentials() throws -> Credentials? {
@@ -24,6 +21,7 @@ struct KeychainManager {
         let query: [String: Any] = [
             kSecClass as String: kSecClassInternetPassword,
             kSecAttrServer as String: NetworkManager.baseURL.absoluteString,
+            kSecAttrAccessGroup as String: Self.accessGroup,
             kSecMatchLimit as String: kSecMatchLimitOne,
             kSecReturnAttributes as String: true,
             kSecReturnData as String: true,
@@ -32,14 +30,14 @@ struct KeychainManager {
         if status == errSecItemNotFound {
             return nil
         } else if status != errSecSuccess {
-            throw self.keychainError(status)
+            throw BasilError.keychainError(status)
         }
         guard let credentialItem = item as? [String : Any],
               let passwordData = credentialItem[kSecValueData as String] as? Data,
               let password = String(data: passwordData, encoding: String.Encoding.utf8),
               let email = credentialItem[kSecAttrAccount as String] as? String
         else {
-            throw BasilError.keychainError("Unexpected password data")
+            throw BasilError.keychainError(errSecInvalidData)
         }
         return Credentials(email: email, password: password)
     }
@@ -51,12 +49,13 @@ struct KeychainManager {
         let query: [String: Any] = [
             kSecClass as String: kSecClassInternetPassword,
             kSecAttrServer as String: NetworkManager.baseURL.absoluteString,
+            kSecAttrAccessGroup as String: Self.accessGroup,
             kSecAttrAccount as String: email,
             kSecValueData as String: password,
         ]
         let status = SecItemAdd(query as CFDictionary, nil)
         if status != errSecSuccess {
-            throw self.keychainError(status)
+            throw BasilError.keychainError(status)
         }
     }
 
@@ -64,10 +63,11 @@ struct KeychainManager {
         let query: [String: Any] = [
             kSecClass as String: kSecClassInternetPassword,
             kSecAttrServer as String: NetworkManager.baseURL.absoluteString,
+            kSecAttrAccessGroup as String: Self.accessGroup,
         ]
         let status = SecItemDelete(query as CFDictionary)
         if status != errSecSuccess && status != errSecItemNotFound {
-            throw self.keychainError(status)
+            throw BasilError.keychainError(status)
         }
     }
 }

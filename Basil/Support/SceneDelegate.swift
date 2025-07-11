@@ -29,7 +29,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         do {
             credentials = try KeychainManager.getCredentials()
         } catch {
-            let alert = ErrorAlert(error: error as! BasilError)
+            // Notify the user that they are logged out due to the keychain error
+            let alert = GenericAlert(
+                title: "Keychain Error",
+                message: "An error occurred while retrieving your password, please log in to your account again"
+            )
             self.preUIAlerts.append(alert)
         }
 
@@ -122,8 +126,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 // and alert them to that fact
                 let alert = GenericAlert(
                     title: "App updated",
-                    message: "Important changes have been made behind the scenes, you must " +
-                             "log into your account again"
+                    message: "Important changes have been made behind the scenes, please log in to your account again"
                 )
                 self.preUIAlerts.append(alert)
             }

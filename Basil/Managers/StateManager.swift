@@ -16,6 +16,15 @@ class State {
     enum Item {
         case recipe
         case folder
+
+        var name: String {
+            switch self {
+            case .recipe:
+                return "recipe"
+            case .folder:
+                return "folder"
+            }
+        }
     }
 
     // use a separate data type for encoding/decoding

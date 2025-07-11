@@ -38,6 +38,14 @@ struct API {
         let device: UUID?
     }
 
+    struct PushUpdateRequest: Codable {
+        let userId: String
+        let token: String
+        let root: UUID?
+        let recipes: [Recipe]
+        let folders: [RecipeFolder]
+    }
+
     //
     // Socket API definitions
     //
