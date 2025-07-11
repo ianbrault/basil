@@ -3,13 +3,54 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		E30A56362DFE633800A35827 /* SwitchContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E30A56352DFE633800A35827 /* SwitchContentView.swift */; };
 		E30A56382E078CA000A35827 /* UIStackView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E30A56372E078C9700A35827 /* UIStackView+Ext.swift */; };
 		E30A563A2E0E63EF00A35827 /* UIImageView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E30A56392E0E63EB00A35827 /* UIImageView+Ext.swift */; };
+		E30A56492E0E867F00A35827 /* BasilShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E30A563F2E0E867F00A35827 /* BasilShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E30A564F2E0E885B00A35827 /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C6F5222DD45CAC0093AA55 /* KeychainManager.swift */; };
+		E30A56522E0E91FE00A35827 /* UIView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C74629CE6CC900736C96 /* UIView+Ext.swift */; };
+		E30A56532E0E927600A35827 /* BasilError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E349B13B29DFDD3C0097A338 /* BasilError.swift */; };
+		E30A56542E0E929200A35827 /* StateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C4660329FF4AE500791576 /* StateManager.swift */; };
+		E30A56552E0E929900A35827 /* SocketManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C6F5142DC533C60093AA55 /* SocketManager.swift */; };
+		E30A56562E0E929E00A35827 /* PersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E349B13929DFDB2D0097A338 /* PersistenceManager.swift */; };
+		E30A56572E0E92B000A35827 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C4B5192B721FF700E8ACE5 /* API.swift */; };
+		E30A56582E0E92BB00A35827 /* Unit.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3277D9B2BC10997004F7566 /* Unit.swift */; };
+		E30A56592E0E92C600A35827 /* GroceryList.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3931E592BA7EEEE0015A127 /* GroceryList.swift */; };
+		E30A565A2E0E92C900A35827 /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73829CD205C00736C96 /* Recipe.swift */; };
+		E30A565B2E0E92CE00A35827 /* RecipeFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E336B63729FDF7D20025CC38 /* RecipeFolder.swift */; };
+		E30A565C2E0E92DC00A35827 /* Ingredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3931E532B9D46C70015A127 /* Ingredient.swift */; };
+		E30A565D2E0E92E500A35827 /* Quantity.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3EAC2BD2BB00E4900B4B7B6 /* Quantity.swift */; };
+		E30A565E2E0E92F000A35827 /* Int+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E542312C5CB5FE0018C5AE /* Int+Ext.swift */; };
+		E30A565F2E0E92F500A35827 /* String+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3EAC2AB2BAE8D3400B4B7B6 /* String+Ext.swift */; };
+		E30A56602E0E930000A35827 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C6F5192DD1D3130093AA55 /* NetworkManager.swift */; };
+		E30A56612E0E931500A35827 /* IngredientParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C6F51E2DD1E7850093AA55 /* IngredientParser.swift */; };
+		E30A56622E0E932000A35827 /* RecipeItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C466052A00B2D100791576 /* RecipeItem.swift */; };
+		E30A56632E0E932D00A35827 /* Data+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E323AB542C79BA310028D6E3 /* Data+Ext.swift */; };
+		E30A56642E0E949D00A35827 /* StyleGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = E323AB582C7A5CEB0028D6E3 /* StyleGuide.swift */; };
+		E30A56652E0E96FC00A35827 /* RecipeFormVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B4D0429D154AF0063A9A2 /* RecipeFormVC.swift */; };
+		E30A56662E0E972D00A35827 /* RecipeFormCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DE7EAC2C72D66900BDC0BF /* RecipeFormCell.swift */; };
+		E30A56672E0E973900A35827 /* TextViewContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3738C4F2C8D2D58001D58F5 /* TextViewContentView.swift */; };
+		E30A56682E0E974700A35827 /* SFSymbols.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6B29CC185A000F7877 /* SFSymbols.swift */; };
+		E30A56692E0E974F00A35827 /* UIStackView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E30A56372E078C9700A35827 /* UIStackView+Ext.swift */; };
+		E30A566A2E0E975F00A35827 /* UIViewController+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B4CED29CF77CC0063A9A2 /* UIViewController+Ext.swift */; };
+		E30A566B2E0E976D00A35827 /* ErrorAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E3E9622A0892F7006A9E00 /* ErrorAlert.swift */; };
+		E30A566C2E0E977A00A35827 /* UITableView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B1C73B29CE1CF600736C96 /* UITableView+Ext.swift */; };
+		E30A567B2E11B18700A35827 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C1D37F2B083004002E26D1 /* Button.swift */; };
+		E30A567D2E12289C00A35827 /* NoteParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E30A567C2E12289A00A35827 /* NoteParser.swift */; };
+		E30A567E2E12289C00A35827 /* NoteParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E30A567C2E12289A00A35827 /* NoteParser.swift */; };
+		E30A567F2E12408400A35827 /* ListContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E320DE3C2C708FB500C9D6DA /* ListContentView.swift */; };
+		E30A56812E136A8000A35827 /* NoteParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E30A56802E136A7A00A35827 /* NoteParserTests.swift */; };
+		E30A56822E136AAA00A35827 /* IngredientParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C6F51E2DD1E7850093AA55 /* IngredientParser.swift */; };
+		E30A56832E136AB000A35827 /* NoteParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E30A567C2E12289A00A35827 /* NoteParser.swift */; };
+		E30A56862E13A51E00A35827 /* TarteNormande.txt in Resources */ = {isa = PBXBuildFile; fileRef = E30A56852E13A51800A35827 /* TarteNormande.txt */; };
+		E30A56872E13B10A00A35827 /* RecipeItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C466052A00B2D100791576 /* RecipeItem.swift */; };
+		E30A56882E13B11900A35827 /* StyleGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = E323AB582C7A5CEB0028D6E3 /* StyleGuide.swift */; };
+		E30A56892E13B12500A35827 /* Data+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E323AB542C79BA310028D6E3 /* Data+Ext.swift */; };
+		E30A568D2E13B91B00A35827 /* RomescoSauce.txt in Resources */ = {isa = PBXBuildFile; fileRef = E30A568C2E13B91700A35827 /* RomescoSauce.txt */; };
 		E3138BD52C6C6A4000F8E05E /* OnboardingFormVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3138BD42C6C6A4000F8E05E /* OnboardingFormVC.swift */; };
 		E316DF1B2C630A9C009550B1 /* QuantityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E316DF1A2C630A9C009550B1 /* QuantityTests.swift */; };
 		E320DE3D2C708FB500C9D6DA /* ListContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E320DE3C2C708FB500C9D6DA /* ListContentView.swift */; };
@@ -36,6 +77,9 @@
 		E3573E6629CC16C1000F7877 /* RecipeListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6529CC16C1000F7877 /* RecipeListVC.swift */; };
 		E3573E6929CC16DC000F7877 /* GroceryListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6829CC16DC000F7877 /* GroceryListVC.swift */; };
 		E3573E6C29CC185A000F7877 /* SFSymbols.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3573E6B29CC185A000F7877 /* SFSymbols.swift */; };
+		E35C09DB2E1F857200B0C252 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E35C09DA2E1F857200B0C252 /* LoadingView.swift */; };
+		E35C09DC2E1F857200B0C252 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E35C09DA2E1F857200B0C252 /* LoadingView.swift */; };
+		E35C09DD2E1F8FBF00B0C252 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E35C09DA2E1F857200B0C252 /* LoadingView.swift */; };
 		E3738C502C8D2D58001D58F5 /* TextViewContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3738C4F2C8D2D58001D58F5 /* TextViewContentView.swift */; };
 		E3839DDE2C61CFD500A4F6AF /* Int+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E542312C5CB5FE0018C5AE /* Int+Ext.swift */; };
 		E384B06A2D7E6CBA0074BE85 /* WarningAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = E384B0692D7E6CBA0074BE85 /* WarningAlert.swift */; };
@@ -71,7 +115,6 @@
 		E3E3E9632A0892F7006A9E00 /* ErrorAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E3E9622A0892F7006A9E00 /* ErrorAlert.swift */; };
 		E3E542302C5CACAB0018C5AE /* UnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E5422F2C5CACAB0018C5AE /* UnitTests.swift */; };
 		E3E542322C5CB5FE0018C5AE /* Int+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E542312C5CB5FE0018C5AE /* Int+Ext.swift */; };
-		E3EAC2A32BAE88DC00B4B7B6 /* RecipeBookTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3EAC2A22BAE88DC00B4B7B6 /* RecipeBookTests.swift */; };
 		E3EAC2AA2BAE8AD200B4B7B6 /* IngredientParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3EAC2A92BAE8AD200B4B7B6 /* IngredientParserTests.swift */; };
 		E3EAC2AC2BAE8D3400B4B7B6 /* String+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3EAC2AB2BAE8D3400B4B7B6 /* String+Ext.swift */; };
 		E3EAC2AD2BAF921800B4B7B6 /* Ingredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3931E532B9D46C70015A127 /* Ingredient.swift */; };
@@ -93,6 +136,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		E30A56472E0E867F00A35827 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E3573E4129CC14B3000F7877 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E30A563E2E0E867F00A35827;
+			remoteInfo = BasilShare;
+		};
 		E3EAC2A42BAE88DC00B4B7B6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E3573E4129CC14B3000F7877 /* Project object */;
@@ -102,10 +152,29 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		E30A564E2E0E867F00A35827 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				E30A56492E0E867F00A35827 /* BasilShare.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		E30A56352DFE633800A35827 /* SwitchContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchContentView.swift; sourceTree = "<group>"; };
 		E30A56372E078C9700A35827 /* UIStackView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIStackView+Ext.swift"; sourceTree = "<group>"; };
 		E30A56392E0E63EB00A35827 /* UIImageView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+Ext.swift"; sourceTree = "<group>"; };
+		E30A563F2E0E867F00A35827 /* BasilShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BasilShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E30A567C2E12289A00A35827 /* NoteParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteParser.swift; sourceTree = "<group>"; };
+		E30A56802E136A7A00A35827 /* NoteParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteParserTests.swift; sourceTree = "<group>"; };
+		E30A56852E13A51800A35827 /* TarteNormande.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = TarteNormande.txt; path = /Users/ianbrault/src/basil/BasilTests/Support/TarteNormande.txt; sourceTree = "<absolute>"; };
+		E30A568C2E13B91700A35827 /* RomescoSauce.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = RomescoSauce.txt; sourceTree = "<group>"; };
 		E3138BD42C6C6A4000F8E05E /* OnboardingFormVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFormVC.swift; sourceTree = "<group>"; };
 		E316DF1A2C630A9C009550B1 /* QuantityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuantityTests.swift; sourceTree = "<group>"; };
 		E320DE3C2C708FB500C9D6DA /* ListContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListContentView.swift; sourceTree = "<group>"; };
@@ -133,6 +202,7 @@
 		E3573E6529CC16C1000F7877 /* RecipeListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeListVC.swift; sourceTree = "<group>"; };
 		E3573E6829CC16DC000F7877 /* GroceryListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryListVC.swift; sourceTree = "<group>"; };
 		E3573E6B29CC185A000F7877 /* SFSymbols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFSymbols.swift; sourceTree = "<group>"; };
+		E35C09DA2E1F857200B0C252 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		E3738C4E2C8173C3001D58F5 /* Basil.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Basil.entitlements; sourceTree = "<group>"; };
 		E3738C4F2C8D2D58001D58F5 /* TextViewContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextViewContentView.swift; sourceTree = "<group>"; };
 		E384B0692D7E6CBA0074BE85 /* WarningAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarningAlert.swift; sourceTree = "<group>"; };
@@ -163,14 +233,34 @@
 		E3E5422F2C5CACAB0018C5AE /* UnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitTests.swift; sourceTree = "<group>"; };
 		E3E542312C5CB5FE0018C5AE /* Int+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Int+Ext.swift"; sourceTree = "<group>"; };
 		E3EAC2A02BAE88DC00B4B7B6 /* BasilTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BasilTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		E3EAC2A22BAE88DC00B4B7B6 /* RecipeBookTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeBookTests.swift; sourceTree = "<group>"; };
 		E3EAC2A92BAE8AD200B4B7B6 /* IngredientParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientParserTests.swift; sourceTree = "<group>"; };
 		E3EAC2AB2BAE8D3400B4B7B6 /* String+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Ext.swift"; sourceTree = "<group>"; };
 		E3EAC2BD2BB00E4900B4B7B6 /* Quantity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quantity.swift; sourceTree = "<group>"; };
 		E3FD19F92A1323E300ACA346 /* FolderTreeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderTreeVC.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		E30A564A2E0E867F00A35827 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = E30A563E2E0E867F00A35827 /* BasilShare */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		E30A56402E0E867F00A35827 /* BasilShare */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (E30A564A2E0E867F00A35827 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = BasilShare; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		E30A563C2E0E867F00A35827 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E3573E4629CC14B3000F7877 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -190,6 +280,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E30A56842E13A50E00A35827 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				E30A568C2E13B91700A35827 /* RomescoSauce.txt */,
+				E30A56852E13A51800A35827 /* TarteNormande.txt */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
 		E3316C0E2C6B5E5000F90117 /* Configurations */ = {
 			isa = PBXGroup;
 			children = (
@@ -218,6 +317,7 @@
 			isa = PBXGroup;
 			children = (
 				E349B13E29DFE2390097A338 /* EmptyStateView.swift */,
+				E35C09DA2E1F857200B0C252 /* LoadingView.swift */,
 				E384B06D2D87CB8A0074BE85 /* NavigationController.swift */,
 			);
 			path = Views;
@@ -259,6 +359,7 @@
 			isa = PBXGroup;
 			children = (
 				E3573E4B29CC14B3000F7877 /* Basil */,
+				E30A56402E0E867F00A35827 /* BasilShare */,
 				E3EAC2A12BAE88DC00B4B7B6 /* BasilTests */,
 				E3573E4A29CC14B3000F7877 /* Products */,
 			);
@@ -269,6 +370,7 @@
 			children = (
 				E3573E4929CC14B3000F7877 /* Basil.app */,
 				E3EAC2A02BAE88DC00B4B7B6 /* BasilTests.xctest */,
+				E30A563F2E0E867F00A35827 /* BasilShare.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -372,6 +474,7 @@
 		E3C6F51D2DD1E76F0093AA55 /* Parse */ = {
 			isa = PBXGroup;
 			children = (
+				E30A567C2E12289A00A35827 /* NoteParser.swift */,
 				E3C6F51E2DD1E7850093AA55 /* IngredientParser.swift */,
 				E3C6F5202DD1E78C0093AA55 /* NYTParser.swift */,
 			);
@@ -381,8 +484,9 @@
 		E3EAC2A12BAE88DC00B4B7B6 /* BasilTests */ = {
 			isa = PBXGroup;
 			children = (
+				E30A56842E13A50E00A35827 /* Support */,
+				E30A56802E136A7A00A35827 /* NoteParserTests.swift */,
 				E3EAC2A92BAE8AD200B4B7B6 /* IngredientParserTests.swift */,
-				E3EAC2A22BAE88DC00B4B7B6 /* RecipeBookTests.swift */,
 				E3E5422F2C5CACAB0018C5AE /* UnitTests.swift */,
 				E316DF1A2C630A9C009550B1 /* QuantityTests.swift */,
 			);
@@ -392,6 +496,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		E30A563E2E0E867F00A35827 /* BasilShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E30A564B2E0E867F00A35827 /* Build configuration list for PBXNativeTarget "BasilShare" */;
+			buildPhases = (
+				E30A563B2E0E867F00A35827 /* Sources */,
+				E30A563C2E0E867F00A35827 /* Frameworks */,
+				E30A563D2E0E867F00A35827 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				E30A56402E0E867F00A35827 /* BasilShare */,
+			);
+			name = BasilShare;
+			packageProductDependencies = (
+			);
+			productName = BasilShare;
+			productReference = E30A563F2E0E867F00A35827 /* BasilShare.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		E3573E4829CC14B3000F7877 /* Basil */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E3573E5D29CC14B6000F7877 /* Build configuration list for PBXNativeTarget "Basil" */;
@@ -399,10 +525,12 @@
 				E3573E4529CC14B3000F7877 /* Sources */,
 				E3573E4629CC14B3000F7877 /* Frameworks */,
 				E3573E4729CC14B3000F7877 /* Resources */,
+				E30A564E2E0E867F00A35827 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E30A56482E0E867F00A35827 /* PBXTargetDependency */,
 			);
 			name = Basil;
 			packageProductDependencies = (
@@ -438,9 +566,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1530;
+				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1640;
 				TargetAttributes = {
+					E30A563E2E0E867F00A35827 = {
+						CreatedOnToolsVersion = 16.4;
+					};
 					E3573E4829CC14B3000F7877 = {
 						CreatedOnToolsVersion = 14.2;
 					};
@@ -469,11 +600,19 @@
 			targets = (
 				E3573E4829CC14B3000F7877 /* Basil */,
 				E3EAC29F2BAE88DC00B4B7B6 /* BasilTests */,
+				E30A563E2E0E867F00A35827 /* BasilShare */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		E30A563D2E0E867F00A35827 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E3573E4729CC14B3000F7877 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -487,12 +626,53 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E30A56862E13A51E00A35827 /* TarteNormande.txt in Resources */,
+				E30A568D2E13B91B00A35827 /* RomescoSauce.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		E30A563B2E0E867F00A35827 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E30A56532E0E927600A35827 /* BasilError.swift in Sources */,
+				E30A565C2E0E92DC00A35827 /* Ingredient.swift in Sources */,
+				E30A567F2E12408400A35827 /* ListContentView.swift in Sources */,
+				E30A566C2E0E977A00A35827 /* UITableView+Ext.swift in Sources */,
+				E30A565B2E0E92CE00A35827 /* RecipeFolder.swift in Sources */,
+				E30A56612E0E931500A35827 /* IngredientParser.swift in Sources */,
+				E30A56562E0E929E00A35827 /* PersistenceManager.swift in Sources */,
+				E30A56522E0E91FE00A35827 /* UIView+Ext.swift in Sources */,
+				E30A565E2E0E92F000A35827 /* Int+Ext.swift in Sources */,
+				E30A56582E0E92BB00A35827 /* Unit.swift in Sources */,
+				E30A56652E0E96FC00A35827 /* RecipeFormVC.swift in Sources */,
+				E30A56542E0E929200A35827 /* StateManager.swift in Sources */,
+				E30A567D2E12289C00A35827 /* NoteParser.swift in Sources */,
+				E35C09DD2E1F8FBF00B0C252 /* LoadingView.swift in Sources */,
+				E30A56552E0E929900A35827 /* SocketManager.swift in Sources */,
+				E30A56682E0E974700A35827 /* SFSymbols.swift in Sources */,
+				E30A566B2E0E976D00A35827 /* ErrorAlert.swift in Sources */,
+				E30A56632E0E932D00A35827 /* Data+Ext.swift in Sources */,
+				E30A56602E0E930000A35827 /* NetworkManager.swift in Sources */,
+				E30A56592E0E92C600A35827 /* GroceryList.swift in Sources */,
+				E30A56642E0E949D00A35827 /* StyleGuide.swift in Sources */,
+				E30A565D2E0E92E500A35827 /* Quantity.swift in Sources */,
+				E30A56572E0E92B000A35827 /* API.swift in Sources */,
+				E30A56672E0E973900A35827 /* TextViewContentView.swift in Sources */,
+				E30A56662E0E972D00A35827 /* RecipeFormCell.swift in Sources */,
+				E30A564F2E0E885B00A35827 /* KeychainManager.swift in Sources */,
+				E30A565F2E0E92F500A35827 /* String+Ext.swift in Sources */,
+				E30A567B2E11B18700A35827 /* Button.swift in Sources */,
+				E30A56692E0E974F00A35827 /* UIStackView+Ext.swift in Sources */,
+				E30A565A2E0E92C900A35827 /* Recipe.swift in Sources */,
+				E30A56622E0E932000A35827 /* RecipeItem.swift in Sources */,
+				E30A566A2E0E975F00A35827 /* UIViewController+Ext.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E3573E4529CC14B3000F7877 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -514,6 +694,7 @@
 				E349B14229E002100097A338 /* DeleteRecipeItemAlert.swift in Sources */,
 				E323AB572C7A58B60028D6E3 /* SettingsVC.swift in Sources */,
 				E34B4D0529D154AF0063A9A2 /* RecipeFormVC.swift in Sources */,
+				E35C09DB2E1F857200B0C252 /* LoadingView.swift in Sources */,
 				E3DE7EAD2C72D66900BDC0BF /* RecipeFormCell.swift in Sources */,
 				E3C6F5242DD45CAC0093AA55 /* KeychainManager.swift in Sources */,
 				E3B1C73929CD205C00736C96 /* Recipe.swift in Sources */,
@@ -551,6 +732,7 @@
 				E30A56362DFE633800A35827 /* SwitchContentView.swift in Sources */,
 				E323AB592C7A5CEB0028D6E3 /* StyleGuide.swift in Sources */,
 				E39605172D8E2B2E00222CE6 /* CookingItemVC.swift in Sources */,
+				E30A567E2E12289C00A35827 /* NoteParser.swift in Sources */,
 				E3573E6C29CC185A000F7877 /* SFSymbols.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -568,17 +750,23 @@
 				E3EAC2B92BAF939200B4B7B6 /* UIViewController+Ext.swift in Sources */,
 				E3839DDE2C61CFD500A4F6AF /* Int+Ext.swift in Sources */,
 				E3277D9D2BC112AA004F7566 /* Unit.swift in Sources */,
-				E3EAC2A32BAE88DC00B4B7B6 /* RecipeBookTests.swift in Sources */,
 				E3E542302C5CACAB0018C5AE /* UnitTests.swift in Sources */,
 				E3EAC2BB2BAF93AA00B4B7B6 /* EmptyStateView.swift in Sources */,
+				E30A56892E13B12500A35827 /* Data+Ext.swift in Sources */,
+				E30A56872E13B10A00A35827 /* RecipeItem.swift in Sources */,
 				E3EAC2B22BAF933200B4B7B6 /* PersistenceManager.swift in Sources */,
+				E30A56822E136AAA00A35827 /* IngredientParser.swift in Sources */,
+				E30A56882E13B11900A35827 /* StyleGuide.swift in Sources */,
 				E3EAC2B12BAF933000B4B7B6 /* StateManager.swift in Sources */,
 				E3C6F51B2DD1D3170093AA55 /* NetworkManager.swift in Sources */,
 				E3EAC2B72BAF937200B4B7B6 /* SFSymbols.swift in Sources */,
 				E3EAC2B82BAF938600B4B7B6 /* String+Ext.swift in Sources */,
 				E3EAC2AA2BAE8AD200B4B7B6 /* IngredientParserTests.swift in Sources */,
 				E3C6F5162DC533C60093AA55 /* SocketManager.swift in Sources */,
+				E30A56812E136A8000A35827 /* NoteParserTests.swift in Sources */,
+				E35C09DC2E1F857200B0C252 /* LoadingView.swift in Sources */,
 				E3EAC2B42BAF934100B4B7B6 /* GroceryList.swift in Sources */,
+				E30A56832E136AB000A35827 /* NoteParser.swift in Sources */,
 				E3EAC2AD2BAF921800B4B7B6 /* Ingredient.swift in Sources */,
 				E316DF1B2C630A9C009550B1 /* QuantityTests.swift in Sources */,
 				E3EAC2B62BAF935200B4B7B6 /* API.swift in Sources */,
@@ -589,6 +777,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		E30A56482E0E867F00A35827 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E30A563E2E0E867F00A35827 /* BasilShare */;
+			targetProxy = E30A56472E0E867F00A35827 /* PBXContainerItemProxy */;
+		};
 		E3EAC2A52BAE88DC00B4B7B6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = E3573E4829CC14B3000F7877 /* Basil */;
@@ -608,6 +801,65 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		E30A564C2E0E867F00A35827 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = BasilShare/BasilShare.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BasilShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = BasilShare;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 0.3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = isft.Basil.BasilShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E30A564D2E0E867F00A35827 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = BasilShare/BasilShare.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BasilShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = BasilShare;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 0.3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = isft.Basil.BasilShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		E3573E5B29CC14B6000F7877 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -809,7 +1061,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = isft.RecipeBookTests;
+				PRODUCT_BUNDLE_IDENTIFIER = isft.BasilTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -832,7 +1084,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = isft.RecipeBookTests;
+				PRODUCT_BUNDLE_IDENTIFIER = isft.BasilTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -844,6 +1096,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		E30A564B2E0E867F00A35827 /* Build configuration list for PBXNativeTarget "BasilShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E30A564C2E0E867F00A35827 /* Debug */,
+				E30A564D2E0E867F00A35827 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		E3573E4429CC14B3000F7877 /* Build configuration list for PBXProject "Basil" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -13,13 +13,8 @@ class NavigationController: UINavigationController {
         super.init(rootViewController: rootViewController)
 
         self.navigationBar.prefersLargeTitles = true
+        self.navigationBar.standardAppearance = StyleGuide.navigationBarAppearance
         self.navigationBar.tintColor = StyleGuide.colors.primary
-
-        let appearance = UINavigationBarAppearance()
-        appearance.largeTitleTextAttributes = [
-            NSAttributedString.Key.font: UIFont.systemFont(ofSize: 32, weight: .bold),
-        ]
-        self.navigationBar.standardAppearance = appearance
     }
 
     required init?(coder aDecoder: NSCoder) {

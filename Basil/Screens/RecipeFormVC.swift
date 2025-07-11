@@ -12,6 +12,10 @@ import UIKit
 //
 class RecipeFormVC: UIViewController {
 
+    private typealias Cell = RecipeFormCell.Info
+    private typealias Section = RecipeFormCell.Section
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, Cell>
+
     protocol Delegate: AnyObject {
         func didSaveRecipe(style: RecipeFormVC.Style, recipe: Recipe)
     }
@@ -21,47 +25,7 @@ class RecipeFormVC: UIViewController {
         case edit
     }
 
-    enum Section: Int, CaseIterable {
-        case title = 0
-        case ingredients = 1
-        case instructions = 2
-    }
-
-    struct Cell: Hashable {
-        enum Style {
-            case textField
-            case button
-
-            var reuseID: String {
-                switch self {
-                case .textField:
-                    return RecipeFormCell.textFieldReuseID
-                case .button:
-                    return RecipeFormCell.buttonReuseID
-                }
-            }
-        }
-
-        let id: UUID
-        let style: Style
-        var text: String
-
-        init(_ style: Style, text: String = "") {
-            self.id = UUID()
-            self.style = style
-            self.text = text
-        }
-
-        func hash(into hasher: inout Hasher) {
-            hasher.combine(self.id)
-        }
-
-        static func == (lhs: Cell, rhs: Cell) -> Bool {
-            return lhs.id == rhs.id && lhs.text == rhs.text
-        }
-    }
-
-    class DataSource: UITableViewDiffableDataSource<Section, Cell> {
+    private class DataSource: UITableViewDiffableDataSource<Section, Cell> {
 
         override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
             guard let tableSection = Section(rawValue: section) else { return nil }
@@ -100,18 +64,13 @@ class RecipeFormVC: UIViewController {
         }
     }
 
-    private var cancelButton: UIBarButtonItem!
-    private var editButton: UIBarButtonItem!
-    private var doneButton: UIBarButtonItem!
-    private var saveButton: UIBarButtonItem!
-
+    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
+    private var style: Style
     private var cells: [[Cell]] = [
         [Cell(.textField)],
         [Cell(.textField), Cell(.button)],
         [Cell(.textField), Cell(.button)],
     ]
-
-    typealias Snapshot = NSDiffableDataSourceSnapshot<Section, Cell>
 
     private lazy var dataSource = DataSource(tableView: self.tableView) { (tableView, indexPath, info) -> RecipeFormCell? in
         var reuseID: String
@@ -137,12 +96,14 @@ class RecipeFormVC: UIViewController {
         return cell
     }
 
-    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
-    private var style: Style
-
     var uuid: UUID?
     var folderId: UUID?
     weak var delegate: Delegate?
+
+    private var cancelButton: UIBarButtonItem!
+    private var editButton: UIBarButtonItem!
+    private var doneButton: UIBarButtonItem!
+    private var saveButton: UIBarButtonItem!
 
     init(style: Style) {
         self.style = style

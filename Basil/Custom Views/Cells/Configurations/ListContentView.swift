@@ -50,14 +50,14 @@ class ListContentView: UIView, UIContentView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    private func orderedString(_ text: String, row: Int) -> NSAttributedString {
-        guard let configuration = self.configuration as? ListContentConfiguration else { return NSAttributedString() }
+    static func orderedString(
+        _ text: String, row: Int,
+        font: UIFont? = nil, lineSpacing: CGFloat? = nil, paragraphSpacing: CGFloat? = nil
+    ) -> NSAttributedString {
+        let font = font ?? UIFont.systemFont(ofSize: UIFont.systemFontSize)
 
         let string = "\(row).\t\(text)"
-        let bulletSize = NSAttributedString(
-            string: "88.",
-            attributes: [.font: UIFont.systemFont(ofSize: UIFont.systemFontSize)]
-        ).size()
+        let bulletSize = NSAttributedString(string: "88.", attributes: [.font: font]).size()
         let itemStart = bulletSize.width + 10
 
         let paragraphStyle = NSMutableParagraphStyle()
@@ -66,8 +66,12 @@ class ListContentView: UIView, UIContentView {
             NSTextTab(textAlignment: .right, location: 0),
             NSTextTab(textAlignment: .left, location: itemStart),
         ]
-        paragraphStyle.lineSpacing = configuration.lineSpacing
-        paragraphStyle.paragraphSpacing = configuration.paragraphSpacing
+        if let lineSpacing {
+            paragraphStyle.lineSpacing = lineSpacing
+        }
+        if let paragraphSpacing {
+            paragraphStyle.paragraphSpacing = paragraphSpacing
+        }
 
         return NSAttributedString(
             string: string,
@@ -75,21 +79,25 @@ class ListContentView: UIView, UIContentView {
         )
     }
 
-    private func unorderedString(_ text: String) -> NSAttributedString {
-        guard let configuration = self.configuration as? ListContentConfiguration else { return NSAttributedString() }
+    static func unorderedString(
+        _ text: String,
+        font: UIFont? = nil, lineSpacing: CGFloat? = nil, paragraphSpacing: CGFloat? = nil
+    ) -> NSAttributedString {
+        let font = font ?? UIFont.systemFont(ofSize: UIFont.systemFontSize)
 
         let string = "•\t\(text)"
-        let bulletSize = NSAttributedString(
-            string: "•",
-            attributes: [.font: UIFont.systemFont(ofSize: UIFont.systemFontSize)]
-        ).size()
+        let bulletSize = NSAttributedString(string: "•", attributes: [.font: font]).size()
         let itemStart = bulletSize.width + 12
 
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.headIndent = itemStart
         paragraphStyle.tabStops = [NSTextTab(textAlignment: .left, location: itemStart)]
-        paragraphStyle.lineSpacing = configuration.lineSpacing
-        paragraphStyle.paragraphSpacing = configuration.paragraphSpacing
+        if let lineSpacing {
+            paragraphStyle.lineSpacing = lineSpacing
+        }
+        if let paragraphSpacing {
+            paragraphStyle.paragraphSpacing = paragraphSpacing
+        }
 
         return NSAttributedString(
             string: string,
@@ -105,9 +113,20 @@ class ListContentView: UIView, UIContentView {
         self.label.numberOfLines = 0
         switch configuration.style {
         case .ordered:
-            self.label.attributedText = self.orderedString(configuration.text, row: configuration.row)
+            self.label.attributedText = Self.orderedString(
+                configuration.text,
+                row: configuration.row,
+                font: StyleGuide.fonts.body,
+                lineSpacing: configuration.lineSpacing,
+                paragraphSpacing: configuration.paragraphSpacing
+            )
         case .unordered:
-            self.label.attributedText = self.unorderedString(configuration.text)
+            self.label.attributedText = Self.unorderedString(
+                configuration.text,
+                font: StyleGuide.fonts.body,
+                lineSpacing: configuration.lineSpacing,
+                paragraphSpacing: configuration.paragraphSpacing
+            )
         }
     }
 }

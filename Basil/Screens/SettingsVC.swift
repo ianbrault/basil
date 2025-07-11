@@ -91,7 +91,7 @@ class SettingsVC: UITableViewController {
             Section(
                 header: nil,
                 cells: [
-                    Cell(factory: { Self.defaultCell($0, text: "Log In") }, action: self.loginAction),
+                    Cell(factory: { Self.defaultCell($0, text: "Sign In") }, action: self.loginAction),
                     Cell(factory: { Self.defaultCell($0, text: "Create an Account") }, action: self.registerAction),
                 ]
             ),
@@ -199,8 +199,6 @@ class SettingsVC: UITableViewController {
     }
 
     private func loginAction() {
-        // NOTE: logging in will wipe away any recipes/folders that were created before logging in
-        // TODO: add an option to import the recipes/folders into the account after logging in
         let vc = OnboardingFormVC(.login) { [weak self] (error) in
             State.manager.userChanged = error == nil
             self?.userAdded(error)
@@ -214,9 +212,8 @@ class SettingsVC: UITableViewController {
     }
 
     private func logoutAction() {
-        let message = "Logging out will remove any saved recipes until you log back in to your account. " +
-        "Are you sure you want to continue?"
-        let warning = WarningAlert(message) { [weak self] () in
+        let message = "Are you sure you wish to sign out?"
+        let warning = WarningAlert(title: "", message: message) { [weak self] () in
             self?.userRemoved(nil)
         }
         self.present(warning, animated: true)

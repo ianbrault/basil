@@ -12,8 +12,8 @@ import UIKit
 //
 class WarningAlert: UIAlertController {
 
-    convenience init(_ message: String? = nil, actionHandler: @escaping () -> Void) {
-        self.init(title: "Warning", message: message, preferredStyle: .alert)
+    convenience init(title: String = "Warning", message: String? = nil, actionHandler: @escaping () -> Void) {
+        self.init(title: title, message: message, preferredStyle: .alert)
         self.view.tintColor = StyleGuide.colors.primary
         self.addActions(actionHandler: actionHandler)
     }

@@ -57,7 +57,6 @@ class OnboardingFormVC: UIViewController {
     private let confirmPasswordIndex = IndexPath(row: 2, section: 0)
 
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
-    private let buttonHeight: CGFloat = 54
     private let insets = UIEdgeInsets(top: 0, left: 40, bottom: 16, right: 40)
 
     init(_ style: FormStyle, onCompletion: @escaping (BasilError?) -> Void) {
@@ -65,14 +64,14 @@ class OnboardingFormVC: UIViewController {
         self.onCompletion = onCompletion
         switch style {
         case .register:
-            self.button = Button(title: "Register")
+            self.button = Button(title: "Create Account")
             self.cells = [
                 Cell(image: SFSymbols.email, placeholder: "Email", contentType: .username, keyboardType: .emailAddress),
                 Cell(image: SFSymbols.password, placeholder: "Password", contentType: .newPassword, isSecure: true),
                 Cell(image: SFSymbols.confirmPassword, placeholder: "Confirm Password", contentType: .newPassword, isSecure: true),
             ]
         case .login:
-            self.button = Button(title: "Login")
+            self.button = Button(title: "Sign In")
             self.cells = [
                 Cell(image: SFSymbols.email, placeholder: "Email", contentType: .username, keyboardType: .emailAddress),
                 Cell(image: SFSymbols.password, placeholder: "Password", contentType: .password, isSecure: true),
@@ -97,9 +96,9 @@ class OnboardingFormVC: UIViewController {
 
         switch style {
         case .register:
-            self.title = "Create Account"
+            self.title = "Create an Account"
         case .login:
-            self.title = "Log in"
+            self.title = "Sign In"
         }
 
         self.navigationController?.navigationBar.prefersLargeTitles = true
@@ -131,7 +130,7 @@ class OnboardingFormVC: UIViewController {
     }
 
     private func configureButton() {
-        self.view.addPinnedSubview(self.button, height: self.buttonHeight, insets: self.insets, keyboardBottom: true, noTop: true)
+        self.view.addPinnedSubview(self.button, height: StyleGuide.buttonHeight, insets: self.insets, keyboardBottom: true, noTop: true)
         self.button.addTarget(self, action: #selector(self.onSubmit), for: .touchUpInside)
     }
 

@@ -7,8 +7,6 @@
 
 import UIKit
 
-fileprivate var containerView: UIView!
-
 extension UIViewController {
 
     @objc func dismissSelf() {
@@ -47,33 +45,21 @@ extension UIViewController {
     }
 
     func showLoadingView() {
-        containerView = UIView(frame: view.bounds)
-        self.view.addSubview(containerView)
-
-        containerView.backgroundColor = .systemBackground
-        containerView.alpha = 0
-
+        let view = LoadingView(frame: self.view.bounds)
+        self.view.addSubview(view)
         UIView.animate(withDuration: 0.5) {
-            containerView.alpha = 0.8
+            view.alpha = 0.8
         }
-
-        let activityIndicator = UIActivityIndicatorView(style: .large)
-        containerView.addSubview(activityIndicator)
-
-        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-
-        NSLayoutConstraint.activate([
-            activityIndicator.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
-            activityIndicator.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
-        ])
-
-        activityIndicator.startAnimating()
+        view.startAnimating()
     }
 
     func dismissLoadingView() {
-        DispatchQueue.main.async {
-            containerView.removeFromSuperview()
-            containerView = nil
+        for subview in self.view.subviews {
+            if let view = subview as? LoadingView {
+                DispatchQueue.main.async {
+                    view.removeFromSuperview()
+                }
+            }
         }
     }
 }

@@ -11,8 +11,45 @@ class RecipeFormCell: UITableViewCell {
     static let textFieldReuseID = "RecipeFormCell__TextField"
     static let buttonReuseID = "RecipeFormCell__Button"
 
-    typealias Info = RecipeFormVC.Cell
-    typealias Section = RecipeFormVC.Section
+    enum Section: Int, CaseIterable {
+        case title = 0
+        case ingredients = 1
+        case instructions = 2
+    }
+
+    struct Info: Hashable {
+        enum Style {
+            case textField
+            case button
+
+            var reuseID: String {
+                switch self {
+                case .textField:
+                    return RecipeFormCell.textFieldReuseID
+                case .button:
+                    return RecipeFormCell.buttonReuseID
+                }
+            }
+        }
+
+        let id: UUID
+        let style: Style
+        var text: String
+
+        init(_ style: Style, text: String = "") {
+            self.id = UUID()
+            self.style = style
+            self.text = text
+        }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(self.id)
+        }
+
+        static func == (lhs: Self, rhs: Self) -> Bool {
+            return lhs.id == rhs.id && lhs.text == rhs.text
+        }
+    }
 
     enum TapLocation {
         case item
