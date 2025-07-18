@@ -100,8 +100,8 @@ class CookingVC: UIPageViewController {
 
     @objc func dismissVC() {
         let alert = DoneCookingAlert { [weak self] in
+            self?.dismissSelf()
             self?.cookingDelegate?.doneCooking()
-            self?.dismiss(animated: true)
         }
         self.present(alert, animated: true)
     }

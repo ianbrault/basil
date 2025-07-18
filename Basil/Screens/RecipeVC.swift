@@ -121,7 +121,7 @@ class RecipeVC: UITableViewController {
 
     @objc func startCooking(_ action: UIAction) {
         if let tabBar = self.tabBarController as? TabBarController {
-            tabBar.addRecipeToCookingView(recipe: self.recipe)
+            tabBar.startCooking(selectedRecipes: [self.recipe.uuid])
         }
     }
 

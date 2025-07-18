@@ -258,5 +258,6 @@ class SettingsVC: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.sections[indexPath.section].cells[indexPath.row].action?()
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 }

@@ -18,6 +18,10 @@ class TabBarController: UITabBarController {
     var cookingView: UINavigationController? = nil
     private var tag: Int = 0
 
+    private var showingCookingView: Bool {
+        return self.cookingView != nil
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         UITabBar.appearance().tintColor = StyleGuide.colors.primary
@@ -79,19 +83,33 @@ class TabBarController: UITabBarController {
         }
     }
 
-    func addRecipeToCookingView(recipe: Recipe) {
-        var present = false
-        if self.cookingView == nil {
+    func startCooking(selectedRecipes: [UUID]) {
+        // if the cooking view is already visible, add the recipes without showing the recipe picker
+        if self.showingCookingView {
+            self.addRecipesToCookingView(recipes: selectedRecipes)
+            return
+        }
+        // otherwise, show the recipe picker to allow the user to select multiple recipes for cooking
+        let viewController = RecipePickerVC(title: "Select Recipes", selected: selectedRecipes) { [weak self] (selected) in
+            self?.addRecipesToCookingView(recipes: selected)
+        }
+        let navigationController = NavigationController(rootViewController: viewController)
+        self.present(navigationController, animated: true)
+    }
+
+    private func addRecipesToCookingView(recipes: [UUID]) {
+        let recipes = recipes.filterMap { State.manager.getRecipe(uuid: $0) }
+        let present = !self.showingCookingView
+
+        if !self.showingCookingView {
             let viewController = CookingVC()
             viewController.cookingDelegate = self
             self.cookingView = NavigationController(rootViewController: viewController)
-            present = true
         }
-
-        guard let controller = self.cookingView, let view = controller.topViewController as? CookingVC else {
-            return
+        guard let controller = self.cookingView, let view = controller.topViewController as? CookingVC else { return }
+        for recipe in recipes {
+            view.addRecipe(recipe: recipe)
         }
-        view.addRecipe(recipe: recipe)
         if let sheetController = view.sheetPresentationController {
             sheetController.animateChanges {
                 sheetController.selectedDetentIdentifier = .large

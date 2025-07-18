@@ -41,7 +41,7 @@ class RecipeListVC: UIViewController {
     }
 
     private lazy var dataSource = DataSource(tableView: self.tableView) { (tableView, indexPath, item) -> UITableViewCell? in
-        let cell = tableView.dequeueReusableCell(withIdentifier: RecipeListVC.reuseID, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: Self.reuseID, for: indexPath)
 
         var content = cell.defaultContentConfiguration()
         content.imageProperties.tintColor = StyleGuide.colors.primary
@@ -195,7 +195,7 @@ class RecipeListVC: UIViewController {
         self.tableView.tableHeaderView = UIView()
         self.tableView.removeExcessCells()
 
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: RecipeListVC.reuseID)
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: Self.reuseID)
     }
 
     private func configureSearchController() {
@@ -237,7 +237,7 @@ class RecipeListVC: UIViewController {
             }
             let cookAction = UIAction(title: "Start cooking", image: SFSymbols.cook) { (action) in
                 if let tabBar = self?.tabBarController as? TabBarController {
-                    tabBar.addRecipeToCookingView(recipe: recipe)
+                    tabBar.startCooking(selectedRecipes: [recipe.uuid])
                 }
             }
             let deleteAction = UIAction(title: "Delete recipe", image: SFSymbols.trash, attributes: .destructive) { (action) in
@@ -494,6 +494,7 @@ extension RecipeListVC: UITableViewDelegate {
             let recipeListVC = RecipeListVC(folderId: folder.uuid)
             self.navigationController?.pushViewController(recipeListVC, animated: true)
         }
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 
     func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
@@ -597,19 +598,5 @@ extension RecipeListVC: RecipeVC.Delegate {
         } else {
             self.removeItem(uuid: recipe.uuid)
         }
-    }
-}
-
-extension Array<RecipeItem> {
-
-    func findItem(uuid: UUID) -> IndexPath? {
-        var indexPath: IndexPath? = nil
-        for (index, item) in self.enumerated() {
-            if item.uuid == uuid {
-                indexPath = IndexPath(row: index, section: 0)
-                break
-            }
-        }
-        return indexPath
     }
 }

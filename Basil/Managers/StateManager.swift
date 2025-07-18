@@ -477,6 +477,26 @@ class State {
         return items
     }
 
+    func folderChain(for uuid: UUID) -> [UUID] {
+        var current: UUID?
+        if let recipe = self.getRecipe(uuid: uuid) {
+            current = recipe.folderId
+        } else if let folder = self.getFolder(uuid: uuid) {
+            current = folder.folderId
+        } else {
+            // unreachable
+            return []
+        }
+
+        var folders: [UUID] = []
+        while let currentId = current, let currentFolder = self.getFolder(uuid: currentId) {
+            folders.append(currentId)
+            current = currentFolder.folderId
+        }
+
+        return folders.reversed()
+    }
+
     //
     // Grocery List
     //

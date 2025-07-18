@@ -34,38 +34,31 @@ class FolderTreeVC: UITableViewController {
     }
 
     private func getFolderItems(folder: RecipeFolder, indentLevel: Int) -> [Item] {
-        let subfolders = folder.subfolders.map { State.manager.getFolder(uuid: $0)! }
-        let sortedFolders = subfolders.sorted(by: RecipeFolder.sortReverse)
-        return sortedFolders.map { Item(folder: $0, indentLevel: indentLevel) }
+        let subfolders = folder.subfolders.filterMap { State.manager.getFolder(uuid: $0) }.sorted { $0.name < $1.name }
+        return subfolders.map { Item(folder: $0, indentLevel: indentLevel) }
     }
 
     private func loadFolderTree() {
         // start with the root
-        let root = State.manager.root!
-        let rootFolder = State.manager.getFolder(uuid: root)!
+        guard let root = State.manager.root, let rootFolder = State.manager.getFolder(uuid: root) else { return }
         self.items.append(Item(folder: rootFolder, indentLevel: 0))
 
         var queue = self.getFolderItems(folder: rootFolder, indentLevel: 1)
-        while !queue.isEmpty {
-            // create an item for the folder
-            let item = queue.popLast()!
+        while let item = queue.popFirst() {
             self.items.append(item)
             // and then add sub-folders to the queue
-            let subItems = self.getFolderItems(folder: item.folder, indentLevel: item.indentLevel + 1)
-            queue.append(contentsOf: subItems)
+            let subitems = self.getFolderItems(folder: item.folder, indentLevel: item.indentLevel + 1)
+            queue.insert(contentsOf: subitems, at: 0)
         }
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         self.title = "Move to folder"
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(self.dismissSelf))
-
+        self.navigationItem.rightBarButtonItem = self.createBarButton(systemItem: .cancel, action: #selector(self.dismissSelf))
         self.tableView.keyboardDismissMode = .onDrag
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: Self.reuseID)
         self.tableView.removeExcessCells()
-
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: FolderTreeVC.reuseID)
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
