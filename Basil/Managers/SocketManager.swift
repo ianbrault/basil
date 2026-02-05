@@ -26,8 +26,6 @@ class SocketManager: NSObject {
         case UpdateRequested
     }
 
-    // let socketURL = URL(string: "ws://localhost:4040")!
-    // let socketURL = URL(string: "wss://brault.dev/nightly/basil/socket")!
     let socketURL = URL(string: "wss://brault.dev/basil/socket")!
 
     private var delegates: [Delegate] = []

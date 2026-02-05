@@ -15,8 +15,10 @@ class NetworkManager {
     typealias Handler = (BasilError?) -> ()
     typealias BodyHandler<T> = (Result<T, BasilError>) -> ()
 
-    // static let baseURL = URL(string: "http://localhost:3030/basil/v2")!
-    // static let baseURL = URL(string: "http://brault.dev/nightly/basil/v2")!
+    struct ErrorResponse: Codable {
+        let error: String
+    }
+
     static let baseURL = URL(string: "https://brault.dev/basil/v2")!
 
     private init() {}
@@ -45,10 +47,10 @@ class NetworkManager {
             }
             if let httpResponse = response as? HTTPURLResponse {
                 if self.statusIsError(httpResponse.statusCode) {
-                    var message = "Invalid response(\(httpResponse.statusCode))"
+                    var message = "Invalid response: \(httpResponse.statusCode)"
                     if let data {
-                        if let errorMessage = String(data: data, encoding: .utf8) {
-                            message = errorMessage
+                        if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                            message = errorResponse.error
                         }
                     }
                     handler(.failure(.httpError(message)))
@@ -91,10 +93,10 @@ class NetworkManager {
             }
             if let httpResponse = response as? HTTPURLResponse {
                 if self.statusIsError(httpResponse.statusCode) {
-                    var message = "Invalid response(\(httpResponse.statusCode))"
+                    var message = "Invalid response: \(httpResponse.statusCode)"
                     if let data {
-                        if let errorMessage = String(data: data, encoding: .utf8) {
-                            message = errorMessage
+                        if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                            message = errorResponse.error
                         }
                     }
                     handler(.failure(.httpError(message)))
