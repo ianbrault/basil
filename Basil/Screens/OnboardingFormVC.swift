@@ -195,7 +195,9 @@ class OnboardingFormVC: UIViewController {
             case .failure(let error):
                 err = error
             }
-            self?.dismissLoadingView()
+            DispatchQueue.main.async {
+                self?.dismissLoadingView()
+            }
             self?.onCompletion?(err)
         }
 

@@ -56,9 +56,7 @@ extension UIViewController {
     func dismissLoadingView() {
         for subview in self.view.subviews {
             if let view = subview as? LoadingView {
-                DispatchQueue.main.async {
-                    view.removeFromSuperview()
-                }
+                view.removeFromSuperview()
             }
         }
     }

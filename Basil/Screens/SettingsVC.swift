@@ -228,7 +228,9 @@ class SettingsVC: UITableViewController {
         ) { [weak self](password) in
             self?.showLoadingView()
             NetworkManager.deleteUser(email: State.manager.userEmail, password: password) { (error) in
-                self?.dismissLoadingView()
+                DispatchQueue.main.async {
+                    self?.dismissLoadingView()
+                }
                 self?.userRemoved(error)
             }
         }
