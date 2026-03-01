@@ -12,8 +12,9 @@ import UIKit
 // Contains ingredients and instructions for a recipe that is being cooked
 //
 class CookingItemVC: UITableViewController {
-    static let ingredientReuseID = "CookingIngredientCell"
-    static let instructionReuseID = "CookingInstructionCell"
+    static let ingredientReuseID = "CookingItemCell__Ingredient"
+    static let instructionReuseID = "CookingItemCell__Instruction"
+    static let sectionReuseID = "CookingItemCell__Section"
 
     enum Section: Int, CaseIterable {
         case ingredients
@@ -40,8 +41,9 @@ class CookingItemVC: UITableViewController {
         self.tableView.separatorStyle = .none
         self.tableView.removeExcessCells()
 
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: CookingItemVC.ingredientReuseID)
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: CookingItemVC.instructionReuseID)
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: Self.ingredientReuseID)
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: Self.instructionReuseID)
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: Self.sectionReuseID)
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -72,13 +74,13 @@ class CookingItemVC: UITableViewController {
         guard let section = Section(rawValue: indexPath.section) else { return UITableViewCell() }
         switch section {
         case .ingredients:
-            let cell = tableView.dequeueReusableCell(withIdentifier: CookingItemVC.ingredientReuseID)!
+            let cell = tableView.dequeueReusableCell(withIdentifier: Self.ingredientReuseID)!
             var content = ListContentConfiguration(style: .unordered)
             content.text = self.recipe.ingredients[indexPath.row].toString()
             cell.contentConfiguration = content
             return cell
         case .instructions:
-            let cell = tableView.dequeueReusableCell(withIdentifier: CookingItemVC.instructionReuseID)!
+            let cell = tableView.dequeueReusableCell(withIdentifier: Self.instructionReuseID)!
             var configuration = CookingContentConfiguration()
             configuration.text = self.recipe.instructions[indexPath.row]
             configuration.selected = self.instructionState[indexPath.row]

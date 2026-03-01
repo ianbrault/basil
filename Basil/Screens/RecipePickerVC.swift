@@ -173,6 +173,7 @@ class RecipePickerVC: UITableViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         // scroll to the first selected recipe
+        // FIXME: this should only scroll if the index is off the screen
         if let index = self.items.firstIndex(where: { $0.selected }) {
             self.tableView.scrollToRow(at: IndexPath(row: index, section: 0), at: .middle, animated: true)
         }

@@ -85,7 +85,7 @@ class CookingVC: UIPageViewController {
             controller.detents = [
                 .large(),
                 .custom { _ in
-                    return 70
+                    return 80
                 }
             ]
             controller.selectedDetentIdentifier = .large
