@@ -36,21 +36,33 @@ class TabBarController: UITabBarController {
 
     private func createGroceryListVC() -> UINavigationController {
         let groceryListVC = GroceryListVC()
-        groceryListVC.tabBarItem = UITabBarItem(title: "Groceries", image: SFSymbols.groceries, tag: self.tag)
+        groceryListVC.tabBarItem = UITabBarItem(
+            title: "Groceries",
+            image: SFSymbols.groceries,
+            tag: self.tag
+        )
         self.tag += 1
         return NavigationController(rootViewController: groceryListVC)
     }
 
     private func createRecipeListVC() -> UINavigationController {
-        let recipeListVC = RecipeListVC(folderId: State.manager.root!)
-        recipeListVC.tabBarItem = UITabBarItem(title: "Recipes", image: SFSymbols.recipeBook, tag: self.tag)
+        let recipeListVC = RecipeListVC(folderId: StateManager.shared.root!)
+        recipeListVC.tabBarItem = UITabBarItem(
+            title: "Recipes",
+            image: SFSymbols.recipeBook,
+            tag: self.tag
+        )
         self.tag += 1
         return NavigationController(rootViewController: recipeListVC)
     }
 
     private func createSettingsVC() -> UINavigationController {
         let settingsVC = SettingsVC()
-        settingsVC.tabBarItem = UITabBarItem(title: "Settings", image: SFSymbols.settings, tag: self.tag)
+        settingsVC.tabBarItem = UITabBarItem(
+            title: "Settings",
+            image: SFSymbols.settings,
+            tag: self.tag
+        )
         self.tag += 1
         return NavigationController(rootViewController: settingsVC)
     }
@@ -59,7 +71,8 @@ class TabBarController: UITabBarController {
         if !PersistenceManager.shared.hasLaunched {
             let alert = UIAlertController(
                 title: "Welcome to Basil!",
-                message: "Go to the \"Settings\" tab to login or register a new account.",
+                message:
+                    "Go to the \"Settings\" tab to login or register a new account.",
                 preferredStyle: .alert
             )
             alert.view.tintColor = StyleGuide.colors.primary
@@ -71,7 +84,9 @@ class TabBarController: UITabBarController {
     }
 
     func refreshRecipeLists() {
-        let recipeListNavController = self.viewControllers?[Index.RecipeList.rawValue] as! NavigationController
+        let recipeListNavController =
+            self.viewControllers?[Index.RecipeList.rawValue]
+            as! NavigationController
         for vc in recipeListNavController.viewControllers {
             if let recipeListVC = vc as? RecipeListVC {
                 recipeListVC.refresh()
@@ -84,11 +99,15 @@ class TabBarController: UITabBarController {
         if self.cookingView == nil {
             let viewController = CookingVC()
             viewController.cookingDelegate = self
-            self.cookingView = NavigationController(rootViewController: viewController)
+            self.cookingView = NavigationController(
+                rootViewController: viewController
+            )
             present = true
         }
 
-        guard let controller = self.cookingView, let view = controller.topViewController as? CookingVC else {
+        guard let controller = self.cookingView,
+            let view = controller.topViewController as? CookingVC
+        else {
             return
         }
         view.addRecipe(recipe: recipe)

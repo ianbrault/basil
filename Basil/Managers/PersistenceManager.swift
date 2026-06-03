@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os
 
 //
 // Singleton class responsible for managing the storage/retrieval of persistent state using the UserDefaults API
@@ -13,96 +14,138 @@ import Foundation
 // Versioned to allow for backwards compatibility
 //
 class PersistenceManager {
+    private static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier!,
+        category: String(describing: PersistenceManager.self)
+    )
 
     static let shared = PersistenceManager()
     static let version = 2
 
-    private let defaults = UserDefaults.standard
-    private let decoder = JSONDecoder()
-    private let encoder = JSONEncoder()
-
     enum Keys {
         static let dataVersion = "dataVersion"
+        static let email = "email"
         static let hasLaunched = "hasLaunched"
         static let root = "root"
         static let recipes = "recipes"
         static let folders = "folders"
-        static let sequence = "sequence"
+        static let offlineQueue = "offlineQueue"
         static let groceryList = "groceryList"
-        // settings
+        // Settings
         static let sortCheckedGroceries = "sortCheckedGroceries"
-        // deprecated but key is retained for use in migrations
-        static let state = "state"
     }
 
     private init() {
-        // set "non-default defaults" here
-        self.defaults.register(defaults: [
+        // Set "non-default defaults" here
+        UserDefaults.standard.register(defaults: [
             Keys.sortCheckedGroceries: true
         ])
     }
 
+    func getObject<T: Codable>(forKey key: String) -> T? {
+        guard let data = UserDefaults.standard.object(forKey: key) as? Data
+        else {
+            return nil
+        }
+        return try? JSONDecoder().decode(T.self, from: data)
+    }
+
+    func setObject<T: Codable>(_ value: T, forKey key: String) {
+        let encoded = try! JSONEncoder().encode(value)
+        UserDefaults.standard.set(encoded, forKey: key)
+    }
+
+    //
+    // Persistence object getters/setters
+    //
 
     var dataVersion: Int {
         get {
-            return self.defaults.integer(forKey: Keys.dataVersion)
+            return UserDefaults.standard.integer(forKey: Keys.dataVersion)
         }
         set {
-            self.defaults.set(newValue, forKey: Keys.dataVersion)
+            UserDefaults.standard.set(newValue, forKey: Keys.dataVersion)
+        }
+    }
+
+    var email: String? {
+        get {
+            return UserDefaults.standard.string(forKey: Keys.email)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Keys.email)
         }
     }
 
     var hasLaunched: Bool {
         get {
-            return self.defaults.bool(forKey: Keys.hasLaunched)
+            return UserDefaults.standard.bool(forKey: Keys.hasLaunched)
         }
         set {
-            self.defaults.set(newValue, forKey: Keys.hasLaunched)
+            UserDefaults.standard.set(newValue, forKey: Keys.hasLaunched)
         }
     }
 
-    var root: UUID? {
+    var root: ObjectID? {
         get {
-            guard let rootString = self.defaults.string(forKey: Keys.root) else {
+            if let id = UserDefaults.standard.string(forKey: Keys.root) {
+                return ObjectID(string: id)
+            } else {
                 return nil
             }
-            return UUID(uuidString: rootString)
         }
         set {
-            self.defaults.set(newValue?.uuidString, forKey: Keys.root)
+            UserDefaults.standard.set(newValue?.description, forKey: Keys.root)
         }
     }
 
-    var recipes: [Recipe] {
+    var recipes: [ObjectID: Recipe] {
         get {
-            return self.getObject(forKey: Keys.recipes, defaultValue: [])
+            return self.getObject(forKey: Keys.recipes) ?? [:]
         }
         set {
             self.setObject(newValue, forKey: Keys.recipes)
         }
     }
 
-    var folders: [RecipeFolder] {
+    var folders: [ObjectID: Folder] {
         get {
-            return self.getObject(forKey: Keys.folders, defaultValue: [])
+            return self.getObject(forKey: Keys.folders) ?? [:]
         }
         set {
             self.setObject(newValue, forKey: Keys.folders)
         }
     }
 
-    var sequence: Int {
+    var offlineQueue: RingBuffer<StateManager.Action> {
         get {
-            return self.defaults.integer(forKey: Keys.sequence)
+            if let queue: RingBuffer<StateManager.Action> = self.getObject(
+                forKey: Keys.offlineQueue
+            ) {
+                return queue
+            } else {
+                Self.logger.warning(
+                    "Failed to load object for key \(Keys.offlineQueue), creating default object"
+                )
+                return RingBuffer(size: StateManager.offlineQueueSize)
+            }
         }
         set {
-            self.defaults.set(newValue, forKey: Keys.sequence)
+            self.setObject(newValue, forKey: Keys.offlineQueue)
         }
     }
 
     var groceryList: GroceryList {
         get {
-            return self.getObject(forKey: Keys.groceryList, defaultValue: GroceryList())
+            if let list: GroceryList = self.getObject(forKey: Keys.groceryList)
+            {
+                return list
+            } else {
+                Self.logger.warning(
+                    "Failed to load object for key \(Keys.groceryList), creating default object"
+                )
+                return GroceryList()
+            }
         }
         set {
             self.setObject(newValue, forKey: Keys.groceryList)
@@ -111,26 +154,13 @@ class PersistenceManager {
 
     var sortCheckedGroceries: Bool {
         get {
-            return self.defaults.bool(forKey: Keys.sortCheckedGroceries)
+            return UserDefaults.standard.bool(forKey: Keys.sortCheckedGroceries)
         }
         set {
-            self.defaults.set(newValue, forKey: Keys.sortCheckedGroceries)
+            UserDefaults.standard.set(
+                newValue,
+                forKey: Keys.sortCheckedGroceries
+            )
         }
-    }
-
-    func getObject<T: Codable>(forKey key: String, defaultValue: T) -> T {
-        guard let data = self.defaults.object(forKey: key) as? Data else {
-            return defaultValue
-        }
-        do {
-            return try self.decoder.decode(T.self, from: data)
-        } catch {
-            return defaultValue
-        }
-    }
-
-    func setObject<T: Codable>(_ value: T, forKey key: String) {
-        let encoded = try! self.encoder.encode(value)
-        self.defaults.set(encoded, forKey: key)
     }
 }

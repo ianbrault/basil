@@ -20,22 +20,28 @@ class NoteParser {
 
     private func startsIngredients(_ text: String) -> Bool {
         // ensure the text is lowercased before passing it in
-        return Self.ingredientsHeadings.firstIndex { text.starts(with: $0) } != nil
+        return Self.ingredientsHeadings.firstIndex { text.starts(with: $0) }
+            != nil
     }
 
     private func startsInstructions(_ text: String) -> Bool {
         // ensure the text is lowercased before passing it in
-        return Self.instructionsHeadings.firstIndex { text.starts(with: $0) } != nil
+        return Self.instructionsHeadings.firstIndex { text.starts(with: $0) }
+            != nil
     }
 
-    func parse(text: String, inFolder folderId: UUID? = nil) -> Result<Recipe, BasilError> {
-        let lines = text.split(separator: "\n").map { String($0).trim() }.filter { !$0.isEmpty }
+    func parse(text: String, inFolder folderId: ObjectID? = nil) -> Result<
+        Recipe, BasilError
+    > {
+        let lines = text.split(separator: "\n").map { String($0).trim() }.filter
+        { !$0.isEmpty }
         if lines.isEmpty {
             return .failure(.recipeParseError("Empty input"))
         }
 
-        let parentFolder = State.manager.root ?? folderId ?? UUID()
-        let recipe = Recipe(folderId: parentFolder, title: lines[0])
+        let parentFolder =
+            StateManager.shared.root ?? folderId ?? ObjectID()
+        let recipe = Recipe(parent: parentFolder, title: lines[0])
 
         var inIngredients = false
         var inInstructions = false

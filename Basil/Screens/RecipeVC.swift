@@ -45,23 +45,65 @@ class RecipeVC: UITableViewController {
     }
 
     private func createContextMenu() -> UIMenu {
-        let editMenuItem = UIAction(title: "Edit recipe", image: SFSymbols.editRecipe, handler: self.editRecipe)
-        let groceriesMenuItem = UIAction(title: "Add to grocery list", image: SFSymbols.groceries, handler: self.addToGroceryList)
-        let deleteMenuItem = UIAction(title: "Delete recipe", image: SFSymbols.trash, attributes: .destructive, handler: self.deleteRecipe)
+        let editMenuItem = UIAction(
+            title: "Edit recipe",
+            image: SFSymbols.editRecipe,
+            handler: self.editRecipe
+        )
+        let groceriesMenuItem = UIAction(
+            title: "Add to grocery list",
+            image: SFSymbols.groceries,
+            handler: self.addToGroceryList
+        )
+        let deleteMenuItem = UIAction(
+            title: "Delete recipe",
+            image: SFSymbols.trash,
+            attributes: .destructive,
+            handler: self.deleteRecipe
+        )
 
-        let menuA = UIMenu(title: "", image: nil, identifier: nil, options: .displayInline, children: [editMenuItem, groceriesMenuItem])
-        let menuB = UIMenu(title: "", image: nil, identifier: nil, options: .displayInline, children: [deleteMenuItem])
-        return UIMenu(title: "", image: nil, identifier: nil, options: [], children: [menuA, menuB])
+        let menuA = UIMenu(
+            title: "",
+            image: nil,
+            identifier: nil,
+            options: .displayInline,
+            children: [editMenuItem, groceriesMenuItem]
+        )
+        let menuB = UIMenu(
+            title: "",
+            image: nil,
+            identifier: nil,
+            options: .displayInline,
+            children: [deleteMenuItem]
+        )
+        return UIMenu(
+            title: "",
+            image: nil,
+            identifier: nil,
+            options: [],
+            children: [menuA, menuB]
+        )
     }
 
     private func configureViewController() {
         self.view.backgroundColor = .systemBackground
         self.navigationItem.largeTitleDisplayMode = .never
 
-        let contextMenuItem = self.createBarButton(image: SFSymbols.contextMenu, menu: self.createContextMenu())
-        let cookingMenuItem = self.createBarButton(image: SFSymbols.cook, action: #selector(self.startCooking))
-        let groceriesMenuItem = self.createBarButton(image: SFSymbols.groceries, action: #selector(self.addToGroceryList))
-        self.navigationItem.rightBarButtonItems = [contextMenuItem, cookingMenuItem, groceriesMenuItem]
+        let contextMenuItem = self.createBarButton(
+            image: SFSymbols.contextMenu,
+            menu: self.createContextMenu()
+        )
+        let cookingMenuItem = self.createBarButton(
+            image: SFSymbols.cook,
+            action: #selector(self.startCooking)
+        )
+        let groceriesMenuItem = self.createBarButton(
+            image: SFSymbols.groceries,
+            action: #selector(self.addToGroceryList)
+        )
+        self.navigationItem.rightBarButtonItems = [
+            contextMenuItem, cookingMenuItem, groceriesMenuItem,
+        ]
     }
 
     private func configureTableView() {
@@ -72,10 +114,22 @@ class RecipeVC: UITableViewController {
         self.tableView.separatorStyle = .none
         self.tableView.removeExcessCells()
 
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: RecipeVC.titleReuseID)
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: RecipeVC.ingredientsReuseID)
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: RecipeVC.instructionsReuseID)
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: RecipeVC.sectionReuseID)
+        self.tableView.register(
+            UITableViewCell.self,
+            forCellReuseIdentifier: RecipeVC.titleReuseID
+        )
+        self.tableView.register(
+            UITableViewCell.self,
+            forCellReuseIdentifier: RecipeVC.ingredientsReuseID
+        )
+        self.tableView.register(
+            UITableViewCell.self,
+            forCellReuseIdentifier: RecipeVC.instructionsReuseID
+        )
+        self.tableView.register(
+            UITableViewCell.self,
+            forCellReuseIdentifier: RecipeVC.sectionReuseID
+        )
     }
 
     func editRecipe(_ action: UIAction) {
@@ -83,12 +137,15 @@ class RecipeVC: UITableViewController {
         viewController.delegate = self
         viewController.set(recipe: self.recipe)
 
-        let navigationController = NavigationController(rootViewController: viewController)
+        let navigationController = NavigationController(
+            rootViewController: viewController
+        )
         self.present(navigationController, animated: true)
     }
 
     func deleteRecipe(_ action: UIAction) {
-        let alert = DeleteRecipeItemAlert(item: .recipe(self.recipe)) { [weak self] in
+        let alert = DeleteRecipeItemAlert(item: .recipe(self.recipe)) {
+            [weak self] in
             guard let self = self else { return }
             self.delegate?.didDeleteRecipe(recipe: self.recipe)
         }
@@ -96,7 +153,9 @@ class RecipeVC: UITableViewController {
     }
 
     private func tryParseSectionHeader(at indexPath: IndexPath) -> String? {
-        guard let section = Section(rawValue: indexPath.section) else { return nil }
+        guard let section = Section(rawValue: indexPath.section) else {
+            return nil
+        }
 
         var text: String
         switch section {
@@ -109,7 +168,8 @@ class RecipeVC: UITableViewController {
         }
 
         if text.starts(with: Recipe.sectionHeader) {
-            return text.replacingOccurrences(of: Recipe.sectionHeader, with: "").trim()
+            return text.replacingOccurrences(of: Recipe.sectionHeader, with: "")
+                .trim()
         }
         return nil
     }
@@ -129,7 +189,10 @@ class RecipeVC: UITableViewController {
         return Section.allCases.count
     }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(
+        _ tableView: UITableView,
+        numberOfRowsInSection section: Int
+    ) -> Int {
         guard let section = Section(rawValue: section) else { return 0 }
         switch section {
         case .title:
@@ -141,7 +204,10 @@ class RecipeVC: UITableViewController {
         }
     }
 
-    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    override func tableView(
+        _ tableView: UITableView,
+        titleForHeaderInSection section: Int
+    ) -> String? {
         guard let section = Section(rawValue: section) else { return nil }
         switch section {
         case .title:
@@ -153,11 +219,18 @@ class RecipeVC: UITableViewController {
         }
     }
 
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let section = Section(rawValue: indexPath.section) else { return UITableViewCell() }
+    override func tableView(
+        _ tableView: UITableView,
+        cellForRowAt indexPath: IndexPath
+    ) -> UITableViewCell {
+        guard let section = Section(rawValue: indexPath.section) else {
+            return UITableViewCell()
+        }
 
         if let sectionHeader = self.tryParseSectionHeader(at: indexPath) {
-            let cell = tableView.dequeueReusableCell(withIdentifier: RecipeVC.sectionReuseID)!
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: RecipeVC.sectionReuseID
+            )!
             var content = cell.defaultContentConfiguration()
             content.text = sectionHeader
             content.directionalLayoutMargins = .zero
@@ -170,19 +243,25 @@ class RecipeVC: UITableViewController {
         var cell: UITableViewCell
         switch section {
         case .title:
-            cell = tableView.dequeueReusableCell(withIdentifier: RecipeVC.titleReuseID)!
+            cell = tableView.dequeueReusableCell(
+                withIdentifier: RecipeVC.titleReuseID
+            )!
             var content = cell.defaultContentConfiguration()
             content.text = self.recipe.title
             content.textProperties.font = .systemFont(ofSize: 24, weight: .bold)
             content.textProperties.lineBreakMode = .byWordWrapping
             cell.contentConfiguration = content
         case .ingredients:
-            cell = tableView.dequeueReusableCell(withIdentifier: RecipeVC.ingredientsReuseID)!
+            cell = tableView.dequeueReusableCell(
+                withIdentifier: RecipeVC.ingredientsReuseID
+            )!
             var content = ListContentConfiguration(style: .unordered)
             content.text = self.recipe.ingredients[indexPath.row].toString()
             cell.contentConfiguration = content
         case .instructions:
-            cell = tableView.dequeueReusableCell(withIdentifier: RecipeVC.instructionsReuseID)!
+            cell = tableView.dequeueReusableCell(
+                withIdentifier: RecipeVC.instructionsReuseID
+            )!
             var content = ListContentConfiguration(style: .ordered)
             content.text = self.recipe.instructions[indexPath.row]
             content.row = indexPath.row + 1  // FIXME: this should be made relative to the section
@@ -192,8 +271,11 @@ class RecipeVC: UITableViewController {
         return cell
     }
 
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if let _ = self.tryParseSectionHeader(at: indexPath) {
+    override func tableView(
+        _ tableView: UITableView,
+        heightForRowAt indexPath: IndexPath
+    ) -> CGFloat {
+        if self.tryParseSectionHeader(at: indexPath) != nil {
             return StyleGuide.tableCellHeight - 12
         } else {
             return UITableView.automaticDimension
@@ -205,11 +287,14 @@ extension RecipeVC: RecipeFormVC.Delegate {
 
     func didSaveRecipe(style: RecipeFormVC.Style, recipe: Recipe) {
         guard style == .edit else { return }
-        if let error = State.manager.updateRecipe(recipe: recipe) {
+        // FIXME: re-implement
+        /*
+        if let error = StateManager.shared.updateRecipe(recipe: recipe) {
             self.presentErrorAlert(error)
         } else {
             self.recipe = recipe
             self.tableView.reloadData()
         }
+        */
     }
 }

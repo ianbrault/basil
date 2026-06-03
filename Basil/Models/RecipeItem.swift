@@ -9,9 +9,9 @@ import Foundation
 
 enum RecipeItem: Codable & Equatable & Hashable {
     case recipe(Recipe)
-    case folder(RecipeFolder)
+    case folder(Folder)
 
-    var uuid: UUID {
+    var uuid: ObjectID {
         switch self {
         case .recipe(let recipe):
             return recipe.uuid
@@ -20,21 +20,21 @@ enum RecipeItem: Codable & Equatable & Hashable {
         }
     }
 
-    var folderId: UUID? {
+    var parent: ObjectID? {
         get {
             switch self {
             case .recipe(let recipe):
-                return recipe.folderId
+                return recipe.parent
             case .folder(let folder):
-                return folder.folderId
+                return folder.parent
             }
         }
         set {
             switch self {
             case .recipe(let recipe):
-                recipe.folderId = newValue!
+                recipe.parent = newValue!
             case .folder(let folder):
-                folder.folderId = newValue
+                folder.parent = newValue
             }
         }
     }
@@ -62,7 +62,7 @@ enum RecipeItem: Codable & Equatable & Hashable {
         case (.folder(_), .recipe(_)):
             return true
         case (.folder(let folderA), .folder(let folderB)):
-            return RecipeFolder.sort(folderA, folderB)
+            return Folder.sort(folderA, folderB)
         }
     }
 

@@ -27,8 +27,13 @@ class RecipeFormVC: UIViewController {
 
     private class DataSource: UITableViewDiffableDataSource<Section, Cell> {
 
-        override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-            guard let tableSection = Section(rawValue: section) else { return nil }
+        override func tableView(
+            _ tableView: UITableView,
+            titleForHeaderInSection section: Int
+        ) -> String? {
+            guard let tableSection = Section(rawValue: section) else {
+                return nil
+            }
             switch tableSection {
             case .title:
                 return "Title"
@@ -39,18 +44,39 @@ class RecipeFormVC: UIViewController {
             }
         }
 
-        override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-            guard tableView.isEditing, let section = Section(rawValue: indexPath.section) else { return false }
-            return indexPath.row < self.snapshot().numberOfItems(inSection: section) - 1
+        override func tableView(
+            _ tableView: UITableView,
+            canMoveRowAt indexPath: IndexPath
+        ) -> Bool {
+            guard tableView.isEditing,
+                let section = Section(rawValue: indexPath.section)
+            else { return false }
+            return indexPath.row < self.snapshot().numberOfItems(
+                inSection: section
+            ) - 1
         }
 
-        override func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        override func tableView(
+            _ tableView: UITableView,
+            moveRowAt sourceIndexPath: IndexPath,
+            to destinationIndexPath: IndexPath
+        ) {
             // move must be within the same section
-            guard sourceIndexPath.section == destinationIndexPath.section else { return }
-            super.tableView(tableView, moveRowAt: sourceIndexPath, to: destinationIndexPath)
+            guard sourceIndexPath.section == destinationIndexPath.section else {
+                return
+            }
+            super.tableView(
+                tableView,
+                moveRowAt: sourceIndexPath,
+                to: destinationIndexPath
+            )
             var snapshot = self.snapshot()
 
-            if let sourceId = self.itemIdentifier(for: sourceIndexPath), let destinationId = self.itemIdentifier(for: destinationIndexPath) {
+            if let sourceId = self.itemIdentifier(for: sourceIndexPath),
+                let destinationId = self.itemIdentifier(
+                    for: destinationIndexPath
+                )
+            {
                 // destination and source must be distinct
                 guard sourceId != destinationId else { return }
                 if sourceIndexPath.row > destinationIndexPath.row {
@@ -72,7 +98,8 @@ class RecipeFormVC: UIViewController {
         [Cell(.textField), Cell(.button)],
     ]
 
-    private lazy var dataSource = DataSource(tableView: self.tableView) { (tableView, indexPath, info) -> RecipeFormCell? in
+    private lazy var dataSource = DataSource(tableView: self.tableView) {
+        (tableView, indexPath, info) -> RecipeFormCell? in
         var reuseID: String
         switch self.cells[indexPath.section][indexPath.row].style {
         case .textField:
@@ -80,9 +107,15 @@ class RecipeFormVC: UIViewController {
         case .button:
             reuseID = RecipeFormCell.buttonReuseID
         }
-        let cell = tableView.dequeueReusableCell(withIdentifier: reuseID, for: indexPath) as! RecipeFormCell
+        let cell =
+            tableView.dequeueReusableCell(
+                withIdentifier: reuseID,
+                for: indexPath
+            ) as! RecipeFormCell
         cell.onChange = { [weak self] (text) in
-            guard let index = self?.tableView.indexPath(for: cell) else { return }
+            guard let index = self?.tableView.indexPath(for: cell) else {
+                return
+            }
             self?.cells[index.section][index.row].text = text
             // allow text fields to expand or shrink lines
             self?.tableView.beginUpdates()
@@ -96,8 +129,8 @@ class RecipeFormVC: UIViewController {
         return cell
     }
 
-    var uuid: UUID?
-    var folderId: UUID?
+    var uuid: ObjectID?
+    var folderId: ObjectID?
     weak var delegate: Delegate?
 
     private var cancelButton: UIBarButtonItem!
@@ -118,10 +151,16 @@ class RecipeFormVC: UIViewController {
         var snapshot = Snapshot()
         snapshot.appendSections(Section.allCases)
         for section in Section.allCases {
-            snapshot.appendItems(self.cells[section.rawValue], toSection: section)
+            snapshot.appendItems(
+                self.cells[section.rawValue],
+                toSection: section
+            )
         }
         DispatchQueue.main.async {
-            self.dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
+            self.dataSource.apply(
+                snapshot,
+                animatingDifferences: animatingDifferences
+            )
         }
     }
 
@@ -150,13 +189,28 @@ class RecipeFormVC: UIViewController {
         self.view.backgroundColor = StyleGuide.colors.groupedBackground
 
         // create the bar button items
-        self.cancelButton = self.createBarButton(systemItem: .cancel, action: #selector(self.dismissSelf))
-        self.editButton = self.createBarButton(image: SFSymbols.reorder, action: #selector(self.enableEditMode))
-        self.doneButton = self.createBarButton(systemItem: .done, action: #selector(self.disableEditMode))
-        self.saveButton = self.createBarButton(title: "Save", style: .done, action: #selector(self.saveRecipe))
+        self.cancelButton = self.createBarButton(
+            systemItem: .cancel,
+            action: #selector(self.dismissSelf)
+        )
+        self.editButton = self.createBarButton(
+            image: SFSymbols.reorder,
+            action: #selector(self.enableEditMode)
+        )
+        self.doneButton = self.createBarButton(
+            systemItem: .done,
+            action: #selector(self.disableEditMode)
+        )
+        self.saveButton = self.createBarButton(
+            title: "Save",
+            style: .done,
+            action: #selector(self.saveRecipe)
+        )
 
         self.navigationItem.leftBarButtonItem = self.cancelButton
-        self.navigationItem.rightBarButtonItems = [self.saveButton, self.editButton]
+        self.navigationItem.rightBarButtonItems = [
+            self.saveButton, self.editButton,
+        ]
     }
 
     private func configureTableView() {
@@ -165,44 +219,67 @@ class RecipeFormVC: UIViewController {
         self.tableView.keyboardDismissMode = .onDrag
         self.tableView.removeExcessCells()
 
-        self.tableView.register(RecipeFormCell.self, forCellReuseIdentifier: RecipeFormCell.textFieldReuseID)
-        self.tableView.register(RecipeFormCell.self, forCellReuseIdentifier: RecipeFormCell.buttonReuseID)
+        self.tableView.register(
+            RecipeFormCell.self,
+            forCellReuseIdentifier: RecipeFormCell.textFieldReuseID
+        )
+        self.tableView.register(
+            RecipeFormCell.self,
+            forCellReuseIdentifier: RecipeFormCell.buttonReuseID
+        )
 
         self.view.addPinnedSubview(self.tableView, keyboardBottom: true)
 
         // tap to dismiss keyboard
-        let gesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissKeyboard))
+        let gesture = UITapGestureRecognizer(
+            target: self,
+            action: #selector(self.dismissKeyboard)
+        )
         self.tableView.addGestureRecognizer(gesture)
     }
 
     func set(recipe: Recipe) {
         self.uuid = recipe.uuid
-        self.folderId = recipe.folderId
+        self.folderId = recipe.parent
 
         // add the title cell
         self.cells[Section.title.rawValue].removeAll()
-        self.cells[Section.title.rawValue].append(Cell(.textField, text: recipe.title))
+        self.cells[Section.title.rawValue].append(
+            Cell(.textField, text: recipe.title)
+        )
 
         // add the ingredients cells
         self.cells[Section.ingredients.rawValue].removeAll()
         for ingredient in recipe.ingredients {
-            self.cells[Section.ingredients.rawValue].append(Cell(.textField, text: ingredient.toString()))
+            self.cells[Section.ingredients.rawValue].append(
+                Cell(.textField, text: ingredient.toString())
+            )
         }
         self.cells[Section.ingredients.rawValue].append(Cell(.button))
 
         // add the instructions cells
         self.cells[Section.instructions.rawValue].removeAll()
         for instruction in recipe.instructions {
-            self.cells[Section.instructions.rawValue].append(Cell(.textField, text: instruction))
+            self.cells[Section.instructions.rawValue].append(
+                Cell(.textField, text: instruction)
+            )
         }
         self.cells[Section.instructions.rawValue].append(Cell(.button))
     }
 
-    private func onButtonTap(_ sender: UITableViewCell, _ location: RecipeFormCell.TapLocation) {
-        guard let indexPath = self.tableView.indexPath(for: sender) else { return }
+    private func onButtonTap(
+        _ sender: UITableViewCell,
+        _ location: RecipeFormCell.TapLocation
+    ) {
+        guard let indexPath = self.tableView.indexPath(for: sender) else {
+            return
+        }
         // add a new input cell when pressed
         let text = location == .section ? Recipe.sectionHeader : ""
-        self.cells[indexPath.section].insert(Cell(.textField, text: text), at: self.cells[indexPath.section].count - 1)
+        self.cells[indexPath.section].insert(
+            Cell(.textField, text: text),
+            at: self.cells[indexPath.section].count - 1
+        )
         self.applySnapshot()
         // then focus the new input row
         self.tableView.cellForRow(at: indexPath)?.becomeFirstResponder()
@@ -219,14 +296,16 @@ class RecipeFormVC: UIViewController {
 
     @objc func disableEditMode(_ action: UIAction? = nil) {
         self.tableView.setEditing(false, animated: true)
-        self.navigationItem.rightBarButtonItems = [self.saveButton, self.editButton]
+        self.navigationItem.rightBarButtonItems = [
+            self.saveButton, self.editButton,
+        ]
     }
 
     @objc func saveRecipe() {
         // verify that the title is filled out
         let title = self.cells[Section.title.rawValue][0].text
         if title.isEmpty {
-            self.presentErrorAlert(.missingTitle)
+            self.presentErrorAlert(BasilError.missingTitle)
             return
         }
 
@@ -249,11 +328,12 @@ class RecipeFormVC: UIViewController {
         }
 
         let recipe = Recipe(
-            uuid: self.uuid ?? UUID(),
-            folderId: self.folderId ?? UUID(),
+            uuid: self.uuid ?? ObjectID(),
+            parent: self.folderId ?? ObjectID(),
             title: title,
             ingredients: ingredients,
-            instructions: instructions)
+            instructions: instructions
+        )
         self.delegate?.didSaveRecipe(style: self.style, recipe: recipe)
         self.dismissSelf()
     }
@@ -261,11 +341,17 @@ class RecipeFormVC: UIViewController {
 
 extension RecipeFormVC: UITableViewDelegate {
 
-    func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
+    func tableView(
+        _ tableView: UITableView,
+        editingStyleForRowAt indexPath: IndexPath
+    ) -> UITableViewCell.EditingStyle {
         return .none
     }
 
-    func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
+    func tableView(
+        _ tableView: UITableView,
+        shouldIndentWhileEditingRowAt indexPath: IndexPath
+    ) -> Bool {
         return false
     }
 
@@ -274,9 +360,14 @@ extension RecipeFormVC: UITableViewDelegate {
         trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
     ) -> UISwipeActionsConfiguration? {
         // do not allow the title to be deleted
-        guard let section = Section(rawValue: indexPath.section), section != .title else { return nil }
+        guard let section = Section(rawValue: indexPath.section),
+            section != .title
+        else { return nil }
 
-        let contextItem = UIContextualAction(style: .destructive, title: "Delete") { [weak self] (action, view, actionPerformed) in
+        let contextItem = UIContextualAction(
+            style: .destructive,
+            title: "Delete"
+        ) { [weak self] (action, view, actionPerformed) in
             self?.cells[indexPath.section].remove(at: indexPath.row)
             self?.applySnapshot()
             actionPerformed(true)
@@ -299,7 +390,9 @@ extension RecipeFormVC: UITableViewDelegate {
             return sourceIndexPath
         }
         // prevent moving past the button in the section
-        if proposedDestinationIndexPath.row >= self.cells[sourceIndexPath.section].count - 1 {
+        if proposedDestinationIndexPath.row >= self.cells[
+            sourceIndexPath.section
+        ].count - 1 {
             return sourceIndexPath
         }
         return proposedDestinationIndexPath

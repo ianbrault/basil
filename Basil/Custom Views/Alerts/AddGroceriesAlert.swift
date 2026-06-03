@@ -13,7 +13,8 @@ import UIKit
 class AddGroceriesAlert: UIAlertController {
 
     convenience init(recipe: Recipe) {
-        let title = "Add the ingredients for \"\(recipe.title)\" to your grocery list?"
+        let title =
+            "Add the ingredients for \"\(recipe.title)\" to your grocery list?"
         self.init(title: title, message: nil, preferredStyle: .actionSheet)
         self.view.tintColor = StyleGuide.colors.primary
         self.addActions(recipe: recipe)
@@ -21,7 +22,7 @@ class AddGroceriesAlert: UIAlertController {
 
     private func addActions(recipe: Recipe) {
         let deleteAction = UIAlertAction(title: "Add", style: .default) { (_) in
-            State.manager.addToGroceryList(from: recipe)
+            StateManager.shared.addToGroceryList(from: recipe)
         }
         self.addAction(deleteAction)
 

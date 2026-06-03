@@ -32,7 +32,11 @@ class SettingsVC: UITableViewController {
         let action: CellAction?
         let reuseId: String
 
-        init(factory: @escaping CellFactory, action: CellAction? = nil, reuseId: String = SettingsVC.reuseID) {
+        init(
+            factory: @escaping CellFactory,
+            action: CellAction? = nil,
+            reuseId: String = SettingsVC.reuseID
+        ) {
             self.factory = factory
             self.action = action
             self.reuseId = reuseId
@@ -61,13 +65,17 @@ class SettingsVC: UITableViewController {
     }
 
     private func registerSections() {
-        self.sections = State.manager.userAuthenticated ? self.authorizedSections() : self.unauthorizedSections()
+        self.sections =
+            StateManager.shared.userAuthenticated
+            ? self.authorizedSections() : self.unauthorizedSections()
     }
 
     static func defaultCell(
         _ cell: UITableViewCell,
-        text: String, textColor: UIColor = StyleGuide.colors.primaryText,
-        image: UIImage? = nil, imageColor: UIColor = StyleGuide.colors.primary,
+        text: String,
+        textColor: UIColor = StyleGuide.colors.primaryText,
+        image: UIImage? = nil,
+        imageColor: UIColor = StyleGuide.colors.primary,
     ) -> UIContentConfiguration {
         var content = cell.defaultContentConfiguration()
         content.text = text
@@ -77,7 +85,11 @@ class SettingsVC: UITableViewController {
         return content
     }
 
-    static func destructiveCell(_ cell: UITableViewCell, text: String, image: UIImage? = nil) -> UIContentConfiguration {
+    static func destructiveCell(
+        _ cell: UITableViewCell,
+        text: String,
+        image: UIImage? = nil
+    ) -> UIContentConfiguration {
         var content = cell.defaultContentConfiguration()
         content.text = text
         content.textProperties.color = StyleGuide.colors.error
@@ -91,10 +103,18 @@ class SettingsVC: UITableViewController {
             Section(
                 header: nil,
                 cells: [
-                    Cell(factory: { Self.defaultCell($0, text: "Sign In") }, action: self.loginAction),
-                    Cell(factory: { Self.defaultCell($0, text: "Create an Account") }, action: self.registerAction),
+                    Cell(
+                        factory: { Self.defaultCell($0, text: "Sign In") },
+                        action: self.loginAction
+                    ),
+                    Cell(
+                        factory: {
+                            Self.defaultCell($0, text: "Create an Account")
+                        },
+                        action: self.registerAction
+                    ),
                 ]
-            ),
+            )
         ]
     }
 
@@ -103,7 +123,12 @@ class SettingsVC: UITableViewController {
             Section(
                 header: nil,
                 cells: [
-                    Cell(factory: { Self.defaultCell($0, text: State.manager.userEmail) }),
+                    Cell(factory: {
+                        Self.defaultCell(
+                            $0,
+                            text: StateManager.shared.userEmail
+                        )
+                    })
                 ]
             ),
             Section(
@@ -113,25 +138,46 @@ class SettingsVC: UITableViewController {
                         factory: { (cell) in
                             var content = SwitchContentConfiguration()
                             content.text = "Sort Checked Items"
-                            content.isOn = PersistenceManager.shared.sortCheckedGroceries
+                            content.isOn =
+                                PersistenceManager.shared.sortCheckedGroceries
                             content.onChange = { (toggled) in
-                                PersistenceManager.shared.sortCheckedGroceries = toggled
+                                PersistenceManager.shared.sortCheckedGroceries =
+                                    toggled
                                 if toggled {
-                                    State.manager.groceryList.sortCheckedGroceries()
-                                    State.manager.storeGroceryList()
+                                    StateManager.shared.groceryList
+                                        .sortCheckedGroceries()
+                                    StateManager.shared.storeGroceryList()
                                 }
                             }
                             return content
                         },
                         reuseId: Self.switchReuseID
-                    ),
+                    )
                 ]
             ),
             Section(
                 header: "Account",
                 cells: [
-                    Cell(factory: { Self.destructiveCell($0, text: "Sign Out", image: SFSymbols.logout) }, action: self.logoutAction),
-                    Cell(factory: { Self.destructiveCell($0, text: "Delete Account", image: SFSymbols.trash) }, action: self.deleteAccountAction),
+                    Cell(
+                        factory: {
+                            Self.destructiveCell(
+                                $0,
+                                text: "Sign Out",
+                                image: SFSymbols.logout
+                            )
+                        },
+                        action: self.logoutAction
+                    ),
+                    Cell(
+                        factory: {
+                            Self.destructiveCell(
+                                $0,
+                                text: "Delete Account",
+                                image: SFSymbols.trash
+                            )
+                        },
+                        action: self.deleteAccountAction
+                    ),
                 ]
             ),
         ]
@@ -140,12 +186,16 @@ class SettingsVC: UITableViewController {
     private func configureNavigationController() {
         self.title = "Settings"
         self.navigationController?.navigationBar.prefersLargeTitles = true
-        self.navigationController?.navigationBar.tintColor = StyleGuide.colors.primary
+        self.navigationController?.navigationBar.tintColor =
+            StyleGuide.colors.primary
         self.navigationController?.setNavigationBarHidden(false, animated: true)
 
         let appearance = UINavigationBarAppearance()
         appearance.largeTitleTextAttributes = [
-            NSAttributedString.Key.font: UIFont.systemFont(ofSize: 32, weight: .bold),
+            NSAttributedString.Key.font: UIFont.systemFont(
+                ofSize: 32,
+                weight: .bold
+            )
         ]
         self.navigationController?.navigationBar.standardAppearance = appearance
     }
@@ -156,13 +206,19 @@ class SettingsVC: UITableViewController {
         self.tableView.separatorInsetReference = .fromAutomaticInsets
         self.tableView.removeExcessCells()
 
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: Self.reuseID)
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: Self.switchReuseID)
+        self.tableView.register(
+            UITableViewCell.self,
+            forCellReuseIdentifier: Self.reuseID
+        )
+        self.tableView.register(
+            UITableViewCell.self,
+            forCellReuseIdentifier: Self.switchReuseID
+        )
 
         self.tableView.setContentOffset(CGPoint(x: 0, y: -100), animated: true)
     }
 
-    private func userAdded(_ error: BasilError?) {
+    private func userAdded(_ error: Error?) {
         if let error {
             self.presentErrorAlert(error)
         } else {
@@ -174,23 +230,10 @@ class SettingsVC: UITableViewController {
         }
     }
 
-    private func userRemoved(_ error: BasilError?) {
+    private func userRemoved(_ error: Error?) {
         if let error {
             self.presentErrorAlert(error)
         } else {
-            // Disconnect from the server
-            SocketManager.shared.disconnect()
-            // Clear the stored password from the keychain
-            do {
-                try KeychainManager.deleteCredentials()
-            } catch {
-                self.presentErrorAlert(error as! BasilError)
-            }
-            // Clear all stored user state
-            State.manager.clearUserInfo()
-            State.manager.readOnly = false
-            State.manager.userChanged = true
-            // Then reload the settings view
             DispatchQueue.main.async {
                 self.registerSections()
                 self.tableView.reloadData()
@@ -200,7 +243,6 @@ class SettingsVC: UITableViewController {
 
     private func loginAction() {
         let vc = OnboardingFormVC(.login) { [weak self] (error) in
-            State.manager.userChanged = error == nil
             self?.userAdded(error)
         }
         self.navigationController?.pushViewController(vc, animated: true)
@@ -213,23 +255,36 @@ class SettingsVC: UITableViewController {
 
     private func logoutAction() {
         let message = "Are you sure you wish to sign out?"
-        let warning = WarningAlert(title: "", message: message) { [weak self] () in
+        let warning = WarningAlert(title: "", message: message) {
+            [weak self] () in
             self?.userRemoved(nil)
         }
         self.present(warning, animated: true)
     }
 
     private func deleteAccountAction() {
-        let message = "This action is irreversible, are you sure you want to continue? " +
-        "Enter your password to confirm."
+        let message =
+            "This action is irreversible, are you sure you want to continue? "
+            + "Enter your password to confirm."
         let alert = TextFieldAlert(
-            title: "Delete your Account", message: message, placeholder: "Password",
-            confirmText: "Delete", destructive: true
-        ) { [weak self](password) in
+            title: "Delete your Account",
+            message: message,
+            placeholder: "Password",
+            confirmText: "Delete",
+            destructive: true
+        ) { [weak self] (password) in
             self?.showLoadingView()
-            NetworkManager.deleteUser(email: State.manager.userEmail, password: password) { (error) in
+            Task {
+                var err: Error? = nil
+                do {
+                    try await StateManager.shared.deleteUser(
+                        password: password
+                    )
+                } catch let error {
+                    err = error
+                }
                 self?.dismissLoadingView()
-                self?.userRemoved(error)
+                self?.userRemoved(err)
             }
         }
         alert.isSecureTextEntry = true
@@ -240,23 +295,37 @@ class SettingsVC: UITableViewController {
         return self.sections.count
     }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(
+        _ tableView: UITableView,
+        numberOfRowsInSection section: Int
+    ) -> Int {
         return self.sections[section].cells.count
     }
 
-    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    override func tableView(
+        _ tableView: UITableView,
+        titleForHeaderInSection section: Int
+    ) -> String? {
         return self.sections[section].header
     }
 
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    override func tableView(
+        _ tableView: UITableView,
+        cellForRowAt indexPath: IndexPath
+    ) -> UITableViewCell {
         let cellConfig = self.sections[indexPath.section].cells[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellConfig.reuseId)!
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: cellConfig.reuseId
+        )!
         cell.contentConfiguration = cellConfig.factory(cell)
         cell.selectionStyle = cellConfig.action == nil ? .none : .default
         return cell
     }
 
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    override func tableView(
+        _ tableView: UITableView,
+        didSelectRowAt indexPath: IndexPath
+    ) {
         self.sections[indexPath.section].cells[indexPath.row].action?()
     }
 }

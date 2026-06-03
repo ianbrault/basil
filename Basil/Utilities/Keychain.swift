@@ -1,5 +1,5 @@
 //
-//  KeychainManager.swift
+//  Keychain.swift
 //  Basil
 //
 //  Created by Ian Brault on 5/13/25.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct KeychainManager {
+struct Keychain {
 
     static let accessGroup = "group.com.isft.Basil"
 
@@ -20,7 +20,7 @@ struct KeychainManager {
         var item: CFTypeRef?
         let query: [String: Any] = [
             kSecClass as String: kSecClassInternetPassword,
-            kSecAttrServer as String: NetworkManager.baseURL.absoluteString,
+            kSecAttrServer as String: Network.baseURL.absoluteString,
             kSecAttrAccessGroup as String: Self.accessGroup,
             kSecMatchLimit as String: kSecMatchLimitOne,
             kSecReturnAttributes as String: true,
@@ -48,7 +48,7 @@ struct KeychainManager {
         }
         let query: [String: Any] = [
             kSecClass as String: kSecClassInternetPassword,
-            kSecAttrServer as String: NetworkManager.baseURL.absoluteString,
+            kSecAttrServer as String: Network.baseURL.absoluteString,
             kSecAttrAccessGroup as String: Self.accessGroup,
             kSecAttrAccount as String: email,
             kSecValueData as String: password,
@@ -62,7 +62,7 @@ struct KeychainManager {
     static func deleteCredentials() throws {
         let query: [String: Any] = [
             kSecClass as String: kSecClassInternetPassword,
-            kSecAttrServer as String: NetworkManager.baseURL.absoluteString,
+            kSecAttrServer as String: Network.baseURL.absoluteString,
             kSecAttrAccessGroup as String: Self.accessGroup,
         ]
         let status = SecItemDelete(query as CFDictionary)

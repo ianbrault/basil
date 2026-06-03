@@ -6,11 +6,55 @@
 //
 
 import UIKit
+import os
 
 struct API {
+    private static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier!,
+        category: String(describing: API.self)
+    )
+
+    enum HttpStatus {
+        static let Ok = 200
+    }
+
+    private static func errorHandler<T>(_ error: any Error) -> Result<
+        T, BasilError
+    > {
+        if Network.isOfflineError(error) {
+            return .failure(.noConnection)
+        } else if let basilError = error as? BasilError {
+            return .failure(basilError)
+        } else {
+            print(error)
+            return .failure(.httpError(error.localizedDescription))
+        }
+    }
 
     //
-    // Network API definitions
+    // Generic model responses
+    //
+
+    struct FolderResponse: Codable {
+        let _id: ObjectID
+        let schema_version: Int
+        let name: String
+        let parent: ObjectID?
+        let recipes: [ObjectID]
+        let subfolders: [ObjectID]
+    }
+
+    struct RecipeResponse: Codable {
+        let _id: ObjectID
+        let schema_version: Int
+        let title: String
+        let parent: ObjectID
+        let ingredients: [String]
+        let instructions: [String]
+    }
+
+    //
+    // API request/response bodies
     //
 
     struct AuthenticationRequest: Codable {
@@ -20,147 +64,170 @@ struct API {
     }
 
     struct AuthenticationResponse: Codable {
-        let id: String
+        let id: ObjectID
         let email: String
-        let root: UUID?
-        let recipes: [Recipe]
-        let folders: [RecipeFolder]
-        let sequence: Int
-        let token: String
+        let root: ObjectID?
+        let recipes: [RecipeResponse]
+        let folders: [FolderResponse]
+        let token: ObjectID
+    }
+
+    struct CreateFolderRequest: Codable {
+        let user_id: ObjectID
+        let token_id: ObjectID
+        let device: UUID?
+        let uuid: ObjectID
+        let name: String
+        let parent: ObjectID?
+    }
+
+    struct CreateRecipeRequest: Codable {
+        let user_id: ObjectID
+        let token_id: ObjectID
+        let device: UUID?
+        let uuid: ObjectID
+        let title: String
+        let parent: ObjectID
+        let ingredients: [String]
+        let instructions: [String]
     }
 
     struct CreateUserRequest: Codable {
+        let root: ObjectID
         let email: String
         let password: String
-        let root: UUID?
-        let recipes: [Recipe]
-        let folders: [RecipeFolder]
         let device: UUID?
     }
 
-    struct PushUpdateRequest: Codable {
-        let userId: String
-        let token: String
-        let root: UUID?
-        let recipes: [Recipe]
-        let folders: [RecipeFolder]
+    struct CreateUserResponse: Codable {
+        let id: ObjectID
+        let email: String
+        let root: ObjectID
+        let token: ObjectID
+    }
+
+    struct DeleteUserRequest: Codable {
+        let email: String
+        let password: String
+    }
+
+    struct UserInfo: Codable {
+        let id: ObjectID
+        let email: String
+        let root: ObjectID?
+        let recipes: [RecipeResponse]
+        let folders: [FolderResponse]
+        let token: ObjectID
     }
 
     //
-    // Socket API definitions
+    // API calls
     //
 
-    enum SocketMessageType: Int, Codable {
-        case Success               = 200
-        case AuthenticationRequest = 201
-        case UpdateRequest         = 202
-        case SyncRequest           = 203
-        case AuthenticationError   = 401
-        case UpdateError           = 402
+    static func authenticate(email: String, password: String) async throws
+        -> UserInfo
+    {
+        Self.logger.info("Authenticating user \(email)")
+        let request = AuthenticationRequest(
+            email: email,
+            password: password,
+            device: StateManager.shared.device
+        )
+        let response: AuthenticationResponse = try await Network.post(
+            url: Network.url("user/authenticate"),
+            body: request
+        )
+        let userInfo = UserInfo(
+            id: response.id,
+            email: response.email,
+            root: response.root,
+            recipes: response.recipes,
+            folders: response.folders,
+            token: response.token
+        )
+        return userInfo
     }
 
-    struct AuthenticationRequestBody: Codable {
-        let userId: String
-        let token: String
+    static func createFolder(_ folder: Folder) async throws -> FolderResponse {
+        guard let userId = StateManager.shared.userId,
+            let tokenId = StateManager.shared.tokenId,
+            let device = StateManager.shared.device
+        else {
+            throw BasilError.missingToken
+        }
+
+        let request = CreateFolderRequest(
+            user_id: userId,
+            token_id: tokenId,
+            device: device,
+            uuid: folder.uuid,
+            name: folder.name,
+            parent: folder.parent
+        )
+        let response: FolderResponse = try await Network.post(
+            url: Network.url("folder/create"),
+            body: request
+        )
+        return response
     }
 
-    struct UpdateRequestBody: Codable {
-        let root: UUID?
-        let recipes: [Recipe]
-        let folders: [RecipeFolder]
+    static func createRecipe(_ recipe: Recipe) async throws -> RecipeResponse {
+        guard let userId = StateManager.shared.userId,
+            let tokenId = StateManager.shared.tokenId,
+            let device = StateManager.shared.device
+        else {
+            throw BasilError.missingToken
+        }
+
+        let ingredients = recipe.ingredients.map { $0.toString() }
+        let request = CreateRecipeRequest(
+            user_id: userId,
+            token_id: tokenId,
+            device: device,
+            uuid: recipe.uuid,
+            title: recipe.title,
+            parent: recipe.parent,
+            ingredients: ingredients,
+            instructions: recipe.instructions,
+        )
+        let response: RecipeResponse = try await Network.post(
+            url: Network.url("recipe/create"),
+            body: request
+        )
+        return response
     }
 
-    struct SyncRequestBody: Codable {
-        let root: UUID?
-        let recipes: [Recipe]
-        let folders: [RecipeFolder]
-        let sequence: Int
+    static func createUser(
+        root: ObjectID,
+        email: String,
+        password: String,
+    ) async throws -> CreateUserResponse {
+        Self.logger.info("Creating user \(email) with root \(root)")
+        let request = CreateUserRequest(
+            root: root,
+            email: email,
+            password: password,
+            device: StateManager.shared.device
+        )
+        let response: CreateUserResponse = try await Network.post(
+            url: Network.url("user/create"),
+            body: request
+        )
+        return response
     }
 
-    enum SocketMessage: Decodable, Encodable {
-        case Success
-        case AuthenticationRequest(AuthenticationRequestBody)
-        case UpdateRequest(UpdateRequestBody)
-        case SyncRequest(SyncRequestBody)
-        case AuthenticationError(String)
-        case UpdateError(String)
-
-        enum CodingKeys: String, CodingKey {
-            case type
-            case body
-        }
-
-        var messageType: SocketMessageType {
-            switch self {
-            case .Success:
-                return .Success
-            case .AuthenticationRequest(_):
-                return .AuthenticationRequest
-            case .UpdateRequest(_):
-                return .UpdateRequest
-            case .SyncRequest(_):
-                return .SyncRequest
-            case .AuthenticationError(_):
-                return .AuthenticationError
-            case .UpdateError(_):
-                return .UpdateError
-            }
-        }
-
-        init(from decoder: Decoder) throws {
-            let values = try decoder.container(keyedBy: CodingKeys.self)
-            let type = try values.decode(SocketMessageType.self, forKey: .type)
-            switch type {
-            case .Success:
-                self = .Success
-            case .AuthenticationRequest:
-                let body = try values.decode(AuthenticationRequestBody.self, forKey: .body)
-                self = .AuthenticationRequest(body)
-            case .UpdateRequest:
-                let body = try values.decode(UpdateRequestBody.self, forKey: .body)
-                self = .UpdateRequest(body)
-            case .SyncRequest:
-                let body = try values.decode(SyncRequestBody.self, forKey: .body)
-                self = .SyncRequest(body)
-            case .AuthenticationError:
-                let body = try values.decode(String.self, forKey: .body)
-                self = .AuthenticationError(body)
-            case .UpdateError:
-                let body = try values.decode(String.self, forKey: .body)
-                self = .UpdateError(body)
-            }
-        }
-
-        func encode(to encoder: Encoder) throws {
-            var container = encoder.container(keyedBy: CodingKeys.self)
-            switch self {
-            case .Success:
-                try container.encode(SocketMessageType.Success, forKey: .type)
-                try container.encodeNil(forKey: .body)
-            case .AuthenticationRequest(let body):
-                try container.encode(SocketMessageType.AuthenticationRequest, forKey: .type)
-                try container.encode(body, forKey: .body)
-            case .UpdateRequest(let body):
-                try container.encode(SocketMessageType.UpdateRequest, forKey: .type)
-                try container.encode(body, forKey: .body)
-            case .SyncRequest(let body):
-                try container.encode(SocketMessageType.SyncRequest, forKey: .type)
-                try container.encode(body, forKey: .body)
-            case .AuthenticationError(let body):
-                try container.encode(SocketMessageType.AuthenticationError, forKey: .type)
-                try container.encode(body, forKey: .body)
-            case .UpdateError(let body):
-                try container.encode(SocketMessageType.UpdateError, forKey: .type)
-                try container.encode(body, forKey: .body)
-            }
-        }
-
-        static func authenticationRequest(userId: String, token: String) -> Self {
-            return .AuthenticationRequest(AuthenticationRequestBody(userId: userId, token: token))
-        }
-
-        static func updateRequest(root: UUID?, recipes: [Recipe], folders: [RecipeFolder]) -> Self {
-            return .UpdateRequest(UpdateRequestBody(root: root, recipes: recipes, folders: folders))
-        }
+    static func deleteUser(
+        email: String,
+        password: String,
+    ) async throws {
+        Self.logger.info("Deleting user \(email)")
+        let request = DeleteUserRequest(
+            email: email,
+            password: password,
+        )
+        try await Network.post(
+            url: Network.url("user/delete"),
+            body: request
+        )
     }
 }

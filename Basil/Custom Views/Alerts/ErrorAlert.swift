@@ -9,8 +9,8 @@ import UIKit
 
 class ErrorAlert: UIAlertController {
 
-    convenience init(error: BasilError) {
-        self.init(title: error.title, message: error.message, preferredStyle: .alert)
+    convenience init(error: Error) {
+        self.init(title: "Something went wrong", message: String(describing: error), preferredStyle: .alert)
         self.view.tintColor = StyleGuide.colors.primary
         self.addActions()
     }

@@ -6,13 +6,18 @@
 //
 
 import UIKit
+import os
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+    private static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier!,
+        category: String(describing: SceneDelegate.self)
+    )
 
     var window: UIWindow? = nil
-    // use this to register any alerts that are generated before the UI is presented
+    // Use this to register any alerts that are generated before the UI is presented
     var preUIAlerts: [UIAlertController] = []
-    // mark after the app has booted, use to determine when to re-cconnect to the server
+    // Mark after the app has booted, use to determine when to re-connect to the server
     var hasBooted = false
 
     // Scene functions
@@ -23,16 +28,21 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         options connectionOptions: UIScene.ConnectionOptions
     ) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
+        Self.logger.trace("Creating scene")
 
         // Attempt to load stored credentials from the keychain
-        var credentials: KeychainManager.Credentials? = nil
+        var credentials: Keychain.Credentials? = nil
         do {
-            credentials = try KeychainManager.getCredentials()
-        } catch {
+            credentials = try Keychain.getCredentials()
+        } catch let error {
+            Self.logger.error(
+                "Error retrieving credentials from keychain: \(error)"
+            )
             // Notify the user that they are logged out due to the keychain error
             let alert = GenericAlert(
                 title: "Keychain Error",
-                message: "An error occurred while retrieving your password, please log in to your account again"
+                message:
+                    "An error occurred while retrieving your password, please log in to your account again"
             )
             self.preUIAlerts.append(alert)
         }
@@ -40,8 +50,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Check if the stored state is outdated and synchronize accordingly
         self.synchronizeStoredData(credentials: credentials)
         // Then load application state from local storage
-        State.manager.load()
-        State.manager.userEmail = credentials?.email ?? ""
+        StateManager.shared.load()
 
         // Create the application window
         self.window = UIWindow(frame: windowScene.coordinateSpace.bounds)
@@ -54,14 +63,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             self.window?.rootViewController?.present(alert, animated: true)
         }
 
-        // Register the scene as a delegate for the WebSocket handler
-        SocketManager.shared.addDelegate(self)
-
         // If an account is logged in, authenticate with the server
+        // Validate that the stored credentials matches the stored state
         if let credentials {
-            // Set the offline read-only mode flag until authentication has completed successfully
-            State.manager.readOnly = true
-            self.authenticate(credentials: credentials)
+            if credentials.email == StateManager.shared.userEmail {
+                self.authenticate(credentials: credentials)
+            }
         }
     }
 
@@ -91,8 +98,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             return
         }
 
-        // Re-connect to the WebSocket server, if authenticated
-        if let credentials = try? KeychainManager.getCredentials() {
+        // Re-connect to the server, if authenticated
+        if let credentials = try? Keychain.getCredentials() {
             self.authenticate(credentials: credentials)
         }
     }
@@ -104,91 +111,39 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         // Synchronize changes made to PersistenceManager with the backing storage
         UserDefaults.standard.synchronize()
-
-        // Disconnect from the WebSocket server
-        SocketManager.shared.disconnect()
     }
 
     // Helper functions
 
-    func synchronizeStoredData(credentials: KeychainManager.Credentials?) {
+    func synchronizeStoredData(credentials: Keychain.Credentials?) {
         if PersistenceManager.shared.dataVersion < PersistenceManager.version {
-            // V1->V2: removed `state` from PersistenceManager keys and split out into individual fields
-            if PersistenceManager.shared.dataVersion == 1 {
-                let stored: State.Storage__V1 = PersistenceManager.shared.getObject(
-                    forKey: PersistenceManager.Keys.state, defaultValue: .empty()
-                )
-                PersistenceManager.shared.root = stored.root
-                PersistenceManager.shared.recipes = stored.recipes
-                PersistenceManager.shared.folders = stored.folders
-                // Clear out the keychain to log out the user
-                do { try KeychainManager.deleteCredentials() } catch {}
-                // and alert them to that fact
-                let alert = GenericAlert(
-                    title: "App updated",
-                    message: "Important changes have been made behind the scenes, please log in to your account again"
-                )
-                self.preUIAlerts.append(alert)
-            }
+            // TODO: unimplemented...
         }
         // Set data version to the current
         PersistenceManager.shared.dataVersion = PersistenceManager.version
     }
 
-    func authenticate(credentials: KeychainManager.Credentials) {
-        NetworkManager.authenticate(email: credentials.email, password: credentials.password) { (result) in
-            switch result {
-            case .success(let info):
-                // Check if the local copy of the recipes is outdated
-                if info.sequence > State.manager.sequence {
-                    State.manager.addUserInfo(info: info)
-                    // Signal to any recipe list views to reload their state
-                    DispatchQueue.main.async {
-                        let tabBarController = self.window?.rootViewController as! TabBarController
-                        tabBarController.refreshRecipeLists()
-                    }
-                }
-                // Open the WebSocket connection with the server
-                SocketManager.shared.connect(userId: info.id, token: info.token)
-            case .failure(let error):
+    func authenticate(credentials: Keychain.Credentials) {
+        Self.logger.info("Authenticating user \(credentials.email)")
+        Task { [weak self] in
+            do {
+                try await StateManager.shared.authenticateUser(
+                    email: credentials.email,
+                    password: credentials.password,
+                    addToKeychain: false  // password already came from the keychain
+                )
+                // Signal to any recipe list views to reload their state
                 DispatchQueue.main.async {
-                    // Failed to ping server
-                    self.window?.rootViewController?.presentErrorAlert(error)
+                    let tabBarController =
+                        self?.window?.rootViewController as! TabBarController
+                    tabBarController.refreshRecipeLists()
+                }
+            } catch let error {
+                // Failed to ping server
+                DispatchQueue.main.async {
+                    self?.window?.rootViewController?.presentErrorAlert(error)
                 }
             }
-        }
-    }
-}
-
-extension SceneDelegate: SocketManager.Delegate {
-
-    func didConnectToServer() {
-        // Server communication successfully established
-        State.manager.readOnly = false
-    }
-
-    func didPushToServer() {
-        // Server update successful, bump the sequence count
-        State.manager.sequence += 1
-    }
-
-    func didReceiveSyncRequest(_ info: API.SyncRequestBody) {
-        // Someone made changes on another device, resync stored state
-        State.manager.syncUserInfo(info: info)
-        // Signal to any recipe list views to reload their state
-        DispatchQueue.main.async {
-            let tabBarController = self.window?.rootViewController as! TabBarController
-            tabBarController.refreshRecipeLists()
-        }
-    }
-
-    func socketError(_ error: BasilError) {
-        // Server communication error, set the offline read-only mode flag until server
-        // communication can be re-established
-        State.manager.readOnly = true
-
-        DispatchQueue.main.async {
-            self.window?.rootViewController?.presentErrorAlert(error)
         }
     }
 }

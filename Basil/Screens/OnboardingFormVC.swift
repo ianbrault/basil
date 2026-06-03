@@ -7,13 +7,18 @@
 
 import SwiftEmailValidator
 import UIKit
+import os
 
 //
 // Presents a form to allow the user to register or login, depending on the provided style
 // Uses the scene delegate to transfer control back to the main flow once the user info has been validated
 //
 class OnboardingFormVC: UIViewController {
-    static let reuseID = "OnboardingFormCell"
+    private static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier!,
+        category: String(describing: OnboardingFormVC.self)
+    )
+    private static let reuseID = "OnboardingFormCell"
 
     enum FormStyle {
         case register
@@ -47,7 +52,7 @@ class OnboardingFormVC: UIViewController {
     }
 
     private var style: FormStyle
-    private var onCompletion: ((BasilError?) -> Void)?
+    private var onCompletion: ((Error?) -> Void)?
 
     private var button: Button!
     private var cells: [Cell]!
@@ -59,22 +64,47 @@ class OnboardingFormVC: UIViewController {
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private let insets = UIEdgeInsets(top: 0, left: 40, bottom: 16, right: 40)
 
-    init(_ style: FormStyle, onCompletion: @escaping (BasilError?) -> Void) {
+    init(_ style: FormStyle, onCompletion: @escaping (Error?) -> Void) {
         self.style = style
         self.onCompletion = onCompletion
         switch style {
         case .register:
             self.button = Button(title: "Create Account")
             self.cells = [
-                Cell(image: SFSymbols.email, placeholder: "Email", contentType: .username, keyboardType: .emailAddress),
-                Cell(image: SFSymbols.password, placeholder: "Password", contentType: .newPassword, isSecure: true),
-                Cell(image: SFSymbols.confirmPassword, placeholder: "Confirm Password", contentType: .newPassword, isSecure: true),
+                Cell(
+                    image: SFSymbols.email,
+                    placeholder: "Email",
+                    contentType: .username,
+                    keyboardType: .emailAddress
+                ),
+                Cell(
+                    image: SFSymbols.password,
+                    placeholder: "Password",
+                    contentType: .newPassword,
+                    isSecure: true
+                ),
+                Cell(
+                    image: SFSymbols.confirmPassword,
+                    placeholder: "Confirm Password",
+                    contentType: .newPassword,
+                    isSecure: true
+                ),
             ]
         case .login:
             self.button = Button(title: "Sign In")
             self.cells = [
-                Cell(image: SFSymbols.email, placeholder: "Email", contentType: .username, keyboardType: .emailAddress),
-                Cell(image: SFSymbols.password, placeholder: "Password", contentType: .password, isSecure: true),
+                Cell(
+                    image: SFSymbols.email,
+                    placeholder: "Email",
+                    contentType: .username,
+                    keyboardType: .emailAddress
+                ),
+                Cell(
+                    image: SFSymbols.password,
+                    placeholder: "Password",
+                    contentType: .password,
+                    isSecure: true
+                ),
             ]
         }
         super.init(nibName: nil, bundle: nil)
@@ -102,11 +132,15 @@ class OnboardingFormVC: UIViewController {
         }
 
         self.navigationController?.navigationBar.prefersLargeTitles = true
-        self.navigationController?.navigationBar.tintColor = StyleGuide.colors.primary
+        self.navigationController?.navigationBar.tintColor =
+            StyleGuide.colors.primary
 
         let appearance = UINavigationBarAppearance()
         appearance.largeTitleTextAttributes = [
-            NSAttributedString.Key.font: UIFont.systemFont(ofSize: 32, weight: .bold),
+            NSAttributedString.Key.font: UIFont.systemFont(
+                ofSize: 32,
+                weight: .bold
+            )
         ]
         self.navigationController?.navigationBar.standardAppearance = appearance
     }
@@ -122,16 +156,32 @@ class OnboardingFormVC: UIViewController {
         self.tableView.separatorInsetReference = .fromAutomaticInsets
         self.tableView.removeExcessCells()
 
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: OnboardingFormVC.reuseID)
+        self.tableView.register(
+            UITableViewCell.self,
+            forCellReuseIdentifier: OnboardingFormVC.reuseID
+        )
 
         // tap to dismiss keyboard
-        let gesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissKeyboard))
+        let gesture = UITapGestureRecognizer(
+            target: self,
+            action: #selector(self.dismissKeyboard)
+        )
         self.tableView.addGestureRecognizer(gesture)
     }
 
     private func configureButton() {
-        self.view.addPinnedSubview(self.button, height: StyleGuide.buttonHeight, insets: self.insets, keyboardBottom: true, noTop: true)
-        self.button.addTarget(self, action: #selector(self.onSubmit), for: .touchUpInside)
+        self.view.addPinnedSubview(
+            self.button,
+            height: StyleGuide.buttonHeight,
+            insets: self.insets,
+            keyboardBottom: true,
+            noTop: true
+        )
+        self.button.addTarget(
+            self,
+            action: #selector(self.onSubmit),
+            for: .touchUpInside
+        )
     }
 
     func validateForm() -> Bool {
@@ -149,15 +199,19 @@ class OnboardingFormVC: UIViewController {
         }
 
         // validate the email address
-        if !EmailSyntaxValidator.correctlyFormatted(self.cells[self.emailIndex.row].text) {
+        if !EmailSyntaxValidator.correctlyFormatted(
+            self.cells[self.emailIndex.row].text
+        ) {
             self.cells[self.emailIndex.row].hasError = true
             valid = false
         }
 
         // check if the password and confirm password fields match
         if self.style == .register {
-            if self.cells[self.passwordIndex.row].text != self.cells[self.confirmPasswordIndex.row].text {
-                self.presentErrorAlert(.passwordsDoNotMatch)
+            if self.cells[self.passwordIndex.row].text
+                != self.cells[self.confirmPasswordIndex.row].text
+            {
+                self.presentErrorAlert(BasilError.passwordsDoNotMatch)
                 valid = false
             }
         }
@@ -175,47 +229,39 @@ class OnboardingFormVC: UIViewController {
         let email = self.cells[self.emailIndex.row].text
         let password = self.cells[self.passwordIndex.row].text
 
-        // common response handler for login/register endpoints
-        let handler: NetworkManager.BodyHandler<API.AuthenticationResponse> = { [weak self] (result) in
-            var err: BasilError? = nil
-            switch result {
-            case .success(let info):
-                // Add the password to the keychain
-                do {
-                    try KeychainManager.setCredentials(email: email, password: password)
-                } catch {
-                    err = error as? BasilError
+        Task { [weak self] in
+            self?.showLoadingView()
+
+            var err: Error? = nil
+            do {
+                switch self?.style {
+                case .register:
+                    try await StateManager.shared.createUser(
+                        email: email,
+                        password: password,
+                    )
+                case .login:
+                    try await StateManager.shared.authenticateUser(
+                        email: email,
+                        password: password,
+                    )
+                default:
+                    return
                 }
-                // Store the user info to the app state
-                State.manager.addUserInfo(info: info)
-                // Set the offline read-only mode flag until authentication has completed successfully
-                State.manager.readOnly = true
-                // Open the WebSocket connection with the server
-                SocketManager.shared.connect(userId: info.id, token: info.token)
-            case .failure(let error):
+            } catch let error {
                 err = error
             }
             self?.dismissLoadingView()
             self?.onCompletion?(err)
-        }
-
-        self.showLoadingView()
-        switch self.style {
-        case .register:
-            NetworkManager.createUser(
-                email: email, password: password,
-                root: State.manager.root, recipes: State.manager.recipes, folders: State.manager.folders,
-                handler: handler
-            )
-        case .login:
-            NetworkManager.authenticate(email: email, password: password, handler: handler)
         }
     }
 }
 
 extension OnboardingFormVC: UITableViewDataSource, UITableViewDelegate {
 
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int)
+        -> Int
+    {
         switch self.style {
         case .register:
             return 3
@@ -224,19 +270,26 @@ extension OnboardingFormVC: UITableViewDataSource, UITableViewDelegate {
         }
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: OnboardingFormVC.reuseID)!
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath)
+        -> UITableViewCell
+    {
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: OnboardingFormVC.reuseID
+        )!
         let info = self.cells[indexPath.row]
 
         var content = TextFieldContentConfiguration()
         content.image = info.image
-        content.tintColor = info.hasError ? StyleGuide.colors.error : StyleGuide.colors.primary
+        content.tintColor =
+            info.hasError ? StyleGuide.colors.error : StyleGuide.colors.primary
         content.text = info.text
         content.placeholder = info.placeholder
-        content.contentType = (self.style == .register && info.contentType == .password) ? .newPassword : info.contentType
+        content.contentType =
+            (self.style == .register && info.contentType == .password)
+            ? .newPassword : info.contentType
         content.isSecureTextEntry = info.isSecure
 
-        content.onChange =  { [weak self] (text) in
+        content.onChange = { [weak self] (text) in
             self?.cells[indexPath.row].text = text
         }
 

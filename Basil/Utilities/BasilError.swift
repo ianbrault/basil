@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum BasilError: Error {
+enum BasilError: Error, Equatable {
 
     case cannotModifyRoot
     case decodeError
@@ -17,99 +17,54 @@ enum BasilError: Error {
     case invalidConversion(Unit, Unit)
     case invalidURL(String)
     case keychainError(OSStatus)
-    case missingItem(State.Item, UUID)
+    case missingFolder(ObjectID?)
+    case missingItem(StateManager.Item, ObjectID)
     case missingTitle
+    case missingToken
     case noConnection
-    case notImplemented
+    case offlineQueueFull
     case passwordsDoNotMatch
-    case readOnly(String, State.Item)
     case recipeParseError(String?)
     case resourceNotFound(String)
-    case socketClosed(String)
-    case socketReadError(String)
-    case socketWriteError(String)
-    case socketUnexpectedMessage(API.SocketMessageType, SocketManager.SocketState)
-
-    var title: String {
-        switch self {
-        case .extensionError(_):
-            return "Failed to load extension"
-        case .httpError(_):
-            return "An error occurred"
-        case .invalidConversion(_, _):
-            return "Invalid unit conversion"
-        case .invalidURL(_):
-            return "Invalid URL"
-        case .missingTitle:
-            return "Missing title"
-        case .notImplemented:
-            return "Not implemented!"
-        case .noConnection:
-            return "Could not reach server"
-        case .passwordsDoNotMatch:
-            return "Passwords do not Match"
-        case .readOnly(let action, let itemType):
-            switch itemType {
-            case .recipe:
-                return "Cannot \(action) recipe"
-            case .folder:
-                return "Cannot \(action) folder"
-            }
-        case .socketClosed(_):
-            return "Lost connection to the server"
-        case .socketReadError(_),
-             .socketWriteError(_):
-            return "Failed to communicate with the server"
-        case .cannotModifyRoot,
-             .decodeError,
-             .encodeError,
-             .keychainError(_),
-             .missingItem(_, _),
-             .recipeParseError(_),
-             .resourceNotFound(_),
-             .socketUnexpectedMessage(_, _):
-            return "Something went wrong"
-        }
-    }
 
     var message: String {
         switch self {
         case .extensionError(let message),
-             .httpError(let message),
-             .invalidURL(let message),
-             .socketClosed(let message),
-             .socketReadError(let message),
-             .socketWriteError(let message):
+            .httpError(let message),
+            .invalidURL(let message):
             return message
         case .cannotModifyRoot:
-            return "You cannot modify the root folder. How did you even get in this situation in the first place?"
+            return
+                "You cannot modify the root folder. How did you even get in this situation in the first place?"
         case .decodeError:
             return "Failed to decode string"
         case .encodeError:
             return "Failed to encode string"
         case .keychainError(let status):
-            let statusMessage = SecCopyErrorMessageString(status, nil) as? String ?? "unknown"
-            return "Keychain storage failure: \(statusMessage)"
+            let statusMessage =
+                SecCopyErrorMessageString(status, nil) as? String ?? "unknown"
+            return "Keychain failure: \(statusMessage)"
         case .invalidConversion(let from, let to):
             return "Cannot convert from \(from.toString()) to \(to.toString())"
+        case .missingFolder(let uuid):
+            return "Missing folder with ID \(uuid?.description ?? "nil")"
         case .missingItem(let itemType, let uuid):
             return "Missing \(itemType.name) \(uuid)"
         case .missingTitle:
             return "Add a title to the recipe and try again"
+        case .missingToken:
+            return "Missing user token, try logging in again."
         case .noConnection:
-            return "You will not be able to make changes until you are back online"
-        case .notImplemented:
-            return "This feature is not implemented. Try again later..."
+            return "Try again later."
+        case .offlineQueueFull:
+            return
+                "The offline action queue is full. Connect to the server and try again."
         case .passwordsDoNotMatch:
             return "Re-enter your password and try again"
-        case .readOnly(_, _):
-            return "Cannot make changes to recipes or folders while offline in read-only mode"
         case .recipeParseError(let message):
             return message ?? "An error occurred while parsing the recipe"
         case .resourceNotFound(let name):
             return "Missing resource \"\(name)\""
-        case .socketUnexpectedMessage(let type, let state):
-            return "Unexpected socket message of type \(type) in state \(state)"
         }
     }
 }
