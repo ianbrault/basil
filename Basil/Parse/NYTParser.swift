@@ -90,34 +90,21 @@ struct NYTRecipeParser {
         return instructions
     }
 
-    static func parse(body contents: Data, folderId: ObjectID) -> Result<
-        Recipe, BasilError
-    > {
+    static func parse(body contents: Data, folderId: ObjectID) throws -> Recipe
+    {
         guard let body = String(data: contents, encoding: .utf8) else {
-            return .failure(.decodeError)
+            throw BasilError.decodeError
         }
-
-        var document: Document
-        do {
-            document = try SwiftSoup.parse(body)
-        } catch {
-            return .failure(.recipeParseError(error.localizedDescription))
-        }
-
-        do {
-            // parse the recipe details
-            let title = try self.parseTitle(document)
-            let ingredients = try self.parseIngredients(document)
-            let instructions = try self.parseInstructions(document)
-            let recipe = Recipe(
-                parent: folderId,
-                title: title,
-                ingredients: ingredients,
-                instructions: instructions
-            )
-            return .success(recipe)
-        } catch {
-            return .failure(.recipeParseError(error.localizedDescription))
-        }
+        let document = try SwiftSoup.parse(body)
+        // Parse the recipe details
+        let title = try self.parseTitle(document)
+        let ingredients = try self.parseIngredients(document)
+        let instructions = try self.parseInstructions(document)
+        return Recipe(
+            parent: folderId,
+            title: title,
+            ingredients: ingredients,
+            instructions: instructions
+        )
     }
 }

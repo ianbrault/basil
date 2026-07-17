@@ -137,3 +137,11 @@ extension Folder: Encodable {
         try container.encode(self.subfolders, forKey: .subfolders)
     }
 }
+
+extension Folder: CustomStringConvertible {
+    var description: String {
+        let parent = String(describing: self.parent)
+        return
+            "Folder(id: \(self.uuid), parent: \(parent), title: \"\(self.name)\", recipes: \(self.recipes), subfolders: \(self.subfolders)"
+    }
+}

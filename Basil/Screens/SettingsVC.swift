@@ -139,14 +139,14 @@ class SettingsVC: UITableViewController {
                             var content = SwitchContentConfiguration()
                             content.text = "Sort Checked Items"
                             content.isOn =
-                                PersistenceManager.shared.sortCheckedGroceries
+                                SettingsManager.shared.sortCheckedGroceries
                             content.onChange = { (toggled) in
-                                PersistenceManager.shared.sortCheckedGroceries =
+                                SettingsManager.shared.sortCheckedGroceries =
                                     toggled
                                 if toggled {
                                     StateManager.shared.groceryList
                                         .sortCheckedGroceries()
-                                    StateManager.shared.storeGroceryList()
+                                    StateManager.shared.store()
                                 }
                             }
                             return content
@@ -257,7 +257,13 @@ class SettingsVC: UITableViewController {
         let message = "Are you sure you wish to sign out?"
         let warning = WarningAlert(title: "", message: message) {
             [weak self] () in
-            self?.userRemoved(nil)
+            var error: Error? = nil
+            do {
+                try StateManager.shared.removeUser()
+            } catch let err {
+                error = err
+            }
+            self?.userRemoved(error)
         }
         self.present(warning, animated: true)
     }

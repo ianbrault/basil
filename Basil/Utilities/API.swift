@@ -106,9 +106,41 @@ struct API {
         let token: ObjectID
     }
 
+    struct DeleteFolderRequest: Codable {
+        let user_id: ObjectID
+        let token_id: ObjectID
+        let device: UUID?
+        let folder_id: ObjectID
+    }
+
+    struct DeleteRecipeRequest: Codable {
+        let user_id: ObjectID
+        let token_id: ObjectID
+        let device: UUID?
+        let recipe_id: ObjectID
+    }
+
     struct DeleteUserRequest: Codable {
         let email: String
         let password: String
+    }
+
+    struct UpdateFolderRequest: Codable {
+        let user_id: ObjectID
+        let token_id: ObjectID
+        let device: UUID?
+        let folder_id: ObjectID
+        let name: String
+    }
+
+    struct UpdateRecipeRequest: Codable {
+        let user_id: ObjectID
+        let token_id: ObjectID
+        let device: UUID?
+        let recipe_id: ObjectID
+        let title: String
+        let ingredients: [String]
+        let instructions: [String]
     }
 
     struct UserInfo: Codable {
@@ -216,6 +248,46 @@ struct API {
         return response
     }
 
+    static func deleteFolder(_ folder: Folder) async throws {
+        guard let userId = StateManager.shared.userId,
+            let tokenId = StateManager.shared.tokenId,
+            let device = StateManager.shared.device
+        else {
+            throw BasilError.missingToken
+        }
+
+        let request = DeleteFolderRequest(
+            user_id: userId,
+            token_id: tokenId,
+            device: device,
+            folder_id: folder.uuid,
+        )
+        try await Network.post(
+            url: Network.url("folder/delete"),
+            body: request
+        )
+    }
+
+    static func deleteRecipe(_ recipe: Recipe) async throws {
+        guard let userId = StateManager.shared.userId,
+            let tokenId = StateManager.shared.tokenId,
+            let device = StateManager.shared.device
+        else {
+            throw BasilError.missingToken
+        }
+
+        let request = DeleteRecipeRequest(
+            user_id: userId,
+            token_id: tokenId,
+            device: device,
+            recipe_id: recipe.uuid,
+        )
+        try await Network.post(
+            url: Network.url("recipe/delete"),
+            body: request
+        )
+    }
+
     static func deleteUser(
         email: String,
         password: String,
@@ -227,6 +299,51 @@ struct API {
         )
         try await Network.post(
             url: Network.url("user/delete"),
+            body: request
+        )
+    }
+
+    static func updateFolder(_ folder: Folder) async throws {
+        guard let userId = StateManager.shared.userId,
+            let tokenId = StateManager.shared.tokenId,
+            let device = StateManager.shared.device
+        else {
+            throw BasilError.missingToken
+        }
+
+        let request = UpdateFolderRequest(
+            user_id: userId,
+            token_id: tokenId,
+            device: device,
+            folder_id: folder.uuid,
+            name: folder.name,
+        )
+        try await Network.post(
+            url: Network.url("folder/modify"),
+            body: request
+        )
+    }
+
+    static func updateRecipe(_ recipe: Recipe) async throws {
+        guard let userId = StateManager.shared.userId,
+            let tokenId = StateManager.shared.tokenId,
+            let device = StateManager.shared.device
+        else {
+            throw BasilError.missingToken
+        }
+
+        let ingredients = recipe.ingredients.map { $0.toString() }
+        let request = UpdateRecipeRequest(
+            user_id: userId,
+            token_id: tokenId,
+            device: device,
+            recipe_id: recipe.uuid,
+            title: recipe.title,
+            ingredients: ingredients,
+            instructions: recipe.instructions,
+        )
+        try await Network.post(
+            url: Network.url("recipe/modify"),
             body: request
         )
     }

@@ -31,26 +31,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         Self.logger.trace("Creating scene")
 
         // Attempt to load stored credentials from the keychain
-        var credentials: Keychain.Credentials? = nil
-        do {
-            credentials = try Keychain.getCredentials()
-        } catch let error {
-            Self.logger.error(
-                "Error retrieving credentials from keychain: \(error)"
-            )
-            // Notify the user that they are logged out due to the keychain error
-            let alert = GenericAlert(
-                title: "Keychain Error",
-                message:
-                    "An error occurred while retrieving your password, please log in to your account again"
-            )
-            self.preUIAlerts.append(alert)
-        }
-
-        // Check if the stored state is outdated and synchronize accordingly
-        self.synchronizeStoredData(credentials: credentials)
-        // Then load application state from local storage
-        StateManager.shared.load()
+        let credentials = self.getCredentials()
 
         // Create the application window
         self.window = UIWindow(frame: windowScene.coordinateSpace.bounds)
@@ -68,7 +49,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if let credentials {
             if credentials.email == StateManager.shared.userEmail {
                 self.authenticate(credentials: credentials)
+            } else {
+                Self.logger.notice(
+                    "Credentials did not match: keychain: \(credentials.email): stored: \(StateManager.shared.userEmail)"
+                )
             }
+        } else {
+            Self.logger.notice("No credentials found in the keychain")
         }
     }
 
@@ -93,13 +80,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneWillEnterForeground(_ scene: UIScene) {
         // Called as the scene transitions from the background to the foreground.
         // Use this method to undo the changes made on entering the background.
+        Self.logger.debug("Scene entering foreground")
+
         if !self.hasBooted {
             self.hasBooted = true
             return
         }
 
         // Re-connect to the server, if authenticated
-        if let credentials = try? Keychain.getCredentials() {
+        // FIXME: is this valid?
+        if let credentials = try? Keychain.getCredentials(
+            email: StateManager.shared.userEmail
+        ) {
             self.authenticate(credentials: credentials)
         }
     }
@@ -108,23 +100,39 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
-
-        // Synchronize changes made to PersistenceManager with the backing storage
-        UserDefaults.standard.synchronize()
     }
 
     // Helper functions
 
-    func synchronizeStoredData(credentials: Keychain.Credentials?) {
-        if PersistenceManager.shared.dataVersion < PersistenceManager.version {
-            // TODO: unimplemented...
+    func getCredentials() -> Keychain.Credentials? {
+        if StateManager.shared.userEmail.isEmpty {
+            // No user is saved so do not check credentials
+            Self.logger.notice("No user saved, not checking for credentials")
+            return nil
+        } else {
+            do {
+                return try Keychain.getCredentials(
+                    email: StateManager.shared.userEmail
+                )
+            } catch let error {
+                Self.logger.error(
+                    "Error retrieving credentials from keychain: \(error)"
+                )
+                // Notify the user that they are logged out due to the keychain error
+                let alert = GenericAlert(
+                    title: "Keychain Error",
+                    message:
+                        "An error occurred while retrieving your password, please log in to your account again"
+                )
+                self.preUIAlerts.append(alert)
+                StateManager.shared.clearUser()
+                StateManager.shared.createRoot()
+                return nil
+            }
         }
-        // Set data version to the current
-        PersistenceManager.shared.dataVersion = PersistenceManager.version
     }
 
     func authenticate(credentials: Keychain.Credentials) {
-        Self.logger.info("Authenticating user \(credentials.email)")
         Task { [weak self] in
             do {
                 try await StateManager.shared.authenticateUser(

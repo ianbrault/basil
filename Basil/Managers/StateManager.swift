@@ -12,33 +12,29 @@ import os
 // Singleton class responsible for managing global application state
 // Reflects state changes to persistence storage and to the remote server (if connected)
 //
-class StateManager {
+final class StateManager {
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
         category: String(describing: StateManager.self)
     )
 
-    static let shared = StateManager()
-
-    enum Item: Codable {
-        case recipe
-        case folder
-
-        var name: String {
-            switch self {
-            case .recipe:
-                return "recipe"
-            case .folder:
-                return "folder"
-            }
-        }
+    enum CodingKeys: String, CodingKey {
+        case userEmail
+        case root
+        case recipes
+        case folders
+        case offlineQueue
+        case groceryList
     }
 
     enum Action: Codable {
-        case create(Item, ObjectID)
-        case modify(Item, ObjectID)
-        case delete(Item, ObjectID)
+        case create(ObjectID)
+        case modify(ObjectID)
+        case delete(ObjectID)
     }
+
+    static let shared =
+        Storage.getObject(forKey: Storage.Key.state) ?? StateManager()
 
     // Device identifier
     var device: UUID? = UIDevice.current.identifierForVendor
@@ -46,25 +42,23 @@ class StateManager {
     // User information
     var tokenId: ObjectID? = nil
     var userId: ObjectID? = nil
-    var userEmail: String = ""
+    var userEmail: String
     var userAuthenticated: Bool {
         return !self.userEmail.isEmpty && self.userId != nil
     }
 
     // ID of the root folder
-    var root: ObjectID? = nil
+    var root: ObjectID?
     // Recipe/folder maps
-    var recipes: [ObjectID: Recipe] = [:]
-    var folders: [ObjectID: Folder] = [:]
+    var recipes: [ObjectID: Recipe]
+    var folders: [ObjectID: Folder]
 
     // Offline action queue
     static let offlineQueueSize = 1024
-    var offlineQueue: RingBuffer<Action> = RingBuffer(
-        size: StateManager.offlineQueueSize
-    )
+    var offlineQueue: RingBuffer<Action>
 
     // Grocery list
-    var groceryList: GroceryList = GroceryList()
+    var groceryList: GroceryList
 
     // Set when communication with the server has been established
     var online: Bool = false
@@ -72,36 +66,42 @@ class StateManager {
     // User has logged in/out so information might need to be reloaded
     var userChanged: Bool = false
 
-    private init() {}
+    private init(
+        userEmail: String = "",
+        root: ObjectID? = nil,
+        recipes: [Recipe] = [],
+        folders: [Folder] = [],
+        offlineQueue: RingBuffer<Action> = RingBuffer(
+            size: StateManager.offlineQueueSize
+        ),
+        groceryList: GroceryList = GroceryList()
+    ) {
+        self.userEmail = userEmail
+        self.recipes = [:]
+        self.folders = [:]
+        self.offlineQueue = offlineQueue
+        self.groceryList = groceryList
 
-    func load() {
-        self.userEmail = PersistenceManager.shared.email ?? ""
-
-        if let root = PersistenceManager.shared.root {
+        if let root {
             self.root = root
-            self.recipes = PersistenceManager.shared.recipes
-            self.folders = PersistenceManager.shared.folders
-            self.offlineQueue = PersistenceManager.shared.offlineQueue
+            for recipe in recipes {
+                self.recipes[recipe.uuid] = recipe
+            }
+            for folder in folders {
+                self.folders[folder.uuid] = folder
+            }
             Self.logger.notice(
-                "Loaded root \(root) with \(self.recipes.count) recipes and \(self.folders.count) folders, \(self.offlineQueue.count) offline actions"
+                "Loaded root \(root) with \(recipes.count) recipes and \(folders.count) folders and \(offlineQueue.count) offline actions"
             )
         } else {
             // If the root does not exist, this is the first launch; create a new root
+            self.offlineQueue.removeAll()
             self.createRoot()
         }
-
-        self.groceryList = PersistenceManager.shared.groceryList
     }
 
-    func storeRecipesAndFolders() {
-        PersistenceManager.shared.root = self.root
-        PersistenceManager.shared.recipes = self.recipes
-        PersistenceManager.shared.folders = self.folders
-        PersistenceManager.shared.offlineQueue = self.offlineQueue
-    }
-
-    func storeGroceryList() {
-        PersistenceManager.shared.groceryList = self.groceryList
+    func store() {
+        Storage.setObject(self, forKey: Storage.Key.state)
     }
 
     //
@@ -115,9 +115,7 @@ class StateManager {
         self.root = nil
         self.recipes.removeAll()
         self.folders.removeAll()
-
-        PersistenceManager.shared.email = nil
-
+        self.store()
         do {
             try Keychain.deleteCredentials()
         } catch {}
@@ -127,14 +125,14 @@ class StateManager {
         self.userId = id
         self.userEmail = email
         self.tokenId = token
-
-        PersistenceManager.shared.email = email
     }
 
     func authenticateUser(
         email: String,
         password: String,
-        addToKeychain: Bool = true
+        clearUser: Bool = false,
+        clearOfflineQueue: Bool = false,
+        addToKeychain: Bool = true,
     ) async throws {
         let info = try await API.authenticate(
             email: email,
@@ -143,10 +141,13 @@ class StateManager {
         Self.logger.notice(
             "Successfully authenticated user \(email)"
         )
-        // Clear out existing structures
-        self.clearUser()
-        // FIXME: should not be clearing the offline queue because this is called from the SceneDelegate
-        // self.offlineQueue.removeAll()
+        if clearUser {
+            // Clear out existing structures
+            self.clearUser()
+        }
+        if clearOfflineQueue {
+            self.offlineQueue.removeAll()
+        }
         // Then populate with the authenticated user info
         self.setUser(id: info.id, email: info.email, token: info.token)
         self.root = info.root
@@ -158,14 +159,18 @@ class StateManager {
             let folder = Folder(response: folderInfo)
             self.folders[folder.uuid] = folder
         }
-        self.storeRecipesAndFolders()
+        self.store()
+        // Process the offline action queue
+        await self.processOfflineQueue()
         // Mark the user as online and signal to views that the user has changed
         self.online = true
         self.userChanged = true
-        try Keychain.setCredentials(
-            email: email,
-            password: password
-        )
+        if addToKeychain {
+            try Keychain.setCredentials(
+                email: email,
+                password: password
+            )
+        }
     }
 
     func createUser(email: String, password: String) async throws {
@@ -179,6 +184,7 @@ class StateManager {
         )
         // Populate with the created user info
         self.setUser(id: info.id, email: info.email, token: info.token)
+        self.store()
         // Process the offline action queue
         await self.processOfflineQueue()
         // Mark the user as online and signal to views that the user has changed
@@ -199,33 +205,40 @@ class StateManager {
     func processOfflineQueue() async {
         let count = self.offlineQueue.count
         for action in self.offlineQueue {
+            Self.logger.info("Processing offline action: \(action)")
             switch action {
-            case .create(let item, let uuid):
-                Self.logger.info(
-                    "Processing offline action: create \(item.name) \(uuid)"
-                )
+            case .create(let uuid):
                 do {
-                    switch item {
-                    case .recipe:
-                        let _ = try await API.createRecipe(self.recipes[uuid]!)
-                    case .folder:
-                        let _ = try await API.createFolder(self.folders[uuid]!)
+                    if let recipe = self.recipes[uuid] {
+                        let _ = try await API.createRecipe(recipe)
+                    } else if let folder = self.folders[uuid] {
+                        let _ = try await API.createFolder(folder)
                     }
                 } catch {
                     break
                 }
                 break
-            case .modify(let item, let uuid):
-                Self.logger.info(
-                    "Processing offline action: modify \(item.name) \(uuid)"
-                )
-                // FIXME: unimplemented
+            case .modify(let uuid):
+                do {
+                    if let recipe = self.recipes[uuid] {
+                        let _ = try await API.updateRecipe(recipe)
+                    } else if let folder = self.folders[uuid] {
+                        let _ = try await API.updateFolder(folder)
+                    }
+                } catch {
+                    break
+                }
                 break
-            case .delete(let item, let uuid):
-                Self.logger.info(
-                    "Processing offline action: delete \(item.name) \(uuid)"
-                )
-                // FIXME: unimplemented
+            case .delete(let uuid):
+                do {
+                    if let recipe = self.recipes[uuid] {
+                        let _ = try await API.deleteRecipe(recipe)
+                    } else if let folder = self.folders[uuid] {
+                        let _ = try await API.deleteFolder(folder)
+                    }
+                } catch {
+                    break
+                }
                 break
             }
         }
@@ -235,8 +248,6 @@ class StateManager {
     func removeUser() throws {
         // Clear out stored user info
         self.clearUser()
-        // Clear the stored password from the keychain
-        try Keychain.deleteCredentials()
         // Create a new root
         self.createRoot()
         // Mark the user as offline and signal to views that the user has changed
@@ -256,6 +267,24 @@ class StateManager {
     // Recipes/Folders
     //
 
+    func folder(id: ObjectID?) -> Folder? {
+        guard let id else { return nil }
+        if self.folders.contains(where: { $0.key == id }) {
+            return self.folders[id]
+        } else {
+            return nil
+        }
+    }
+
+    func recipe(id: ObjectID?) -> Recipe? {
+        guard let id else { return nil }
+        if self.recipes.contains(where: { $0.key == id }) {
+            return self.recipes[id]
+        } else {
+            return nil
+        }
+    }
+
     func createRoot(uuid: ObjectID? = nil) {
         let rootFolder: Folder
         if let uuid {
@@ -274,10 +303,20 @@ class StateManager {
         Self.logger.info("Created root folder \(rootFolder.uuid)")
     }
 
-    func addFolder(name: String, parent: ObjectID) async throws -> Folder {
-        var folder = Folder(parent: parent, name: name)
+    func addFolder(
+        name: String,
+        parent: ObjectID?,
+        recipes: [ObjectID] = [],
+        subfolders: [ObjectID] = [],
+    ) async throws -> Folder {
+        var folder = Folder(
+            parent: parent,
+            name: name,
+            recipes: recipes,
+            subfolders: subfolders
+        )
         Self.logger.notice(
-            "Creating folder \"\(name)\" (ID: \(folder.uuid)) with parent \(parent)"
+            "Creating folder \"\(name)\" (ID: \(folder.uuid)) with parent \(parent?.description ?? "nil")"
         )
 
         // If the user is online, send the action to the server
@@ -304,13 +343,13 @@ class StateManager {
             Self.logger.debug(
                 "Adding offline action to create folder \(folder.uuid)"
             )
-            self.offlineQueue.pushBack(.create(.folder, folder.uuid))
+            self.offlineQueue.pushBack(.create(folder.uuid))
         }
 
         // Add the folder to the tracked state
         self.folders[folder.uuid] = folder
         // Then link to its parent
-        guard let parentId = folder.parent, let parent = self.folders[parentId]
+        guard let parent = self.folder(id: folder.parent)
         else {
             Self.logger.error(
                 "Missing parent \(folder.parent?.description ?? "nil") for folder \(folder.uuid)"
@@ -318,8 +357,19 @@ class StateManager {
             throw BasilError.missingFolder(folder.parent)
         }
         parent.addSubfolder(uuid: folder.uuid)
-        self.storeRecipesAndFolders()
+        self.store()
         return folder
+    }
+
+    func addFolder(
+        _ folder: Folder
+    ) async throws -> Folder {
+        return try await self.addFolder(
+            name: folder.name,
+            parent: folder.parent,
+            recipes: folder.recipes,
+            subfolders: folder.subfolders
+        )
     }
 
     func addRecipe(
@@ -365,13 +415,13 @@ class StateManager {
             Self.logger.debug(
                 "Adding offline action to create recipe \(recipe.uuid)"
             )
-            self.offlineQueue.pushBack(.create(.recipe, recipe.uuid))
+            self.offlineQueue.pushBack(.create(recipe.uuid))
         }
 
         // Add the recipe to the tracked state
         self.recipes[recipe.uuid] = recipe
         // Then link to its parent
-        guard let parent = self.folders[recipe.parent]
+        guard let parent = self.folder(id: recipe.parent)
         else {
             Self.logger.error(
                 "Missing parent \(recipe.parent) for recipe \(recipe.uuid)"
@@ -379,250 +429,220 @@ class StateManager {
             throw BasilError.missingFolder(recipe.parent)
         }
         parent.addRecipe(uuid: recipe.uuid)
-        self.storeRecipesAndFolders()
+        self.store()
         return recipe
     }
 
-    // FIXME: re-implement
-    /*
-    func updateRecipe(recipe updatedRecipe: Recipe) -> BasilError? {
-        guard let recipe = self.getRecipe(uuid: updatedRecipe.uuid) else {
-            return .missingItem(.recipe, updatedRecipe.uuid)
-        }
-        recipe.update(with: updatedRecipe)
-
-        self.storeRecipesAndFolders()
-        return nil
+    func addRecipe(
+        _ recipe: Recipe
+    ) async throws -> Recipe {
+        let ingredients = recipe.ingredients.map { $0.toString() }
+        return try await self.addRecipe(
+            title: recipe.title,
+            parent: recipe.parent,
+            ingredients: ingredients,
+            instructions: recipe.instructions
+        )
     }
-    */
 
-    // FIXME: re-implement
-    /*
-    func updateFolder(folder updatedFolder: Folder) -> BasilError? {
-        guard let folder = self.getFolder(uuid: updatedFolder.uuid) else {
-            return .missingItem(.folder, updatedFolder.uuid)
-        }
-        folder.update(with: updatedFolder)
-
-        self.storeRecipesAndFolders()
-        return nil
-    }
-    */
-
-    // FIXME: re-implement
-    /*
-    func removeRecipe(recipe: Recipe) {
-        // unhook from the parent folder
-        if let parentFolder = self.getFolder(uuid: recipe.parent) {
-            parentFolder.removeRecipe(uuid: recipe.uuid)
-        }
-        // then remove the recipe itself
-        self.recipes.removeAll { $0.uuid == recipe.uuid }
-        self.recipeMap.removeValue(forKey: recipe.uuid)
-    }
-    */
-
-    // FIXME: re-implement
-    /*
-    func removeRecipe(uuid: UUID) {
-        if let recipe = self.getRecipe(uuid: uuid) {
-            self.removeRecipe(recipe: recipe)
-        }
-    }
-    */
-
-    // FIXME: re-implement
-    /*
-    func removeFolder(folder: Folder) {
-        // guard removal of root
-        guard let parentFolderId = folder.parent else { return }
-
-        // first recursively delete sub-items
-        for uuid in folder.subfolders {
-            self.removeFolder(uuid: uuid)
-        }
-        for uuid in folder.recipes {
-            self.removeRecipe(uuid: uuid)
-        }
-
-        // unhook from the parent folder
-        if let parentFolder = self.getFolder(uuid: parentFolderId) {
-            parentFolder.removeSubfolder(uuid: folder.uuid)
-        }
-        // then remove the folder itself
-        self.folders.removeAll { $0.uuid == folder.uuid }
-        self.folderMap.removeValue(forKey: folder.uuid)
-    }
-    */
-
-    // FIXME: re-implement
-    /*
-    func removeFolder(uuid: UUID) {
-        if let folder = self.getFolder(uuid: uuid) {
-            self.removeFolder(folder: folder)
-        }
-    }
-    */
-
-    // FIXME: re-implement
-    /*
-    func deleteItem(uuid: UUID) -> BasilError? {
-        return self.deleteItems(uuids: [uuid])
-    }
-    */
-
-    // FIXME: re-implement
-    /*
-    func deleteItems(uuids: [UUID]) -> BasilError? {
-        var recipes: [UUID] = []
-        var folders: [UUID] = []
-        for uuid in uuids {
-            if let recipe = self.recipeMap[uuid] {
-                recipes.append(uuid)
-                self.removeRecipe(recipe: recipe)
-            } else if let folder = self.folderMap[uuid] {
-                folders.append(uuid)
-                self.removeFolder(folder: folder)
-            } else {
-                return .missingItem(.recipe, uuid)
-            }
-        }
-
-        self.storeRecipesAndFolders()
-        return nil
-    }
-    */
-
-    // FIXME: re-implement
-    /*
-    func moveRecipeToFolder(recipe: Recipe, folderId: UUID) -> BasilError? {
-        // first unhook from the parent folder
-        if let oldParentFolder = self.getFolder(uuid: recipe.parent) {
-            oldParentFolder.removeRecipe(uuid: recipe.uuid)
-        } else {
-            return .missingItem(.folder, recipe.parent)
-        }
-        // then add it to the new parent folder
-        recipe.parent = folderId
-        if let newParentFolder = self.getFolder(uuid: folderId) {
-            newParentFolder.addRecipe(uuid: recipe.uuid)
-        } else {
-            return .missingItem(.folder, folderId)
-        }
-
-        return nil
-    }
-    */
-
-    // FIXME: re-implement
-    /*
-    func moveFolderToFolder(folder: Folder, folderId: UUID) -> BasilError? {
-        // first unhook from the parent folder
-        if let oldParentFolderId = folder.parent {
-            if let oldParentFolder = self.getFolder(uuid: oldParentFolderId) {
-                oldParentFolder.removeSubfolder(uuid: folder.uuid)
-            } else {
-                return .missingItem(.folder, oldParentFolderId)
-            }
-        } else {
-            // this branch should never be hit
-            // folder ID should only be nil for the root, which should never be modified
-            return .cannotModifyRoot
-        }
-        // then add it to the new parent folder
-        folder.parent = folderId
-        if let newParentFolder = self.getFolder(uuid: folderId) {
-            newParentFolder.addSubfolder(uuid: folder.uuid)
-        } else {
-            return .missingItem(.folder, folderId)
-        }
-
-        return nil
-    }
-    */
-
-    // FIXME: re-implement
-    /*
-    func moveItemToFolder(uuid: UUID, folderId: UUID) -> BasilError? {
-        return self.moveItemsToFolder(uuids: [uuid], folderId: folderId)
-    }
-    */
-
-    // FIXME: re-implement
-    /*
-    func moveItemsToFolder(uuids: [UUID], folderId: UUID) -> BasilError? {
-        var recipes: [Recipe] = []
-        var folders: [Folder] = []
-        var recipeIds: Set<UUID> = []
-        var folderIds: Set<UUID> = []
-
-        if let folder = self.getFolder(uuid: folderId) {
-            folders.append(folder)
-            folderIds.insert(folderId)
-        } else {
-            return .missingItem(.folder, folderId)
-        }
-
-        for uuid in uuids {
-            var error: BasilError? = nil
-            if let recipe = self.recipeMap[uuid] {
-                // track the recipe so it can be updated via the API
-                if !recipeIds.contains(uuid) {
-                    recipes.append(recipe)
-                    recipeIds.insert(uuid)
-                }
-                // also track the parent folder
-                if !folderIds.contains(recipe.parent) {
-                    if let parentFolder = self.getFolder(uuid: recipe.parent) {
-                        folders.append(parentFolder)
-                        folderIds.insert(recipe.parent)
-                    } else {
-                        error = .missingItem(.folder, recipe.parent)
-                    }
-                }
-                // then move the recipe
-                error = self.moveRecipeToFolder(
-                    recipe: recipe,
-                    folderId: folderId
-                )
-            } else if let folder = self.folderMap[uuid] {
-                // track the folder so it can be updated via the API
-                if !folderIds.contains(uuid) {
-                    folders.append(folder)
-                    folderIds.insert(uuid)
-                }
-                // also track the parent folder
-                if let parentFolderId = folder.parent {
-                    if !folderIds.contains(parentFolderId) {
-                        if let parentFolder = self.getFolder(
-                            uuid: parentFolderId
-                        ) {
-                            folders.append(parentFolder)
-                            folderIds.insert(parentFolderId)
-                        } else {
-                            error = .missingItem(.folder, parentFolderId)
-                        }
-                    }
+    func updateFolder(folder: Folder) async throws {
+        // If the user is online, send the action to the server
+        if self.online {
+            do {
+                try await API.updateFolder(folder)
+            } catch let error {
+                Self.logger.error("Error updating folder: \(error)")
+                // If the client/server has gone offline, enter offline mode and continue on
+                if Network.isOfflineError(error) {
+                    self.online = false
                 } else {
-                    error = .cannotModifyRoot
+                    throw error
                 }
-                // then move the folder
-                error = self.moveFolderToFolder(
-                    folder: folder,
-                    folderId: folderId
-                )
-            } else {
-                error = .missingItem(.recipe, uuid)
-            }
-            if let error {
-                return error
             }
         }
 
-        self.storeRecipesAndFolders()
-        return nil
+        // If the user is offline, store the action in the offline queue
+        if !self.online {
+            if self.offlineQueue.isFull {
+                throw BasilError.offlineQueueFull
+            }
+            Self.logger.debug(
+                "Adding offline action to modify folder \(folder.uuid)"
+            )
+            self.offlineQueue.pushBack(.modify(folder.uuid))
+        }
+
+        self.folders[folder.uuid] = folder
+        self.store()
     }
-    */
+
+    func updateRecipe(recipe: Recipe) async throws {
+        // If the user is online, send the action to the server
+        if self.online {
+            do {
+                try await API.updateRecipe(recipe)
+            } catch let error {
+                Self.logger.error("Error updating recipe: \(error)")
+                // If the client/server has gone offline, enter offline mode and continue on
+                if Network.isOfflineError(error) {
+                    self.online = false
+                } else {
+                    throw error
+                }
+            }
+        }
+
+        // If the user is offline, store the action in the offline queue
+        if !self.online {
+            if self.offlineQueue.isFull {
+                throw BasilError.offlineQueueFull
+            }
+            Self.logger.debug(
+                "Adding offline action to modify recipe \(recipe.uuid)"
+            )
+            self.offlineQueue.pushBack(.modify(recipe.uuid))
+        }
+
+        self.recipes[recipe.uuid] = recipe
+        self.store()
+    }
+
+    func deleteFolder(folder: Folder, recursive: Bool = true) async throws {
+        Self.logger.notice(
+            "Deleting folder \"\(folder.name)\" (ID: \(folder.uuid))"
+        )
+
+        if recursive {
+            // Recursively delete children
+            for recipeId in folder.recipes {
+                if let recipe = self.recipe(id: recipeId) {
+                    try await self.deleteRecipe(recipe: recipe)
+                }
+            }
+            for folderId in folder.subfolders {
+                if let folder = self.folder(id: folderId) {
+                    try await self.deleteFolder(folder: folder)
+                }
+            }
+        }
+
+        // Remove the folder from its parent
+        if let parent = folder.parent {
+            self.folders[parent]?.removeSubfolder(uuid: folder.uuid)
+        }
+
+        // If the user is online, send the action to the server
+        if self.online {
+            do {
+                try await API.deleteFolder(folder)
+            } catch let error {
+                Self.logger.error("Error deleting folder: \(error)")
+                // If the client/server has gone offline, enter offline mode and continue on
+                if Network.isOfflineError(error) {
+                    self.online = false
+                } else {
+                    throw error
+                }
+            }
+        }
+
+        // If the user is offline, store the action in the offline queue
+        if !self.online {
+            if self.offlineQueue.isFull {
+                throw BasilError.offlineQueueFull
+            }
+            Self.logger.debug(
+                "Adding offline action to delete folder \(folder.uuid)"
+            )
+            self.offlineQueue.pushBack(.delete(folder.uuid))
+        }
+
+        self.folders.removeValue(forKey: folder.uuid)
+        self.store()
+    }
+
+    func deleteRecipe(recipe: Recipe) async throws {
+        Self.logger.notice(
+            "Deleting recipe \"\(recipe.title)\" (ID: \(recipe.uuid))"
+        )
+
+        // Remove the recipe from its parent
+        self.folders[recipe.parent]?.removeRecipe(uuid: recipe.uuid)
+
+        // If the user is online, send the action to the server
+        if self.online {
+            do {
+                try await API.deleteRecipe(recipe)
+            } catch let error {
+                Self.logger.error("Error deleting recipe: \(error)")
+                // If the client/server has gone offline, enter offline mode and continue on
+                if Network.isOfflineError(error) {
+                    self.online = false
+                } else {
+                    throw error
+                }
+            }
+        }
+
+        // If the user is offline, store the action in the offline queue
+        if !self.online {
+            if self.offlineQueue.isFull {
+                throw BasilError.offlineQueueFull
+            }
+            Self.logger.debug(
+                "Adding offline action to delete recipe \(recipe.uuid)"
+            )
+            self.offlineQueue.pushBack(.delete(recipe.uuid))
+        }
+
+        self.recipes.removeValue(forKey: recipe.uuid)
+        self.store()
+    }
+
+    func deleteItem(uuid: ObjectID) async throws {
+        return try await self.deleteItems(uuids: [uuid])
+    }
+
+    func deleteItems(uuids: [ObjectID]) async throws {
+        for uuid in uuids {
+            if let recipe = self.recipe(id: uuid) {
+                try await self.deleteRecipe(recipe: recipe)
+            } else if let folder = self.folder(id: uuid) {
+                try await self.deleteFolder(folder: folder)
+            }
+        }
+    }
+
+    func moveFolder(folder: Folder, to folderId: ObjectID) async throws {
+        // First remove the folder
+        try await self.deleteFolder(folder: folder, recursive: false)
+        // Then create a new folder inside the new parent
+        folder.parent = folderId
+        let _ = try await self.addFolder(folder)
+    }
+
+    func moveRecipe(recipe: Recipe, to folderId: ObjectID) async throws {
+        // First remove the recipe
+        try await self.deleteRecipe(recipe: recipe)
+        // Then create a new recipe inside the new parent
+        recipe.parent = folderId
+        let _ = try await self.addRecipe(recipe)
+    }
+
+    func moveItem(uuid: ObjectID, to folderId: ObjectID) async throws {
+        try await self.moveItems(uuids: [uuid], to: folderId)
+    }
+
+    func moveItems(uuids: [ObjectID], to folderId: ObjectID) async throws {
+        for item in uuids {
+            if let folder = self.folders[item] {
+                try await self.moveFolder(folder: folder, to: folderId)
+            }
+            if let recipe = self.recipes[item] {
+                try await self.moveRecipe(recipe: recipe, to: folderId)
+            }
+        }
+    }
 
     func itemsMatchingText(_ text: String) -> [RecipeItem] {
         var items: [RecipeItem] = []
@@ -647,34 +667,108 @@ class StateManager {
 
     func addToGroceryList(_ ingredient: Ingredient) {
         self.groceryList.addIngredient(ingredient)
-        self.storeGroceryList()
+        self.store()
     }
 
     func addToGroceryList(from recipe: Recipe) {
         self.groceryList.addIngredients(from: recipe)
-        self.storeGroceryList()
+        self.store()
     }
 
     func modifyGrocery(at indexPath: IndexPath, with grocery: Ingredient) {
         self.groceryList.modify(at: indexPath, with: grocery)
-        self.storeGroceryList()
+        self.store()
     }
 
     func replaceGrocery(at indexPath: IndexPath, with grocery: Ingredient)
         -> IndexPath
     {
         let indexPath = self.groceryList.replace(at: indexPath, with: grocery)
-        self.storeGroceryList()
+        self.store()
         return indexPath
     }
 
     func removeGrocery(at indexPath: IndexPath) {
         self.groceryList.remove(at: indexPath)
-        self.storeGroceryList()
+        self.store()
     }
 
     func removeAllGroceries() {
         self.groceryList.clear()
-        self.storeGroceryList()
+        self.store()
+    }
+}
+
+extension StateManager: CustomStringConvertible {
+
+    var description: String {
+        return
+            "StateManager(userEmail: \(self.userEmail), root: \(self.root?.description ?? "nil"), recipes: \(self.recipes), folders: \(self.folders))"
+    }
+}
+
+extension StateManager.Action: CustomStringConvertible {
+
+    var description: String {
+        switch self {
+        case .create(let uuid):
+            return ".create(\(uuid))"
+        case .modify(let uuid):
+            return ".modify(\(uuid))"
+        case .delete(let uuid):
+            return ".delete(\(uuid))"
+        }
+    }
+}
+
+extension StateManager: Decodable {
+
+    convenience init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+
+        let userEmail = try values.decode(String.self, forKey: .userEmail)
+        Self.logger.trace("StateManager: decoded userEmail: \(userEmail)")
+        let root =
+            try values.decodeIfPresent(ObjectID?.self, forKey: .root) ?? nil
+        Self.logger.trace(
+            "StateManager: decoded root: \(root?.description ?? "nil")"
+        )
+        let recipes = try values.decode([Recipe].self, forKey: .recipes)
+        Self.logger.trace("StateManager: decoded recipes: \(recipes)")
+        let folders = try values.decode([Folder].self, forKey: .folders)
+        Self.logger.trace("StateManager: decoded folders: \(folders)")
+        let offlineQueue = try values.decode(
+            RingBuffer<Action>.self,
+            forKey: .offlineQueue
+        )
+        let groceryList = try values.decode(
+            GroceryList.self,
+            forKey: .groceryList
+        )
+
+        self.init(
+            userEmail: userEmail,
+            root: root,
+            recipes: recipes,
+            folders: folders,
+            offlineQueue: offlineQueue,
+            groceryList: groceryList
+        )
+    }
+}
+
+extension StateManager: Encodable {
+
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        let recipes = Array(self.recipes.values)
+        let folders = Array(self.folders.values)
+
+        try container.encode(self.userEmail, forKey: .userEmail)
+        try container.encode(self.root, forKey: .root)
+        try container.encode(recipes, forKey: .recipes)
+        try container.encode(folders, forKey: .folders)
+        try container.encode(self.offlineQueue, forKey: .offlineQueue)
+        try container.encode(self.groceryList, forKey: .groceryList)
     }
 }

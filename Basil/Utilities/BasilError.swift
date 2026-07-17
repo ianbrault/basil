@@ -18,7 +18,7 @@ enum BasilError: Error, Equatable {
     case invalidURL(String)
     case keychainError(OSStatus)
     case missingFolder(ObjectID?)
-    case missingItem(StateManager.Item, ObjectID)
+    case missingItem(ObjectID)
     case missingTitle
     case missingToken
     case noConnection
@@ -48,8 +48,8 @@ enum BasilError: Error, Equatable {
             return "Cannot convert from \(from.toString()) to \(to.toString())"
         case .missingFolder(let uuid):
             return "Missing folder with ID \(uuid?.description ?? "nil")"
-        case .missingItem(let itemType, let uuid):
-            return "Missing \(itemType.name) \(uuid)"
+        case .missingItem(let uuid):
+            return "Missing item with ID \(uuid)"
         case .missingTitle:
             return "Add a title to the recipe and try again"
         case .missingToken:

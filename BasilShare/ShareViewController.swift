@@ -57,10 +57,10 @@ class ShareViewController: UIViewController {
         self.loadFromExtension()
     }
 
-    private func presentError(_ error: BasilError) {
+    private func presentError(_ error: Error) {
         let alert = UIAlertController(
             title: "Something went wrong",
-            message: error.message,
+            message: error.localizedDescription,
             preferredStyle: .alert
         )
         alert.view.tintColor = StyleGuide.colors.primary
@@ -146,9 +146,15 @@ class ShareViewController: UIViewController {
     }
 
     private func loadCredentials() {
+        if StateManager.shared.userEmail.isEmpty {
+            self.loadError = .keychainError(errSecItemNotFound)
+            return
+        }
         do {
-            self.credentials = try Keychain.getCredentials()
-        } catch {
+            self.credentials = try Keychain.getCredentials(
+                email: StateManager.shared.userEmail
+            )
+        } catch let error {
             self.loadError =
                 error as? BasilError ?? .keychainError(errSecItemNotFound)
         }
@@ -274,50 +280,22 @@ class ShareViewController: UIViewController {
         return NSAttributedString(attributedString: output)
     }
 
-    private func addRecipeAndPushUpdate(
-        response info: API.UserInfo
-    ) {
-        // FIXME: needs update
-        /*
-        guard let recipe = self.recipe, let root = info.root else { return }
-        // Find the root folder and add the new recipe
-        guard let rootFolder = info.folders.first(where: { $0.uuid == root })
-        else {
-            self.presentError(.missingItem(.folder, root))
-            return
-        }
-        rootFolder.recipes.append(recipe.uuid)
-        // Then add the new recipe to the recipe list
-        var recipes = info.recipes
-        recipe.parent = root
-        recipes.append(recipe)
-        // Then push the updated state to the server
-        // FIXME: re-add this with new API
-        */
-    }
-
     @objc func save() {
         guard let credentials = self.credentials else {
-            self.presentError(.keychainError(errSecItemNotFound))
+            self.presentError(BasilError.keychainError(errSecItemNotFound))
             return
         }
-        // FIXME: needs update
-        /*
+        guard let recipe = self.recipe else { return }
         self.showLoadingView()
         // If the user is logged in, connect to the server and push the update
         Task {
-            let result = await API.authenticate(
-                email: credentials.email,
-                password: credentials.password
-            )
-            switch result {
-            case .success(let info):
-                self.addRecipeAndPushUpdate(response: info)
-            case .failure(let error):
+            do {
+                try await StateManager.shared.authenticateUser(email: credentials.email, password: credentials.password, addToKeychain: false)
+                let _ = try await StateManager.shared.addRecipe(recipe)
+            } catch let error {
                 self.presentError(error)
             }
         }
-        */
     }
 
     @objc func close() {

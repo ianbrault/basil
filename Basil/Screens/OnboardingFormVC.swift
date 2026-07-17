@@ -241,9 +241,12 @@ class OnboardingFormVC: UIViewController {
                         password: password,
                     )
                 case .login:
+                    // FIXME: this should warn that any recipes and folders that currently exist will be wiped away
                     try await StateManager.shared.authenticateUser(
                         email: email,
                         password: password,
+                        clearUser: true,
+                        clearOfflineQueue: true
                     )
                 default:
                     return

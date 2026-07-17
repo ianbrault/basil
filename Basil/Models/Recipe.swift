@@ -131,3 +131,10 @@ extension Recipe: Encodable {
         try container.encode(self.instructions, forKey: .instructions)
     }
 }
+
+extension Recipe: CustomStringConvertible {
+    var description: String {
+        return
+            "Recipe(id: \(self.uuid), parent: \(self.parent), title: \"\(self.title)\", ingredients: \(self.ingredients), instructions: \(self.instructions)"
+    }
+}

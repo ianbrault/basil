@@ -21,10 +21,10 @@ class GroceryListVC: UIViewController {
         super.viewWillAppear(animated)
 
         StateManager.shared.groceryList.mergeGroceries()
-        if PersistenceManager.shared.sortCheckedGroceries {
+        if SettingsManager.shared.sortCheckedGroceries {
             StateManager.shared.groceryList.sortCheckedGroceries()
         }
-        StateManager.shared.storeGroceryList()
+        StateManager.shared.store()
 
         self.tableView.reloadData()
         if StateManager.shared.groceryList.isEmpty {
@@ -95,7 +95,7 @@ class GroceryListVC: UIViewController {
         self.feedback.selectionChanged()
         self.tableView.reloadRows(at: [indexPath], with: .none)
 
-        if PersistenceManager.shared.sortCheckedGroceries {
+        if SettingsManager.shared.sortCheckedGroceries {
             StateManager.shared.groceryList.sortCheckedGroceries()
             if let newIndexPath = StateManager.shared.groceryList.indexOf(
                 grocery: grocery
@@ -104,7 +104,7 @@ class GroceryListVC: UIViewController {
             }
         }
 
-        StateManager.shared.storeGroceryList()
+        StateManager.shared.store()
     }
 
     @objc func dismissKeyboard(_ action: UIAction) {

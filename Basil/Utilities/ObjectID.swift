@@ -13,7 +13,7 @@ final class ObjectID: Equatable {
 
     private let id: String
 
-    enum DecodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case oid = "$oid"
     }
 
@@ -64,7 +64,7 @@ extension ObjectID: Hashable {
 
 extension ObjectID: Decodable {
     convenience init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: DecodingKeys.self)
+        let container = try decoder.container(keyedBy: CodingKeys.self)
         let id = try container.decode(String.self, forKey: .oid)
         self.init(string: id)
     }
@@ -72,7 +72,7 @@ extension ObjectID: Decodable {
 
 extension ObjectID: Encodable {
     func encode(to encoder: any Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encode(self.id)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(self.id, forKey: .oid)
     }
 }

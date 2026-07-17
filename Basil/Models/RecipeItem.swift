@@ -70,3 +70,14 @@ enum RecipeItem: Codable & Equatable & Hashable {
         return !RecipeItem.sort(this, that)
     }
 }
+
+extension RecipeItem: CustomStringConvertible {
+    var description: String {
+        switch self {
+        case .recipe(let recipe):
+            return "\(recipe)"
+        case .folder(let folder):
+            return "\(folder)"
+        }
+    }
+}

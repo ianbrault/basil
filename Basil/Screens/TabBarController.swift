@@ -68,7 +68,7 @@ class TabBarController: UITabBarController {
     }
 
     private func checkForFirstLaunch() {
-        if !PersistenceManager.shared.hasLaunched {
+        if !Storage.defaults.bool(forKey: Storage.Key.hasLaunched) {
             let alert = UIAlertController(
                 title: "Welcome to Basil!",
                 message:
@@ -79,7 +79,7 @@ class TabBarController: UITabBarController {
             alert.addAction(UIAlertAction(title: "Continue", style: .default))
             self.present(alert, animated: true)
 
-            PersistenceManager.shared.hasLaunched = true
+            Storage.defaults.set(true, forKey: Storage.Key.hasLaunched)
         }
     }
 

@@ -6,12 +6,18 @@
 //
 
 import UIKit
+import os
 
 //
 // Displays a list of recipes and folders
 // Allows users to add/delete/move recipes
 //
 class RecipeListVC: UIViewController {
+    private static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier!,
+        category: String(describing: RecipeListVC.self)
+    )
+
     static let reuseID = "RecipeListCell"
 
     // Shown nominally
@@ -83,14 +89,10 @@ class RecipeListVC: UIViewController {
     }
 
     func loadItems() {
-        guard let folder = StateManager.shared.folders[self.folderId]
-        else {
-            // This should never happen but including as a fail-safe
-            self.title = "Recipes"
-            self.items.removeAll()
-            self.tableView.backgroundView = EmptyStateView(.recipes)
-            return
-        }
+        let folder = StateManager.shared.folder(id: self.folderId)!
+        Self.logger.debug(
+            "Loading items for folder \(self.folderId): \(folder.subfolders.count) subfolders and \(folder.recipes.count) recipes"
+        )
         self.title = folder.name.isEmpty ? "Recipes" : folder.name
         // Load subfolder/recipe items using the IDs from the folder
         var folderItems: [RecipeItem] = []
@@ -98,14 +100,14 @@ class RecipeListVC: UIViewController {
             if let folder = StateManager.shared.folders[folderId] {
                 folderItems.append(.folder(folder))
             } else {
-                self.loadErrors.append(.missingItem(.folder, folderId))
+                self.loadErrors.append(.missingItem(folderId))
             }
         }
         for recipeId in folder.recipes {
             if let recipe = StateManager.shared.recipes[recipeId] {
                 folderItems.append(.recipe(recipe))
             } else {
-                self.loadErrors.append(.missingItem(.recipe, recipeId))
+                self.loadErrors.append(.missingItem(recipeId))
             }
         }
         self.items = folderItems.sorted(by: RecipeItem.sort)
@@ -470,27 +472,27 @@ class RecipeListVC: UIViewController {
             placeholder: "Name",
             confirmText: "Save"
         ) { [weak self] (text) in
-            guard let self else { return }
             folder.name = text
-            // FIXME: re-implement
-            /*
-            if let error = StateManager.shared.updateFolder(folder: folder) {
-                self.presentErrorAlert(error)
-            } else {
-                // Update the items array with the updated folder
-                let item = RecipeItem.folder(folder)
-                if let indexPath = self.items.findItem(uuid: folder.uuid) {
-                    self.items[indexPath.row] = item
+            Task {
+                do {
+                    try await StateManager.shared.updateFolder(folder: folder)
+                    // Update the items array with the updated folder
+                    let item = RecipeItem.folder(folder)
+                    if let indexPath = self?.items.findItem(uuid: folder.uuid) {
+                        self?.items[indexPath.row] = item
+                    }
+                    if let indexPath = self?.searchResults.findItem(
+                        uuid: folder.uuid
+                    ) {
+                        self?.searchResults[indexPath.row] = item
+                    }
+                    self?.updateItemsForSearchText()
+                    self?.applySnapshot(reload: [item])
+                } catch let error {
+                    self?.presentErrorAlert(error)
                 }
-                if let indexPath = self.searchResults.findItem(
-                    uuid: folder.uuid
-                ) {
-                    self.searchResults[indexPath.row] = item
-                }
-                self.updateItemsForSearchText()
-                self.applySnapshot(reload: [item])
             }
-            */
+
         }
         alert.text = folder.name
         self.present(alert, animated: true)
@@ -499,18 +501,18 @@ class RecipeListVC: UIViewController {
     func moveItemToFolder(_ action: UIAction, uuid: ObjectID) {
         let viewController = FolderTreeVC(currentFolder: self.folderId) {
             [weak self] (selectedFolder) in
-            // FIXME: re-implement
-            /*
-            if let error = StateManager.shared.moveItemToFolder(
-                uuid: uuid,
-                folderId: selectedFolder.uuid
-            ) {
-                self?.presentErrorAlert(error)
-            } else if selectedFolder.uuid != self?.folderId {
-                // Item has been moved to a folder on another screen so remove it
-                self?.removeItem(uuid: uuid)
+            Task {
+                do {
+                    try await StateManager.shared.moveItem(
+                        uuid: uuid,
+                        to: selectedFolder.uuid
+                    )
+                    // Item has been moved to a folder on another screen so remove it
+                    self?.removeItem(uuid: uuid)
+                } catch let error {
+                    self?.presentErrorAlert(error)
+                }
             }
-            */
         }
         let navigationController = NavigationController(
             rootViewController: viewController
@@ -520,14 +522,14 @@ class RecipeListVC: UIViewController {
 
     func deleteItem(_ action: UIAction, item: RecipeItem) {
         let alert = DeleteRecipeItemAlert(item: item) { [weak self] () in
-            // FIXME: re-implement
-            /*
-            if let error = StateManager.shared.deleteItem(uuid: item.uuid) {
-                self?.presentErrorAlert(error)
-            } else {
-                self?.removeItem(uuid: item.uuid)
+            Task { [weak self] in
+                do {
+                    try await StateManager.shared.deleteItem(uuid: item.uuid)
+                    self?.removeItem(uuid: item.uuid)
+                } catch let error {
+                    self?.presentErrorAlert(error)
+                }
             }
-            */
         }
         self.present(alert, animated: true)
     }
@@ -540,31 +542,25 @@ class RecipeListVC: UIViewController {
             confirmText: "Import"
         ) { [weak self] (text) in
             guard let self else { return }
-            // FIXME: needs work
-            /*
-            NetworkManager.get(string: text) { (response) in
-                let result = response.flatMap { (body) in
-                    NYTRecipeParser.parse(body: body, folderId: self.folderId)
-                }
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let recipe):
-                        // Open the recipe in an editing window to allow the user to change before adding
-                        let viewController = RecipeFormVC(style: .new)
-                        viewController.delegate = self
-                        viewController.set(recipe: recipe)
-
-                        let navigationController = NavigationController(
-                            rootViewController: viewController
-                        )
-                        self.present(navigationController, animated: true)
-
-                    case .failure(let error):
-                        self.presentErrorAlert(error)
-                    }
+            Task {
+                do {
+                    let response = try await Network.get(string: text)
+                    let recipe = try NYTRecipeParser.parse(
+                        body: response,
+                        folderId: self.folderId
+                    )
+                    // Open the recipe in an editing window to allow the user to change before adding
+                    let viewController = RecipeFormVC(style: .new)
+                    viewController.delegate = self
+                    viewController.set(recipe: recipe)
+                    let navigationController = NavigationController(
+                        rootViewController: viewController
+                    )
+                    self.present(navigationController, animated: true)
+                } catch let error {
+                    self.presentErrorAlert(error)
                 }
             }
-            */
         }
         self.present(alert, animated: true)
     }
@@ -596,20 +592,20 @@ class RecipeListVC: UIViewController {
 
             let viewController = FolderTreeVC(currentFolder: self.folderId) {
                 [weak self] (selectedFolder) in
-                // FIXME: re-implement
-                /*
-                if let error = StateManager.shared.moveItemsToFolder(
-                    uuids: uuids,
-                    folderId: selectedFolder.uuid
-                ) {
-                    self?.presentErrorAlert(error)
-                } else if selectedFolder.uuid != self?.folderId {
-                    // Items have been moved to a folder on another screen so remove them
-                    self?.removeItems(uuids: uuids)
-                    // Disable edit mode once the action has completed
-                    self?.disableEditMode()
+                Task {
+                    do {
+                        try await StateManager.shared.moveItems(
+                            uuids: uuids,
+                            to: selectedFolder.uuid
+                        )
+                        // Items have been moved to a folder on another screen so remove them
+                        self?.removeItems(uuids: uuids)
+                        // Disable edit mode once the action has completed
+                        self?.disableEditMode()
+                    } catch let error {
+                        self?.presentErrorAlert(error)
+                    }
                 }
-                */
             }
             let navigationController = NavigationController(
                 rootViewController: viewController
@@ -627,16 +623,16 @@ class RecipeListVC: UIViewController {
                 "Are you sure you want to delete these \(uuids.count) items?"
 
             let alert = DeleteAlert(title: title) { [weak self] () in
-                // FIXME: re-implement
-                /*
-                if let error = StateManager.shared.deleteItems(uuids: uuids) {
-                    self?.presentErrorAlert(error)
-                } else {
-                    self?.removeItems(uuids: uuids)
-                    // Disable edit mode once the action has completed
-                    self?.disableEditMode()
+                Task { [weak self] in
+                    do {
+                        try await StateManager.shared.deleteItems(uuids: uuids)
+                        self?.removeItems(uuids: uuids)
+                        // Disable edit mode once the action has completed
+                        self?.disableEditMode()
+                    } catch let error {
+                        self?.presentErrorAlert(error)
+                    }
                 }
-                */
             }
             self.present(alert, animated: true)
         }
@@ -707,16 +703,18 @@ extension RecipeListVC: UITableViewDelegate {
             title: "Delete"
         ) { (action, view, actionPerformed) in
             let alert = DeleteRecipeItemAlert(item: item) { [weak self] () in
-                // FIXME: re-implement
-                /*
-                if let error = StateManager.shared.deleteItem(uuid: item.uuid) {
-                    self?.presentErrorAlert(error)
-                    actionPerformed(false)
-                } else {
-                    self?.removeItem(uuid: item.uuid)
-                    actionPerformed(true)
+                Task { [weak self] in
+                    do {
+                        try await StateManager.shared.deleteItem(
+                            uuid: item.uuid
+                        )
+                        self?.removeItem(uuid: item.uuid)
+                        actionPerformed(true)
+                    } catch let error {
+                        self?.presentErrorAlert(error)
+                        actionPerformed(false)
+                    }
                 }
-                */
             }
             self.present(alert, animated: true)
         }
@@ -745,35 +743,35 @@ extension RecipeListVC: RecipeFormVC.Delegate {
     func didSaveRecipe(style: RecipeFormVC.Style, recipe: Recipe) {
         switch style {
         case .new:
-            // FIXME: re-implement
-            /*
-            if let error = StateManager.shared.addRecipe(recipe: recipe) {
-                self.presentErrorAlert(error)
-            } else {
-                self.insertItem(item: .recipe(recipe))
+            Task { [weak self] in
+                do {
+                    let _ = try await StateManager.shared.addRecipe(recipe)
+                    self?.insertItem(item: .recipe(recipe))
+                } catch let error {
+                    self?.presentErrorAlert(error)
+                }
             }
-            */
             break
         case .edit:
-            // FIXME: re-implement
-            /*
-            if let error = StateManager.shared.updateRecipe(recipe: recipe) {
-                self.presentErrorAlert(error)
-            } else {
-                // Update the items array with the new recipe contents
-                let item = RecipeItem.recipe(recipe)
-                if let indexPath = self.items.findItem(uuid: recipe.uuid) {
-                    self.items[indexPath.row] = item
+            Task { [weak self] in
+                do {
+                    try await StateManager.shared.updateRecipe(recipe: recipe)
+                    // Update the items array with the updated recipe
+                    let item = RecipeItem.recipe(recipe)
+                    if let indexPath = self?.items.findItem(uuid: recipe.uuid) {
+                        self?.items[indexPath.row] = item
+                    }
+                    if let indexPath = self?.searchResults.findItem(
+                        uuid: recipe.uuid
+                    ) {
+                        self?.searchResults[indexPath.row] = item
+                    }
+                    self?.updateItemsForSearchText()
+                    self?.applySnapshot(reload: [item])
+                } catch let error {
+                    self?.presentErrorAlert(error)
                 }
-                if let indexPath = self.searchResults.findItem(
-                    uuid: recipe.uuid
-                ) {
-                    self.searchResults[indexPath.row] = item
-                }
-                self.updateItemsForSearchText()
-                self.applySnapshot(reload: [item])
             }
-            */
             break
         }
     }
@@ -792,15 +790,16 @@ extension RecipeListVC: RecipeVC.Delegate {
     func didDeleteRecipe(recipe: Recipe) {
         // Remove the recipe view first
         self.navigationController?.popViewController(animated: true)
-
-        // FIXME: re-implement
-        /*
-        if let error = StateManager.shared.deleteItem(uuid: recipe.uuid) {
-            self.presentErrorAlert(error)
-        } else {
-            self.removeItem(uuid: recipe.uuid)
+        Task { [weak self] in
+            do {
+                try await StateManager.shared.deleteItem(
+                    uuid: recipe.uuid
+                )
+                self?.removeItem(uuid: recipe.uuid)
+            } catch let error {
+                self?.presentErrorAlert(error)
+            }
         }
-        */
     }
 }
 

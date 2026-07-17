@@ -287,14 +287,15 @@ extension RecipeVC: RecipeFormVC.Delegate {
 
     func didSaveRecipe(style: RecipeFormVC.Style, recipe: Recipe) {
         guard style == .edit else { return }
-        // FIXME: re-implement
-        /*
-        if let error = StateManager.shared.updateRecipe(recipe: recipe) {
-            self.presentErrorAlert(error)
-        } else {
-            self.recipe = recipe
-            self.tableView.reloadData()
+        Task { [weak self] in
+            do {
+                try await StateManager.shared.updateRecipe(recipe: recipe)
+                // Update the items array with the updated recipe
+                self?.recipe = recipe
+                self?.tableView.reloadData()
+            } catch let error {
+                self?.presentErrorAlert(error)
+            }
         }
-        */
     }
 }
